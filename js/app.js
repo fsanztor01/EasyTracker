@@ -1393,50 +1393,47 @@ document.addEventListener('DOMContentLoaded', () => {
     // EXTREME PERFORMANCE: Optimized renderSessions
     // Only renders structure, defers all calculations
     function renderSessions() {
-        if (isRendering) return;
-        isRendering = true;
-
         const container = $('#sessions');
         const emptyState = $('#emptyState');
-        if (!container) {
-            isRendering = false;
-            return;
-        }
+        if (!container) return;
 
-        // Setup event delegation once
-        setupDiaryEventDelegation();
-
-        // Capture minimal state (only open/closed state)
+        // Preserve user's open/closed state of sessions across re-renders
         const prevDetails = Array.from(container.querySelectorAll('details'));
         const prevOpen = new Set();
         prevDetails.forEach(d => {
             if (d.open) {
+                // Store both dayKey and sessionId for backward compatibility
                 if (d.dataset.dayKey) prevOpen.add(d.dataset.dayKey);
                 if (d.dataset.sessionId) prevOpen.add(d.dataset.sessionId);
             }
         });
         const hadPrev = prevDetails.length > 0;
 
-        // Clear only if needed (incremental updates would be better, but for now full clear)
-        clearDomCache();
         container.innerHTML = '';
 
+        // Use robust function to check if there are any sessions in the visible week
         const hasSessions = hasSessionsThisWeek();
+
+        // Show "No hay entrenos" message ONLY when there are truly no sessions
         if (!hasSessions) {
             if (emptyState) {
                 emptyState.hidden = false;
                 emptyState.style.display = '';
             }
-            isRendering = false;
             return;
         }
 
+        // Hide empty state completely when there are sessions
         if (emptyState) {
             emptyState.hidden = true;
             emptyState.style.display = 'none';
         }
 
+        // Get and render all sessions for the visible week
         const week = getWeekSessions();
+
+        // Sort sessions: non-completed first, completed at the end
+        // Within same completion status, sort ascending by date
         const sortedSessions = [...week].sort((a, b) => {
             const aCompleted = !!a.completed;
             const bCompleted = !!b.completed;
@@ -1444,47 +1441,63 @@ document.addEventListener('DOMContentLoaded', () => {
             return parseLocalDate(a.date) - parseLocalDate(b.date);
         });
 
-        const currentDayId = sortedSessions.find(s => !s.completed)?.id || null;
-        
-        // Render structure only - NO calculations, NO expensive operations
-        const fragment = document.createDocumentFragment();
+        // Render each session as its own day (collapsible <details> element)
         sortedSessions.forEach(session => {
             const dayKey = toLocalISO(parseLocalDate(session.date));
             const sessionId = session.id;
 
             const details = document.createElement('details');
             details.className = 'day-panel card pop';
+            // Store dayKey and sessionId so we can restore open state later
             details.dataset.dayKey = dayKey;
             details.dataset.sessionId = sessionId;
 
+            // Restore previous user state if available; otherwise open non-completed sessions by default
             if (hadPrev) {
                 details.open = prevOpen.has(dayKey) || prevOpen.has(sessionId);
             } else {
-                details.open = sessionId === currentDayId;
+                details.open = !session.completed;
             }
 
-            // Minimal summary (fast)
             const summary = document.createElement('summary');
-            summary.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:10px;cursor:pointer';
-            const completedStyle = session.completed ? 'color:#4CAF50' : '';
-            summary.innerHTML = `
-                <div><strong style="font-weight:800;${completedStyle}">${escapeHtml(session.name)}</strong></div>
-                <div style="color:${session.completed ? '#4CAF50' : 'var(--muted)'}">${new Date(session.date).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' })}${session.completed ? ' · Completada ✓' : ''}</div>
-            `;
+            summary.style.display = 'flex';
+            summary.style.justifyContent = 'space-between';
+            summary.style.alignItems = 'center';
+            summary.style.padding = '10px';
+            summary.style.cursor = 'pointer';
+
+            const left = document.createElement('div');
+            left.innerHTML = `<strong style="font-weight:800">${session.name}</strong>`;
+            const right = document.createElement('div');
+            right.style.color = 'var(--muted)';
+            const dateStr = new Date(session.date).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' });
+            right.textContent = dateStr;
+            if (session.completed) {
+                left.classList.add('completed');
+                right.textContent += ' · Completada ✓';
+            }
+            summary.appendChild(left);
+            summary.appendChild(right);
             details.appendChild(summary);
 
             const dayBody = document.createElement('div');
-            dayBody.style.cssText = 'display:grid;gap:8px;padding:10px';
+            dayBody.style.display = 'grid';
+            dayBody.style.gap = '8px';
+            dayBody.style.padding = '10px';
 
-            // Clone session card template (fast)
+            // Render the session card
             const card = $('#tpl-session').content.firstElementChild.cloneNode(true);
             card.dataset.id = session.id;
             card.classList.toggle('completed', !!session.completed);
             card.querySelector('.session__title').textContent = session.name;
+            card.querySelector('.session__date').textContent = new Date(session.date).toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
             const dateEl = card.querySelector('.session__date');
-            if (dateEl) dateEl.style.display = 'none';
+            if (dateEl) {
+                dateEl.textContent = '';
+                dateEl.style.display = 'none';
+            }
             const btnComplete = card.querySelector('.js-complete');
-            if (btnComplete) btnComplete.setAttribute('aria-pressed', String(!!session.completed));
+            btnComplete.setAttribute('aria-pressed', String(!!session.completed));
             if (session.completed) {
                 const badge = document.createElement('span');
                 badge.className = 'badge-done';
@@ -1493,7 +1506,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const body = card.querySelector('.session__body');
-            // Render exercises immediately (like TrainTracker) - no lazy loading
             (session.exercises || []).forEach(ex => body.appendChild(renderExercise(session, ex)));
 
             // Move the "Añadir ejercicio" button to the end of the session body
@@ -1508,7 +1520,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             dayBody.appendChild(card);
             details.appendChild(dayBody);
-            fragment.appendChild(details);
+            container.appendChild(details);
 
             // Add toggle event listener to trigger animation each time
             details.addEventListener('toggle', function() {
@@ -1543,10 +1555,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }, 50);
             }
         });
-
-        container.appendChild(fragment);
-
-        isRendering = false;
     }
     
     function renderExercise(session, ex) {
