@@ -38,17 +38,26 @@
 
                 <div class="diary-actions">
                     <button class="btn" id="btnNewSession">+ Nueva sesión</button>
-                    <button class="btn btn--ghost" id="btnCopyLastWeek">📅 Copiar dia actual de la semana
-                        pasada</button>
+                    <button class="btn btn--clear-week" id="btnClearWeek" aria-label="Limpiar semana">
+                        <span style="color:var(--danger, #ff4444)">✕</span> Limpiar semana
+                    </button>
                 </div>
 
-                <article class="summary card pop" aria-labelledby="summaryTitle">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px">
-                        <h2 class="summary__title" id="summaryTitle" style="margin-bottom:0">Resumen semanal</h2>
-                        <button class="btn btn--ghost btn--danger btn--kpi-style" id="btnClearWeek"
-                            style="font-size:0.75rem; padding:4px 8px; min-width:auto" aria-label="Limpiar semana"><span
-                                style="color:var(--danger, #ff4444)">✕</span> Limpiar semana</button>
+                <div class="diary-content">
+                    <section class="sessions" id="sessions" aria-live="polite"></section>
+                    <div class="empty card pop" id="emptyState" hidden>
+                        <div aria-hidden="true" style="font-size:1.6rem">📝</div>
+                        <h3 style="margin:0">No hay entrenos esta semana</h3>
+                        <p style="margin:0">Crea una sesión o importa una plantilla.</p>
                     </div>
+                </div>
+            </section>
+
+            <!-- ESTADISTICAS -->
+            <section class="panel" id="panel-stats" role="tabpanel" aria-labelledby="tab-stats" aria-hidden="true">
+                <!-- Resumen semanal -->
+                <article class="summary card pop" aria-labelledby="summaryTitle">
+                    <h2 class="summary__title" id="summaryTitle" style="margin-bottom:12px">Resumen semanal</h2>
                     <div class="summary__grid">
                         <div class="kpi">
                             <div class="kpi__label">Sesiones</div>
@@ -69,20 +78,8 @@
                     </div>
                 </article>
 
-                <div class="diary-content">
-                    <section class="sessions" id="sessions" aria-live="polite"></section>
-                    <div class="empty card pop" id="emptyState" hidden>
-                        <div aria-hidden="true" style="font-size:1.6rem">📝</div>
-                        <h3 style="margin:0">No hay entrenos esta semana</h3>
-                        <p style="margin:0">Crea una sesión o importa una plantilla.</p>
-                    </div>
-                </div>
-            </section>
-
-            <!-- ESTADISTICAS -->
-            <section class="panel" id="panel-stats" role="tabpanel" aria-labelledby="tab-stats" aria-hidden="true">
                 <!-- Filtros compartidos -->
-                <article class="card pop" style="padding:12px; margin-bottom:10px">
+                <article class="card pop" style="padding:12px; margin-bottom:10px; margin-top:10px">
                     <h3 class="summary__title" style="margin-bottom:10px">Filtros</h3>
                     <div class="chart-controls">
                         <div class="chart-control-group">
@@ -114,24 +111,17 @@
                     </div>
                 </article>
 
+                <!-- Progreso semanal - Dos gráficos en horizontal -->
                 <article class="card chart-card pop">
-                    <div
-                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                        <h3 class="summary__title" style="margin-bottom:0">Progreso semanal</h3>
-                        <select id="chartType" class="chart-select" style="width: auto; min-width: 140px;"
-                            aria-label="Tipo de gráfico">
-                            <option value="bar">Barras</option>
-                            <option value="pie" selected>Circular</option>
-                        </select>
-                    </div>
-                    <canvas id="progressChart" aria-label="Gráfico de progreso" role="img"></canvas>
+                    <h3 class="summary__title" style="margin-bottom: 12px;">Progreso semanal</h3>
+                    <canvas id="progressChartPie" aria-label="Gráfico circular de progreso" role="img"></canvas>
                 </article>
 
                 <!-- Ciclos archivados -->
                 <article class="card pop" style="padding:12px; margin-top:10px; margin-bottom:10px">
                     <h3 class="summary__title" style="margin-bottom:10px">Gestión de Ciclos</h3>
                     <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
-                        <button class="btn btn--secondary" id="archiveCycleBtn" type="button">📦 Archivar Ciclo
+                        <button class="btn btn--archive-cycle" id="archiveCycleBtn" type="button">📦 Archivar Ciclo
                             Actual</button>
                         <div id="archivedCyclesList" style="display: flex; gap: 8px; flex-wrap: wrap;"></div>
                     </div>
@@ -182,15 +172,22 @@
                             Añade días, ejercicios y sets para construir tu rutina personalizada.
                         </p>
                     </article>
-                    <article class="card pop routine-card">
-                        <h3 class="summary__title" style="margin-bottom:6px">Rutinas creadas</h3>
-                        <div class="routine-created__list" id="createdRoutineList"></div>
+                    <hr class="routine-separator" />
+                    <details class="card pop routine-card">
+                        <summary class="summary__title" style="margin-bottom:6px; cursor:pointer; list-style:none; display:flex; align-items:center; gap:8px">
+                            <span>▶</span>
+                            <span>Rutinas creadas</span>
+                        </summary>
+                        <div class="routine-created__list" id="createdRoutineList" style="margin-top:10px"></div>
                         <div class="routine-empty" id="noCreatedRoutines">Todavía no has creado rutinas.</div>
-                    </article>
-                    <article class="card pop routine-card">
-                        <h3 class="summary__title" style="margin-bottom:6px">Rutinas por defecto</h3>
-                        <div class="routine-default__list" id="defaultRoutineList"></div>
-                    </article>
+                    </details>
+                    <details class="card pop routine-card">
+                        <summary class="summary__title" style="margin-bottom:6px; cursor:pointer; list-style:none; display:flex; align-items:center; gap:8px">
+                            <span>▶</span>
+                            <span>Rutinas por defecto</span>
+                        </summary>
+                        <div class="routine-default__list" id="defaultRoutineList" style="margin-top:10px"></div>
+                    </details>
                 </div>
             </section>
 

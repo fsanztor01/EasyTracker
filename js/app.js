@@ -921,9 +921,20 @@ document.addEventListener('DOMContentLoaded', () => {
             if (panelId === 'panel-diary') { renderSessions(); }
             if (panelId === 'panel-routines') { renderRoutines(); }
             if (panelId === 'panel-stats') { 
-                loadModule('js/modules/stats.js').then(() => {
+                renderSummary(); // Update weekly summary
+                loadModule('./js/modules/stats.js').then(() => {
                     if (typeof buildStats === 'function') buildStats();
                     if (typeof buildChartState === 'function') buildChartState();
+                    // Ensure chart is drawn multiple times to catch when panel becomes visible
+                    setTimeout(() => {
+                        if (typeof drawChart === 'function') drawChart();
+                    }, 100);
+                    setTimeout(() => {
+                        if (typeof drawChart === 'function') drawChart();
+                    }, 300);
+                    setTimeout(() => {
+                        if (typeof drawChart === 'function') drawChart();
+                    }, 600);
                     if (typeof renderArchivedCycles === 'function') renderArchivedCycles();
                 });
             }
@@ -6374,11 +6385,6 @@ document.addEventListener('DOMContentLoaded', () => {
             $('#sessionDialog').showModal();
         });
 
-        // Copiar entrenamiento de la semana pasada
-        $('#btnCopyLastWeek').addEventListener('click', () => {
-            copyLastWeekWorkout();
-        });
-
         $('#btnClearWeek').addEventListener('click', () => {
             clearWeek();
         });
@@ -6992,6 +6998,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Render Stats if visible
         const activePanel = document.querySelector('.panel[aria-hidden="false"]');
         if (activePanel && activePanel.id === 'panel-stats') {
+            renderSummary(); // Update weekly summary
             if (typeof buildStats === 'function') buildStats();
             if (typeof buildChartState === 'function') buildChartState();
             if (typeof renderArchivedCycles === 'function') renderArchivedCycles();
@@ -7559,7 +7566,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (settingsThemeBtn) settingsThemeBtn.addEventListener('click', showSettingsTheme);
     if (settingsProfileBtn) settingsProfileBtn.addEventListener('click', showSettingsProfile);
-    if (settingsInfoBtn) settingsInfoBtn.addEventListener('click', showSettingsInfo);
+    if (settingsInfoBtn) {
+        settingsInfoBtn.addEventListener('click', () => {
+            const manualDialog = $('#manualDialog');
+            if (manualDialog) manualDialog.showModal();
+        });
+    }
     if (backFromTheme) backFromTheme.addEventListener('click', showSettingsMain);
     if (backFromProfile) backFromProfile.addEventListener('click', showSettingsMain);
     if (backFromInfo) backFromInfo.addEventListener('click', showSettingsMain);

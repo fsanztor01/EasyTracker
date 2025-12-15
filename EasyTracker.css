@@ -1,24 +1,24 @@
 /* ==================== THEME BASE ==================== */
 :root {
-    /* Dark Theme - Premium OLED-optimized with vibrant accents */
+    /* Dark Theme - iOS OLED-optimized */
     --bg1: #000000;
     --bg2: #000000;
     --bg3: #000000;
-    --surface: #000000;
-    --surface-2: #000000;
-    --text: #F5F5F7;
-    --muted: #6F6F77;
-    --heading: #F5F5F7;
-    --heading-strong: #F5F5F7;
-    --border: #000000;
-    --primary: #5ea9ff;
-    --primary-600: #0080e9;
-    --accent: #5ea9ff;
-    --accent-600: #0080e9;
-    --warn: #fbbf24;
-    --danger: #ef4444;
-    --progress-green: #10b981;
-    --success: #22c55e;
+    --surface: #1C1C1E;
+    --surface-2: #0A0A0A;
+    --text: #FFFFFF;
+    --muted: #8E8E93;
+    --heading: #FFFFFF;
+    --heading-strong: #FFFFFF;
+    --border: rgba(255, 255, 255, 0.1);
+    --primary: #007AFF;
+    --primary-600: #0051D5;
+    --accent: #007AFF;
+    --accent-600: #0051D5;
+    --warn: #FF9500;
+    --danger: #FF3B30;
+    --progress-green: #34C759;
+    --success: #34C759;
 
     /* Enhanced spacing for mobile */
     --spacing-xs: 4px;
@@ -34,20 +34,20 @@
     --radius-sm: 8px;
     --radius-xs: 6px;
 
-    /* Premium shadows with depth - OLED optimized */
-    --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.4);
-    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.4);
-    --shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-    --shadow-md: 0 6px 16px rgba(0, 0, 0, 0.4);
-    --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.4);
-    --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.4);
-    --shadow-elegant: 0 8px 24px rgba(0, 0, 0, 0.4);
-    --shadow-hover: 0 12px 32px rgba(0, 0, 0, 0.4);
-    --shadow-glow: 0 0 20px rgba(94, 169, 255, 0.15);
+    /* iOS-style shadows - minimal for OLED */
+    --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.2);
+    --shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    --shadow-md: 0 6px 12px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 20px rgba(0, 0, 0, 0.08);
+    --shadow-xl: 0 20px 30px rgba(0, 0, 0, 0.06);
+    --shadow-elegant: 0 4px 12px rgba(0, 0, 0, 0.1);
+    --shadow-hover: 0 8px 16px rgba(0, 0, 0, 0.12);
+    --shadow-glow: 0 0 20px rgba(0, 122, 255, 0.2);
 
-    /* Focus states */
-    --focus: 0 0 0 3px rgba(94, 169, 255, .4);
-    --focus-keyboard: 0 0 0 3px rgba(94, 169, 255, .5), 0 0 16px rgba(94, 169, 255, .3);
+    /* Focus states - iOS style */
+    --focus: 0 0 0 3px rgba(0, 122, 255, .4);
+    --focus-keyboard: 0 0 0 3px rgba(0, 122, 255, .5), 0 0 16px rgba(0, 122, 255, .3);
 
     /* Layout */
     --nav-h: 80px;
@@ -63,36 +63,36 @@
 }
 
 [data-theme="light"] {
-    /* Light Theme - Clean and professional with subtle warmth */
-    --bg1: #F6F6F8;
-    --bg2: #F6F6F8;
+    /* Light Theme - iOS-like clean and minimal */
+    --bg1: #FFFFFF;
+    --bg2: #F2F2F7;
     --bg3: #FFFFFF;
     --surface: #FFFFFF;
-    --surface-2: #F6F6F8;
-    --text: #18181B;
-    --muted: #6B7280;
-    --heading: #18181B;
-    --heading-strong: #18181B;
-    --border: #E5E7EB;
-    --primary: #5ea9ff;
-    --primary-600: #0080e9;
-    --accent: #5ea9ff;
-    --accent-600: #0080e9;
-    --warn: #f59e0b;
-    --danger: #ef4444;
-    --progress-green: #10b981;
-    --success: #22c55e;
+    --surface-2: #F2F2F7;
+    --text: #1C1C1E;
+    --muted: #8E8E93;
+    --heading: #1C1C1E;
+    --heading-strong: #1C1C1E;
+    --border: rgba(0, 0, 0, 0.1);
+    --primary: #007AFF;
+    --primary-600: #0051D5;
+    --accent: #007AFF;
+    --accent-600: #0051D5;
+    --warn: #FF9500;
+    --danger: #FF3B30;
+    --progress-green: #34C759;
+    --success: #34C759;
 
-    /* Light theme shadows - softer and more subtle */
-    --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
-    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.06);
-    --shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
-    --shadow-md: 0 6px 12px rgba(0, 0, 0, 0.1);
-    --shadow-lg: 0 10px 20px rgba(0, 0, 0, 0.12);
-    --shadow-xl: 0 20px 30px rgba(0, 0, 0, 0.15);
-    --shadow-elegant: 0 4px 12px rgba(0, 0, 0, 0.08);
-    --shadow-hover: 0 8px 20px rgba(0, 0, 0, 0.12);
-    --shadow-glow: 0 0 20px rgba(94, 169, 255, 0.1);
+    /* Light theme shadows - iOS minimal */
+    --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.03);
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.04);
+    --shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 6px 12px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 20px rgba(0, 0, 0, 0.07);
+    --shadow-xl: 0 20px 30px rgba(0, 0, 0, 0.08);
+    --shadow-elegant: 0 4px 12px rgba(0, 0, 0, 0.05);
+    --shadow-hover: 0 8px 16px rgba(0, 0, 0, 0.06);
+    --shadow-glow: 0 0 20px rgba(0, 122, 255, 0.15);
 }
 
 * {
@@ -731,6 +731,87 @@ header::after {
     transform: translateY(0);
 }
 
+/* Botón Archivar Ciclo - Oscuro para tema oscuro, claro para tema claro */
+.btn--archive-cycle {
+    background: var(--surface-2);
+    color: var(--text);
+    border: 1px solid var(--border);
+    font-weight: 600;
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition-base);
+}
+
+.btn--archive-cycle:hover {
+    background: var(--surface);
+    border-color: var(--primary);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+[data-theme="light"] .btn--archive-cycle {
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border);
+}
+
+[data-theme="light"] .btn--archive-cycle:hover {
+    background: var(--surface-2);
+    border-color: var(--primary);
+}
+
+/* Botón Limpiar Semana - Oscuro para tema oscuro, claro para tema claro, X roja */
+.btn--clear-week {
+    background: var(--surface-2);
+    color: var(--text);
+    border: 1px solid var(--border);
+    font-weight: 600;
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition-base);
+}
+
+.btn--clear-week:hover {
+    background: var(--surface);
+    border-color: var(--danger);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+[data-theme="light"] .btn--clear-week {
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border);
+}
+
+[data-theme="light"] .btn--clear-week:hover {
+    background: var(--surface-2);
+    border-color: var(--danger);
+}
+
+/* Estilos para detalles de rutinas */
+.routine-card details summary {
+    list-style: none;
+    cursor: pointer;
+    user-select: none;
+}
+
+.routine-card details summary::-webkit-details-marker {
+    display: none;
+}
+
+.routine-card details summary::marker {
+    display: none;
+}
+
+.routine-card details summary span:first-child {
+    display: inline-block;
+    transition: transform 0.2s ease;
+    font-size: 0.8rem;
+}
+
+.routine-card details[open] summary span:first-child {
+    transform: rotate(90deg);
+}
+
 .btn--small {
     min-height: 40px;
     padding: 0 12px;
@@ -819,15 +900,23 @@ header::after {
 .diary-actions {
     display: flex;
     gap: 10px;
-    justify-content: center;
+    justify-content: flex-start;
+    align-items: center;
     margin-bottom: 10px;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
 }
 
 /* ==================== ROUTINE BUILDER ==================== */
 .routine-panel {
     display: grid;
     gap: 12px;
+}
+
+.routine-separator {
+    margin: 16px 0;
+    border: none;
+    border-top: 1px solid var(--border);
+    opacity: 0.5;
 }
 
 .routine-card {
@@ -914,6 +1003,17 @@ header::after {
     margin-bottom: 24px;
     overflow: hidden;
 }
+
+.chart-card canvas {
+    display: block;
+    width: 100% !important;
+    max-width: 100%;
+    height: 250px !important;
+    min-height: 250px;
+    background: transparent;
+}
+
+/* Chart card - single chart now */
 
 /* Stats Table Styling */
 .stats-table-container {
@@ -3156,13 +3256,14 @@ dialog {
 
     /* Diary actions - Better layout */
     .diary-actions {
-        flex-direction: column;
+        flex-direction: row;
         gap: 10px;
         margin-bottom: 18px;
+        flex-wrap: nowrap;
     }
 
     .diary-actions .btn {
-        width: 100%;
+        flex: 1;
         min-height: 48px;
         font-size: 0.9rem;
     }
@@ -3371,9 +3472,11 @@ dialog {
     .diary-actions {
         margin-bottom: 16px;
         gap: 8px;
+        flex-wrap: nowrap;
     }
 
     .diary-actions .btn {
+        flex: 1;
         min-height: 46px;
         font-size: 0.88rem;
     }

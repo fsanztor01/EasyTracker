@@ -818,13 +818,6 @@
             };
         }
 
-        const chartTypeSelect = $('#chartType');
-        if (chartTypeSelect) {
-            chartTypeSelect.onchange = () => {
-                drawChart();
-            };
-        }
-
         // Throttle resize events for better performance
         let resizeTimeout;
         window.addEventListener('resize', () => {
@@ -835,17 +828,35 @@
                 resizeTimeout = null;
             });
         }, { passive: true });
+        
+        // Initialize canvas and draw chart
         resizeCanvas();
+        // Draw chart - use multiple attempts to ensure it renders
+        setTimeout(() => {
+            drawChart();
+        }, 100);
+        setTimeout(() => {
+            drawChart();
+        }, 300);
+        setTimeout(() => {
+            drawChart();
+        }, 500);
     }
 
     function resizeCanvas() {
-        const canvas = $('#progressChart'); if (!canvas) return;
+        const canvasPie = document.getElementById('progressChartPie');
+        if (!canvasPie) return;
+        
         const dpr = Math.max(1, window.devicePixelRatio || 1);
-        const rect = canvas.getBoundingClientRect();
-        canvas.width = Math.floor(rect.width * dpr);
-        canvas.height = Math.floor((window.innerWidth < 420 ? 230 : 250) * dpr);
-        const ctx = canvas.getContext('2d');
-        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        const width = 300;
+        const height = 250;
+        
+        canvasPie.width = Math.floor(width * dpr);
+        canvasPie.height = Math.floor(height * dpr);
+        const ctx = canvasPie.getContext('2d');
+        if (ctx) {
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        }
     }
 
     function weeklyData(period = 4, filter = 'all', metric = 'volume') {
@@ -898,44 +909,16 @@
     }
 
     function drawChart() {
-        const canvas = $('#progressChart'); if (!canvas) return;
-        const ctx = canvas.getContext('2d'); if (!ctx) return;
-
-        // Ensure canvas dimensions match display size for sharpness
-        const dpr = Math.max(1, window.devicePixelRatio || 1);
-        const rect = canvas.getBoundingClientRect();
-
-        // Only resize if dimensions changed to avoid flickering
-        if (canvas.width !== Math.floor(rect.width * dpr) || canvas.height !== Math.floor(rect.height * dpr)) {
-            canvas.width = Math.floor(rect.width * dpr);
-            canvas.height = Math.floor(rect.height * dpr);
-            ctx.scale(dpr, dpr);
-        } else {
-            // Reset transform if not resizing, but ensure scale is correct
-            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-        }
-
-        // Clear with correct dimensions
-        ctx.clearRect(0, 0, rect.width, rect.height);
-
-        const chartTypeSelect = $('#chartType');
-        const chartType = chartTypeSelect ? chartTypeSelect.value : 'bar';
-
         // Get theme colors
         const style = getComputedStyle(document.documentElement);
-        const barColor = style.getPropertyValue('--primary').trim() || '#3b82f6';
-        const lineColor = style.getPropertyValue('--accent').trim() || '#10b981';
+        const barColor = style.getPropertyValue('--primary').trim() || '#007AFF';
         const gridColor = document.documentElement.getAttribute('data-theme') === 'light' ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.05)';
-        const textColor = style.getPropertyValue('--text').trim() || '#94a3b8';
-
-        const padding = { l: 50, r: 20, t: 30, b: 40 };
-        const w = rect.width;
-        const h = rect.height;
+        const textColor = style.getPropertyValue('--text').trim() || '#E5E5E7';
 
         // Use shared filters
-        const sharedMetric = $('#sharedMetric');
-        const sharedExercise = $('#sharedExercise');
-        const sharedPeriod = $('#sharedPeriod');
+        const sharedMetric = document.getElementById('sharedMetric');
+        const sharedExercise = document.getElementById('sharedExercise');
+        const sharedPeriod = document.getElementById('sharedPeriod');
 
         const period = sharedPeriod ? parseInt(sharedPeriod.value) : (app.chartState.period || 8);
 
@@ -950,95 +933,43 @@
         const metric = sharedMetric ? sharedMetric.value : (app.chartState.metric || 'volume');
         const { weeks, values } = weeklyData(period, filter, metric);
 
-        if (chartType === 'pie') {
-            drawPieChart(ctx, canvas, weeks, values, metric, barColor, textColor, gridColor);
-        } else {
-            drawBarChart(ctx, canvas, weeks, values, metric, barColor, lineColor, gridColor, textColor, padding, w, h);
+        // Draw Pie Chart
+        const canvasPie = document.getElementById('progressChartPie');
+        if (!canvasPie) {
+            return;
         }
+        
+        const ctxPie = canvasPie.getContext('2d');
+        if (!ctxPie) {
+            return;
+        }
+
+        // Get actual dimensions from the element
+        const dpr = Math.max(1, window.devicePixelRatio || 1);
+        let width = canvasPie.offsetWidth || canvasPie.clientWidth || 300;
+        let height = canvasPie.offsetHeight || canvasPie.clientHeight || 250;
+        
+        // If dimensions are 0, use CSS computed values or defaults
+        if (width === 0 || height === 0) {
+            const rect = canvasPie.getBoundingClientRect();
+            width = rect.width > 0 ? rect.width : 300;
+            height = rect.height > 0 ? rect.height : 250;
+        }
+        
+        // Ensure minimum dimensions
+        if (width < 100) width = 300;
+        if (height < 100) height = 250;
+        
+        // Set canvas dimensions
+        canvasPie.width = Math.floor(width * dpr);
+        canvasPie.height = Math.floor(height * dpr);
+        ctxPie.scale(dpr, dpr);
+        
+        // Clear and draw
+        ctxPie.clearRect(0, 0, width, height);
+        drawPieChart(ctxPie, canvasPie, weeks, values, metric, barColor, textColor, gridColor);
     }
 
-    function drawBarChart(ctx, canvas, weeks, values, metric, barColor, lineColor, gridColor, textColor, padding, w, h) {
-        const vmax = Math.max(1, ...values) * 1.1; // Add 10% headroom
-        const cw = w - padding.l - padding.r;
-        const ch = h - padding.t - padding.b;
-        const barW = Math.min(40, (cw / weeks.length) * 0.6); // Cap bar width
-        const step = cw / weeks.length;
-        const isLight = document.documentElement.getAttribute('data-theme') === 'light';
-
-        // Background grid lines
-        ctx.strokeStyle = gridColor;
-        ctx.lineWidth = 1;
-        const ticks = 5;
-
-        ctx.textAlign = 'right';
-        ctx.textBaseline = 'middle';
-        ctx.fillStyle = textColor;
-        ctx.font = '11px Inter, system-ui, sans-serif';
-
-        for (let i = 0; i <= ticks; i++) {
-            const val = vmax * (i / ticks);
-            const y = padding.t + ch - (val / vmax) * ch;
-
-            // Grid line
-            ctx.beginPath();
-            ctx.moveTo(padding.l, y);
-            ctx.lineTo(padding.l + cw, y);
-            ctx.stroke();
-
-            // Y-axis label
-            let label = val >= 1000 ? (val / 1000).toFixed(1) + 'k' : Math.round(val).toLocaleString();
-            if (metric === 'rir') label = val.toFixed(1);
-            ctx.fillText(label, padding.l - 10, y);
-        }
-
-        // Bars
-        for (let i = 0; i < weeks.length; i++) {
-            const x = padding.l + i * step + (step - barW) / 2;
-            const val = values[i];
-            const barH = (val / vmax) * ch;
-            const y = padding.t + ch - barH;
-
-            if (barH > 0) {
-                // Gradient fill
-                const gradient = ctx.createLinearGradient(x, y, x, y + barH);
-                gradient.addColorStop(0, barColor);
-                gradient.addColorStop(1, adjustColorOpacity(barColor, 0.6));
-
-                ctx.fillStyle = gradient;
-
-                // Rounded top corners
-                const radius = Math.min(6, barW / 2);
-                ctx.beginPath();
-                ctx.moveTo(x, y + barH);
-                ctx.lineTo(x, y + radius);
-                ctx.quadraticCurveTo(x, y, x + radius, y);
-                ctx.lineTo(x + barW - radius, y);
-                ctx.quadraticCurveTo(x + barW, y, x + barW, y + radius);
-                ctx.lineTo(x + barW, y + barH);
-                ctx.closePath();
-                ctx.fill();
-
-                // Value label on hover or always if space permits (simplified to always for now)
-                if (weeks.length <= 8) {
-                    ctx.fillStyle = textColor;
-                    ctx.textAlign = 'center';
-                    ctx.font = 'bold 10px Inter, system-ui, sans-serif';
-                    let valLabel = val >= 1000 ? (val / 1000).toFixed(1) + 'k' : Math.round(val).toLocaleString();
-                    if (metric === 'rir') valLabel = val.toFixed(1);
-                    ctx.fillText(valLabel, x + barW / 2, y - 8);
-                }
-            }
-
-            // X-axis label
-            ctx.fillStyle = textColor;
-            ctx.textAlign = 'center';
-            ctx.font = '10px Inter, system-ui, sans-serif';
-            // Simplify week label if too many
-            let weekLabel = weeks[i].replace('Sem ', 'S');
-            if (weeks.length > 12 && i % 2 !== 0) weekLabel = ''; // Skip every other label if crowded
-            ctx.fillText(weekLabel, x + barW / 2, padding.t + ch + 15);
-        }
-    }
 
     function adjustColorOpacity(color, opacity) {
         // Simple hex to rgba converter
@@ -1182,6 +1113,5 @@ window.buildChartState = buildChartState;
 window.resizeCanvas = resizeCanvas;
 window.weeklyData = weeklyData;
 window.drawChart = drawChart;
-window.drawBarChart = drawBarChart;
 window.drawPieChart = drawPieChart;
 window.adjustColorOpacity = adjustColorOpacity;
