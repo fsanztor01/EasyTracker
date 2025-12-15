@@ -1,124 +1,631 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-theme="dark">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="description"
-        content="FitTracker - Tu compañero personal de entrenamiento. Registra entrenamientos, crea rutinas y visualiza tu progreso.">
-    <meta name="theme-color" content="#0A84FF">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <title>FitTracker</title>
-    <link rel="stylesheet" href="styles/main.css">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>EasyTracker</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="EasyTracker.css">
 </head>
 
 <body>
-    <!-- Main App Container -->
-    <div id="app" class="app-container">
-
-        <!-- Header -->
-        <header class="app-header">
-            <div class="header-content">
-                <h1 class="app-title">
-                    <span class="title-icon">💪</span>
-                    FitTracker
-                </h1>
-                <button id="themeToggle" class="theme-toggle" aria-label="Cambiar tema">
-                    <span class="theme-icon">🌙</span>
-                </button>
+    <!-- MAIN APPLICATION -->
+    <div id="mainApp">
+        <!-- HEADER -->
+        <header>
+            <div class="topbar">
+                <div class="brand" aria-label="EasyTracker">
+                    <strong class="brand__title">EasyTracker</strong>
+                </div>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <button class="theme-btn" id="themeToggle" aria-pressed="false" aria-label="Cambiar tema">🌙
+                        Oscuro</button>
+                </div>
             </div>
         </header>
 
-        <!-- Navigation Tabs -->
-        <nav class="nav-tabs">
-            <button class="nav-tab active" data-view="diary">
-                <span class="tab-icon">📅</span>
-                <span class="tab-label">Diario</span>
+        <main class="container fade-in" id="main">
+            <!-- DIARIO -->
+            <section class="panel" id="panel-diary" role="tabpanel" aria-labelledby="tab-diary" aria-hidden="false">
+                <div class="weekbar">
+                    <button class="btn btn--ghost" id="prevWeek">← Semana anterior</button>
+                    <div class="week-info" id="weekInfo">Semana actual</div>
+                    <button class="btn btn--ghost" id="nextWeek">Semana siguiente →</button>
+                </div>
+
+                <div class="diary-actions">
+                    <button class="btn" id="btnNewSession">+ Nueva sesión</button>
+                    <button class="btn btn--ghost" id="btnCopyLastWeek">📅 Copiar dia actual de la semana
+                        pasada</button>
+                </div>
+
+                <article class="summary card pop" aria-labelledby="summaryTitle">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px">
+                        <h2 class="summary__title" id="summaryTitle" style="margin-bottom:0">Resumen semanal</h2>
+                        <button class="btn btn--ghost btn--danger btn--kpi-style" id="btnClearWeek"
+                            style="font-size:0.75rem; padding:4px 8px; min-width:auto" aria-label="Limpiar semana"><span
+                                style="color:var(--danger, #ff4444)">✕</span> Limpiar semana</button>
+                    </div>
+                    <div class="summary__grid">
+                        <div class="kpi">
+                            <div class="kpi__label">Sesiones</div>
+                            <div class="kpi__value" id="kpiSessions">0</div>
+                        </div>
+                        <div class="kpi">
+                            <div class="kpi__label">Ejercicio con más progreso</div>
+                            <div class="kpi__value" id="kpiTop">–</div>
+                        </div>
+                        <div class="kpi">
+                            <div class="kpi__label">Volumen total</div>
+                            <div class="kpi__value" id="kpiVolume">0 kg</div>
+                        </div>
+                        <div class="kpi">
+                            <div class="kpi__label">RIR promedio</div>
+                            <div class="kpi__value" id="kpiRIR">–</div>
+                        </div>
+                    </div>
+                </article>
+
+                <div class="diary-content">
+                    <section class="sessions" id="sessions" aria-live="polite"></section>
+                    <div class="empty card pop" id="emptyState" hidden>
+                        <div aria-hidden="true" style="font-size:1.6rem">📝</div>
+                        <h3 style="margin:0">No hay entrenos esta semana</h3>
+                        <p style="margin:0">Crea una sesión o importa una plantilla.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ESTADISTICAS -->
+            <section class="panel" id="panel-stats" role="tabpanel" aria-labelledby="tab-stats" aria-hidden="true">
+                <!-- Filtros compartidos -->
+                <article class="card pop" style="padding:12px; margin-bottom:10px">
+                    <h3 class="summary__title" style="margin-bottom:10px">Filtros</h3>
+                    <div class="chart-controls">
+                        <div class="chart-control-group">
+                            <label class="chart-control-label" for="sharedMetric">Métrica</label>
+                            <select id="sharedMetric" class="chart-select" aria-label="Selecciona métrica">
+                                <option value="volume">Volumen total</option>
+                                <option value="rir">RIR promedio</option>
+                                <option value="weight">Peso máximo</option>
+                            </select>
+                        </div>
+                        <div class="chart-control-group">
+                            <label class="chart-control-label" for="sharedExercise">Ejercicio</label>
+                            <div class="exercise-search-wrapper">
+                                <input type="text" id="sharedExercise" class="exercise-search-input"
+                                    placeholder="Todos los ejercicios" aria-label="Buscar ejercicio"
+                                    autocomplete="off" />
+                                <span class="exercise-search-icon">🔍</span>
+                                <div id="exerciseSuggestions" class="exercise-suggestions" style="display: none;"></div>
+                            </div>
+                        </div>
+                        <div class="chart-control-group">
+                            <label class="chart-control-label" for="sharedPeriod">Periodo</label>
+                            <select id="sharedPeriod" class="chart-select" aria-label="Selecciona periodo de semanas">
+                                <option value="4">Últimas 4 semanas</option>
+                                <option value="8" selected>Últimas 8 semanas</option>
+                                <option value="12">Últimas 12 semanas</option>
+                            </select>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="card chart-card pop">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <h3 class="summary__title" style="margin-bottom:0">Progreso semanal</h3>
+                        <select id="chartType" class="chart-select" style="width: auto; min-width: 140px;"
+                            aria-label="Tipo de gráfico">
+                            <option value="bar">Barras</option>
+                            <option value="pie" selected>Circular</option>
+                        </select>
+                    </div>
+                    <canvas id="progressChart" aria-label="Gráfico de progreso" role="img"></canvas>
+                </article>
+
+                <!-- Ciclos archivados -->
+                <article class="card pop" style="padding:12px; margin-top:10px; margin-bottom:10px">
+                    <h3 class="summary__title" style="margin-bottom:10px">Gestión de Ciclos</h3>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+                        <button class="btn btn--secondary" id="archiveCycleBtn" type="button">📦 Archivar Ciclo
+                            Actual</button>
+                        <div id="archivedCyclesList" style="display: flex; gap: 8px; flex-wrap: wrap;"></div>
+                    </div>
+                </article>
+
+                <article class="card pop" style="padding:10px; margin-top:10px">
+                    <h3 class="summary__title" style="margin-bottom:6px">Estadísticas detalladas</h3>
+                    <div class="stats-table-container">
+                        <table class="table stats-table" id="statsTable">
+                            <thead>
+                                <tr>
+                                    <th>Ejercicio</th>
+                                    <th>Sesiones</th>
+                                    <th>KG máximo</th>
+                                    <th>Total reps</th>
+                                    <th>Volumen total</th>
+                                    <th>RIR promedio</th>
+                                    <th>Progreso (%)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="statsBody">
+                                <tr>
+                                    <td colspan="7" style="padding:16px">No hay datos suficientes</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </article>
+            </section>
+
+            <!-- RUTINAS -->
+            <section class="panel" id="panel-routines" role="tabpanel" aria-labelledby="tab-routines"
+                aria-hidden="true">
+                <div class="routine-panel">
+                    <article class="card pop routine-card">
+                        <h3 class="summary__title" style="margin-bottom:6px">Crear rutina personalizada</h3>
+                        <div class="field">
+                            <label class="label" for="routineName">Nombre de la rutina</label>
+                            <input id="routineName" class="input" placeholder="Ej. Fuerza 4 días" />
+                        </div>
+                        <div class="routine-builder__controls">
+                            <button class="btn btn--ghost" id="addRoutineDay">+ Añadir día</button>
+                            <button class="btn btn--secondary" id="saveRoutine">Guardar rutina</button>
+                            <button class="btn btn--ghost" id="resetRoutine">Limpiar</button>
+                        </div>
+                        <div class="routine-days" id="routineDays"></div>
+                        <p style="color:var(--muted); font-size:.85rem; margin:10px 0 0">
+                            Añade días, ejercicios y sets para construir tu rutina personalizada.
+                        </p>
+                    </article>
+                    <article class="card pop routine-card">
+                        <h3 class="summary__title" style="margin-bottom:6px">Rutinas creadas</h3>
+                        <div class="routine-created__list" id="createdRoutineList"></div>
+                        <div class="routine-empty" id="noCreatedRoutines">Todavía no has creado rutinas.</div>
+                    </article>
+                    <article class="card pop routine-card">
+                        <h3 class="summary__title" style="margin-bottom:6px">Rutinas por defecto</h3>
+                        <div class="routine-default__list" id="defaultRoutineList"></div>
+                    </article>
+                </div>
+            </section>
+
+            <!-- IMPORTAR -->
+            <section class="panel" id="panel-import" role="tabpanel" aria-labelledby="tab-import" aria-hidden="true">
+                <article class="card pop import-section">
+                    <h3 class="summary__title">Importar entrenamientos</h3>
+                    <div class="field">
+                        <label class="label" for="targetWeek">Semana objetivo</label>
+                        <select id="targetWeek" class="input" aria-describedby="targetHelp"></select>
+                        <div id="targetHelp" style="color:var(--muted); font-size:.9rem">Las sesiones se ubicarán (lunes
+                            a
+                            domingo) en la semana seleccionada.</div>
+                    </div>
+                    <div class="field">
+                        <label class="label" for="fileInput">Archivo JSON</label>
+                        <input id="fileInput" type="file" accept="application/json,.json" class="input"
+                            aria-describedby="fileHelp" style="display:none" />
+                        <button type="button" class="btn btn--ghost"
+                            onclick="document.getElementById('fileInput').click()" style="width:100%">Seleccionar
+                            archivo</button>
+                        <div id="fileHelp" style="color:var(--muted); font-size:.9rem; margin-top:8px">Se valida el
+                            contenido antes de
+                            integrarlo.</div>
+                    </div>
+                    <div id="importAlert" class="toast toast--err hidden" role="alert" aria-live="assertive"></div>
+                    <div id="importErrorList" class="import-error-list hidden"></div>
+                    <div id="preview" class="card hidden" style="padding:10px; margin-top:8px">
+                        <strong>Vista previa:</strong>
+                        <ul id="previewList" style="margin:6px 0 0 16px; padding:0; list-style:disc"></ul>
+                    </div>
+                    <div class="modal__actions" style="padding:0; margin-top:8px">
+                        <button class="btn btn--secondary" id="btnImport">Importar</button>
+                        <button class="btn btn--ghost" id="btnExport">Exportar sesiones</button>
+                    </div>
+                </article>
+
+                <article class="card pop" style="padding:12px; margin-top:10px">
+                    <h4 class="summary__title" style="margin:0">Plantillas rápidas</h4>
+                    <div class="template-buttons" id="templateButtons" style="margin-top:8px">
+                        <button class="btn btn--ghost" data-template="3day">💪 3 días</button>
+                        <button class="btn btn--ghost" data-template="4day">🔥 4 días</button>
+                        <button class="btn btn--ghost" data-template="5day">🏋️ 5 días</button>
+                        <button class="btn btn--ghost" data-template="ppl">⚡ PPL 6 días</button>
+                    </div>
+                </article>
+
+                <article class="card pop" style="padding:12px; margin-top:10px">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px">
+                        <h4 class="summary__title" style="margin:0">Rutinas creadas</h4>
+                        <div style="display:flex; gap:8px; align-items:center">
+                            <button class="btn btn--ghost" id="btnImportRoutines"
+                                style="font-size:0.85rem; padding:6px 12px">🧑🏼‍💻​ Importar rutinas</button>
+                            <button class="btn btn--ghost" id="btnExportRoutines"
+                                style="font-size:0.85rem; padding:6px 12px">📤 Exportar rutinas</button>
+                        </div>
+                    </div>
+                    <input id="routineFileInput" type="file" accept="application/json,.json" style="display:none" />
+                    <div id="routineFileInputContainer" style="display:none; margin-bottom:8px">
+                        <div id="routineImportAlert" class="toast toast--err hidden" role="alert" aria-live="assertive">
+                        </div>
+                        <div id="routineImportErrorList" class="import-error-list hidden"></div>
+                        <div id="routinePreview" class="card hidden" style="padding:10px; margin-top:8px">
+                            <strong>Vista previa:</strong>
+                            <ul id="routinePreviewList" style="margin:6px 0 0 16px; padding:0; list-style:disc"></ul>
+                        </div>
+                        <div class="modal__actions" style="padding:0; margin-top:8px">
+                            <button class="btn btn--secondary" id="btnConfirmImportRoutines">Importar</button>
+                            <button class="btn btn--ghost" id="btnCancelImportRoutines">Cancelar</button>
+                        </div>
+                    </div>
+                    <div id="importRoutineList" class="routine-import__list"></div>
+                    <div class="routine-empty" id="importRoutineEmpty">Aún no tienes rutinas guardadas.</div>
+                </article>
+            </section>
+        </main>
+
+        <!-- BOTTOM NAV -->
+        <nav class="bottom-nav" aria-label="Navegación inferior">
+            <button class="nav-btn" id="navDiary" aria-current="page" aria-label="EasyTracker">
+                <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path
+                        d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H6.5A2.5 2.5 0 0 0 4 4.5v15Z" />
+                    <path d="M8 2v4" />
+                    <path d="M16 2v4" />
+                    <path d="M4 10h16" />
+                    <path d="M8 14h8" />
+                    <path d="M8 18h6" />
+                </svg>
+                <span>EasyTracker</span>
             </button>
-            <button class="nav-tab" data-view="routines">
-                <span class="tab-icon">📋</span>
-                <span class="tab-label">Rutinas</span>
+            <button class="nav-btn" id="navStats" aria-label="Estadísticas">
+                <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 3v18h18" />
+                    <path d="M13 17V9" />
+                    <path d="M18 17V5" />
+                    <path d="M8 17v-3" />
+                </svg>
+                <span>Estadísticas</span>
             </button>
-            <button class="nav-tab" data-view="stats">
-                <span class="tab-icon">📊</span>
-                <span class="tab-label">Stats</span>
+            <button class="nav-btn" id="navRoutines" aria-label="Rutinas">
+                <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+                    <rect x="8" y="2" width="8" height="4" rx="1" ry="1" />
+                    <path d="M9 14l2 2 4-4" />
+                </svg>
+                <span>Rutinas</span>
+            </button>
+            <button class="nav-btn" id="navImport" aria-label="Importar">
+                <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="7 10 12 15 17 10" />
+                    <line x1="12" y1="15" x2="12" y2="3" />
+                </svg>
+                <span>Importar</span>
             </button>
         </nav>
 
-        <!-- Main Content Area -->
-        <main class="main-content">
-
-            <!-- Diary View -->
-            <section id="diaryView" class="view-section active">
-                <div class="view-header">
-                    <h2 class="view-title">Diario de Entrenamiento</h2>
-                    <button id="addSessionBtn" class="btn btn-primary">
-                        <span class="btn-icon">+</span>
-                        Nueva Sesión
-                    </button>
+        <!-- MODALES -->
+        <dialog id="sessionDialog" aria-labelledby="sessionTitle" aria-modal="true">
+            <form method="dialog">
+                <div class="modal__head">
+                    <h3 class="modal__title" id="sessionTitle">Nueva sesión</h3>
+                    <button class="theme-btn" value="cancel" aria-label="Cerrar">Cerrar</button>
                 </div>
-
-                <div id="diaryContent" class="diary-content">
-                    <!-- Sessions will be rendered here -->
+                <div class="modal__body">
+                    <div class="field"><label class="label" for="sessionName">Nombre</label><input id="sessionName"
+                            class="input" placeholder="Ej. Pecho/Espalda" /></div>
+                    <div class="field"><label class="label" for="sessionDate">Fecha</label><input id="sessionDate"
+                            class="input" type="date" /></div>
                 </div>
-            </section>
+                <div class="modal__actions"><button class="btn btn--ghost" value="cancel">Cancelar</button><button
+                        class="btn" id="saveSession" value="default">Guardar</button></div>
+            </form>
+        </dialog>
 
-            <!-- Routines View -->
-            <section id="routinesView" class="view-section">
-                <div class="view-header">
-                    <h2 class="view-title">Mis Rutinas</h2>
-                    <div class="header-actions">
-                        <button id="addRoutineBtn" class="btn btn-primary">
-                            <span class="btn-icon">+</span>
-                            Nueva Rutina
-                        </button>
-                        <button id="importRoutineBtn" class="btn btn-secondary">
-                            <span class="btn-icon">📥</span>
-                            Importar
-                        </button>
+        <dialog id="editSessionDialog" aria-labelledby="editSessionTitle" aria-modal="true">
+            <form method="dialog">
+                <div class="modal__head">
+                    <h3 class="modal__title" id="editSessionTitle">Editar sesión</h3>
+                    <button class="theme-btn" value="cancel" aria-label="Cerrar">Cerrar</button>
+                </div>
+                <div class="modal__body">
+                    <div class="field"><label class="label" for="editSessionName">Nombre</label><input
+                            id="editSessionName" class="input" placeholder="Ej. Pecho/Espalda" /></div>
+                    <div class="field"><label class="label" for="editSessionDate">Fecha</label><input
+                            id="editSessionDate" class="input" type="date" /></div>
+                </div>
+                <div class="modal__actions"><button class="btn btn--ghost" value="cancel">Cancelar</button><button
+                        class="btn" id="updateSession" value="default">Actualizar</button></div>
+            </form>
+        </dialog>
+
+        <dialog id="exerciseDialog" aria-labelledby="exerciseTitle" aria-modal="true">
+            <form method="dialog">
+                <div class="modal__head">
+                    <h3 class="modal__title" id="exerciseTitle">Nuevo ejercicio</h3>
+                    <button class="theme-btn" value="cancel" aria-label="Cerrar">Cerrar</button>
+                </div>
+                <div class="modal__body">
+                    <div class="field"><label class="label" for="exerciseName">Nombre del ejercicio</label><input
+                            id="exerciseName" class="input" placeholder="Ej. Press banca" /></div>
+                </div>
+                <div class="modal__actions"><button class="btn btn--ghost" value="cancel">Cancelar</button><button
+                        class="btn" id="saveExercise" value="default">Guardar</button></div>
+            </form>
+        </dialog>
+
+        <dialog id="exerciseNoteDialog" aria-labelledby="exerciseNoteTitle" aria-modal="true">
+            <form method="dialog">
+                <div class="modal__head">
+                    <h3 class="modal__title" id="exerciseNoteTitle">Nota del ejercicio</h3>
+                    <button class="theme-btn" value="cancel" aria-label="Cerrar">Cerrar</button>
+                </div>
+                <div class="modal__body">
+                    <div class="field">
+                        <label class="label" for="exerciseNoteText">Nota (puedes usar saltos de línea)</label>
+                        <textarea id="exerciseNoteText" class="input" rows="6"
+                            placeholder="Escribe tu nota aquí..."></textarea>
                     </div>
                 </div>
+                <div class="modal__actions">
+                    <button class="btn btn--ghost" value="cancel">Cancelar</button>
+                    <button class="btn btn--secondary" id="saveExerciseNote" value="default">Guardar</button>
+                </div>
+            </form>
+        </dialog>
 
-                <div id="routinesContent" class="routines-content">
-                    <!-- Routines will be rendered here -->
+        <dialog id="confirmDialog" class="confirm-dialog" aria-labelledby="confirmTitle" aria-modal="true">
+            <form method="dialog">
+                <div class="modal__head">
+                    <h3 class="modal__title" id="confirmTitle">Confirmar eliminación</h3>
+                    <button class="theme-btn" value="cancel" aria-label="Cerrar">Cerrar</button>
+                </div>
+                <div class="modal__body">
+                    <p class="confirm-message" id="confirmMessage">¿Estás seguro de que quieres eliminar este elemento?
+                    </p>
+                </div>
+                <div class="modal__actions">
+                    <button class="btn btn--ghost" value="cancel">Cancelar</button>
+                    <button class="btn" id="confirmDelete" value="default">Eliminar</button>
+                </div>
+            </form>
+        </dialog>
+
+        <dialog id="restTimerDialog" aria-labelledby="restTimerTitle" aria-modal="true">
+            <form method="dialog">
+                <div class="modal__head">
+                    <h3 class="modal__title" id="restTimerTitle">Temporizador de descanso</h3>
+                    <button class="theme-btn" value="cancel" aria-label="Cerrar">Cerrar</button>
+                </div>
+                <div class="modal__body">
+                    <div class="timer-selection" id="timerSelection">
+                        <p style="text-align:center; margin-bottom:16px; color:var(--muted)">Selecciona el tiempo de
+                            descanso:</p>
+                        <div class="timer-buttons">
+                            <button type="button" class="btn btn--ghost timer-btn" data-minutes="1">1 min</button>
+                            <button type="button" class="btn btn--ghost timer-btn" data-minutes="2">2 min</button>
+                            <button type="button" class="btn btn--ghost timer-btn" data-minutes="3">3 min</button>
+                            <button type="button" class="btn btn--ghost timer-btn" data-minutes="4">4 min</button>
+                        </div>
+                    </div>
+                    <div class="timer-running" id="timerRunning" style="display:none">
+                        <div class="timer-display">
+                            <div class="timer-time" id="timerTime">00:00</div>
+                            <div class="timer-label">Tiempo restante</div>
+                        </div>
+                    </div>
+                    <div class="timer-completed" id="timerCompleted" style="display:none">
+                        <div class="timer-completed-content">
+                            <div class="timer-checkmark">✓</div>
+                            <div class="timer-completed-message">Descanso finalizado</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal__actions">
+                    <button class="btn btn--ghost" value="cancel" id="timerCancel"
+                        style="display:none">Cancelar</button>
+                </div>
+            </form>
+        </dialog>
+
+        <!-- Templates -->
+        <template id="tpl-session">
+            <article class="session card pop" data-id="">
+                <div class="session__header">
+                    <div class="session__titlewrap">
+                        <div class="session__title"></div>
+                        <div class="session__date"></div>
+                        <div class="session__changes-indicator" style="display:none">
+                            <span>⚠️</span>
+                            <span>Cambios sin guardar</span>
+                        </div>
+                    </div>
+                    <div class="session__tools">
+                        <button class="btn btn--mobile btn--ghost js-complete" title="Marcar como completada"
+                            aria-pressed="false" aria-label="Marcar como completada">✓</button>
+                        <button class="btn btn--mobile btn--ghost js-edit-session"
+                            title="Editar nombre y fecha de la sesión"
+                            aria-label="Editar nombre y fecha de la sesión">✏️</button>
+                        <button class="btn btn--mobile btn--ghost js-add-ex" title="Añadir ejercicio"
+                            aria-label="Añadir ejercicio">+
+                            Ejercicio</button>
+                        <button class="btn btn--mobile btn--ghost js-delete" title="Eliminar sesión"
+                            aria-label="Eliminar sesión">✕</button>
+                    </div>
+                    <div class="session__edit-controls" style="display:none">
+                        <button class="btn btn--small js-save-session">💾 Guardar cambios</button>
+                        <button class="btn btn--small btn--ghost js-cancel-session">✕ Cancelar</button>
+                    </div>
+                </div>
+                <div class="session__body"></div>
+            </article>
+        </template>
+
+        <template id="tpl-exercise">
+            <section class="exercise" data-ex-id="">
+                <div class="exercise__head">
+                    <div class="exercise__name"></div>
+                    <div>
+                        <button class="btn btn--small btn--ghost js-add-set">+ Set</button>
+                        <button class="btn btn--small btn--ghost js-del-ex"
+                            style="border:1px solid var(--border)">✕</button>
+                    </div>
+                </div>
+                <!-- Mobile cards container -->
+                <div class="sets-container"></div>
+                <!-- Desktop table container -->
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Set</th>
+                                <th>KG</th>
+                                <th>Reps</th>
+                                <th>RIR</th>
+                                <th>Progreso</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody class="sets"></tbody>
+                    </table>
                 </div>
             </section>
+        </template>
 
-            <!-- Stats View -->
-            <section id="statsView" class="view-section">
-                <div class="view-header">
-                    <h2 class="view-title">Estadísticas</h2>
-                    <select id="statsPeriod" class="stats-period-selector">
-                        <option value="week">Esta Semana</option>
-                        <option value="month">Este Mes</option>
-                        <option value="year">Este Año</option>
-                        <option value="all">Todo</option>
-                    </select>
-                </div>
+        <template id="tpl-set">
+            <tr data-set-id="">
+                <td class="set-num"></td>
+                <td style="position:relative">
+                    <input class="input js-kg" inputmode="decimal" aria-label="Kilogramos" />
+                    <div class="prev-week-data prev-week-kg" style="display:none"></div>
+                </td>
+                <td style="position:relative">
+                    <input class="input js-reps" inputmode="numeric" aria-label="Repeticiones"
+                        placeholder="6, 6+1 o 6-8" />
+                    <div class="prev-week-data prev-week-reps" style="display:none"></div>
+                </td>
+                <td style="position:relative">
+                    <input class="input js-rir" inputmode="decimal" aria-label="RIR" placeholder="1 o 1/0" />
+                    <div class="prev-week-data prev-week-rir" style="display:none"></div>
+                </td>
+                <td class="progress">Primera sesión</td>
+                <td>
+                    <button class="btn btn--ghost btn--timer js-rest-timer" aria-label="Temporizador de descanso"
+                        title="Temporizador de descanso">⏳</button>
+                    <button class="btn btn--ghost btn--prev-week js-prev-week-data"
+                        aria-label="Ver datos de la semana pasada" title="Ver datos de la semana pasada">👁️</button>
+                    <button class="btn btn--ghost js-del-set" aria-label="Eliminar set">✕</button>
+                </td>
+            </tr>
+        </template>
 
-                <div id="statsContent" class="stats-content">
-                    <!-- Stats will be rendered here -->
+        <!-- Mobile set card template -->
+        <template id="tpl-set-card">
+            <div class="set-card" data-set-id="">
+                <div class="set-header">
+                    <div class="set-number">Set 1</div>
+                    <div class="set-header-actions">
+                        <button class="btn btn--ghost btn--timer btn--small js-rest-timer"
+                            aria-label="Temporizador de descanso" title="Temporizador de descanso">⏳</button>
+                        <button class="btn btn--ghost btn--prev-week btn--small js-prev-week-data"
+                            aria-label="Ver datos de la semana pasada"
+                            title="Ver datos de la semana pasada">👁️</button>
+                        <button class="set-delete js-del-set" aria-label="Eliminar set">✕</button>
+                    </div>
                 </div>
-            </section>
+                <div class="set-inputs">
+                    <div class="set-input-group" style="position:relative">
+                        <label class="set-input-label">KG</label>
+                        <input class="set-input js-kg" inputmode="decimal" aria-label="Kilogramos" placeholder="0" />
+                        <div class="prev-week-data prev-week-kg" style="display:none"></div>
+                    </div>
+                    <div class="set-input-group" style="position:relative">
+                        <label class="set-input-label">Reps</label>
+                        <input class="set-input js-reps" inputmode="numeric" aria-label="Repeticiones"
+                            placeholder="0" />
+                        <div class="prev-week-data prev-week-reps" style="display:none"></div>
+                    </div>
+                    <div class="set-input-group" style="position:relative">
+                        <label class="set-input-label">RIR</label>
+                        <input class="set-input js-rir" inputmode="decimal" aria-label="RIR" placeholder="0" />
+                        <div class="prev-week-data prev-week-rir" style="display:none"></div>
+                    </div>
+                </div>
+                <div class="set-progress">Primera sesión</div>
+            </div>
+        </template>
+
+        <template id="tpl-routine-day">
+            <div class="routine-day" data-day-id="">
+                <div class="routine-day__head">
+                    <div class="routine-day__title">Día</div>
+                    <input class="input routine-day__name" placeholder="Nombre del día (ej. Pecho/Espalda)" />
+                    <div>
+                        <button class="btn btn--small btn--ghost js-add-routine-exercise">+ Ejercicio</button>
+                        <button class="btn btn--small btn--ghost js-delete-routine-day"
+                            aria-label="Eliminar día">✕</button>
+                    </div>
+                </div>
+                <div class="routine-exercises"></div>
+            </div>
+        </template>
+
+        <template id="tpl-routine-exercise">
+            <div class="routine-exercise" data-ex-id="">
+                <div class="routine-exercise__head">
+                    <input class="input routine-exercise__name" placeholder="Nombre del ejercicio" />
+                    <div>
+                        <button class="btn btn--small btn--ghost js-add-routine-set">+ Set</button>
+                        <button class="btn btn--small btn--ghost js-delete-routine-exercise"
+                            aria-label="Eliminar ejercicio">✕</button>
+                    </div>
+                </div>
+                <div class="routine-sets"></div>
+            </div>
+        </template>
+
+        <template id="tpl-routine-set">
+            <div class="routine-set" data-set-id="">
+                <span class="routine-set__index">Set</span>
+                <input class="input routine-set__kg" inputmode="decimal" placeholder="KG" aria-label="Kilogramos" />
+                <input class="input routine-set__reps" inputmode="numeric" placeholder="Reps"
+                    aria-label="Repeticiones" />
+                <input class="input routine-set__rir" inputmode="decimal" placeholder="RIR" aria-label="RIR" />
+                <button class="btn btn--small btn--ghost js-delete-routine-set" aria-label="Eliminar set">✕</button>
+            </div>
+        </template>
+
+        <!-- TOASTS -->
+        <div class="toasts" id="toasts" aria-live="polite" aria-atomic="true"></div>
 
         </main>
     </div>
 
-    <!-- Modal Container -->
-    <div id="modalContainer" class="modal-container"></div>
-
-    <!-- Toast Notifications -->
-    <div id="toastContainer" class="toast-container"></div>
-
-    <!-- Scripts -->
+    <!-- Main Application -->
+    <!-- Utils -->
+    <script src="js/utils/dom.js"></script>
+    <script src="js/utils/uuid.js"></script>
+    <script src="js/utils/dates.js"></script>
+    <script src="js/utils/calculations.js"></script>
+    <script src="js/utils/theme.js"></script>
+    <script src="js/utils/toast.js"></script>
+    <!-- Config -->
+    <script src="js/config/app-state.js"></script>
+    <script src="js/config/templates.js"></script>
+    <!-- Storage -->
     <script src="js/utils/storage.js"></script>
-    <script src="js/utils/ui.js"></script>
-    <script src="js/modules/diary.js"></script>
-    <script src="js/modules/routines.js"></script>
+    <!-- Modules -->
     <script src="js/modules/stats.js"></script>
+    <script src="js/modules/import.js"></script>
+    <!-- Main App -->
     <script src="js/app.js"></script>
+
 </body>
 
 </html>
+
