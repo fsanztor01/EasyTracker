@@ -697,6 +697,24 @@
             </form>
         </dialog>
 
+        <dialog id="templateDialog" aria-labelledby="templateTitle" aria-modal="true">
+            <form method="dialog">
+                <div class="modal__head">
+                    <h3 class="modal__title" id="templateTitle">Vista previa de plantilla</h3>
+                    <button class="theme-btn" value="cancel" aria-label="Cerrar">Cerrar</button>
+                </div>
+                <div class="modal__body">
+                    <div id="templatePreview" style="display:grid; gap:8px"></div>
+                    <small style="color:var(--muted)">Se importará en la <strong>semana visible</strong> (pestaña
+                        Diario).</small>
+                </div>
+                <div class="modal__actions">
+                    <button class="btn btn--ghost" value="cancel">Cancelar</button>
+                    <button class="btn btn--secondary" id="confirmTemplate">Importar en esta semana</button>
+                </div>
+            </form>
+        </dialog>
+
         <dialog id="restTimerDialog" aria-labelledby="restTimerTitle" aria-modal="true">
             <form method="dialog">
                 <div class="modal__head">
