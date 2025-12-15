@@ -144,8 +144,8 @@
     }
 }
 
-/* Smooth animations for all elements */
-* {
+/* Smooth animations for animated elements only */
+[class*="fade"], [class*="pop"], [class*="slide"], .card, .btn {
     animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -207,13 +207,19 @@ body {
     background: #6B7280;
 }
 
-/* Firefox */
-* {
+/* Firefox - apply to scrollable elements only */
+.scrollable, .panel, .modal__body, .manual-content, .sessions, .routine-days, .routine-exercises {
     scrollbar-width: thin;
     scrollbar-color: var(--border) var(--surface-2);
 }
 
-[data-theme="light"] * {
+[data-theme="light"] .scrollable,
+[data-theme="light"] .panel,
+[data-theme="light"] .modal__body,
+[data-theme="light"] .manual-content,
+[data-theme="light"] .sessions,
+[data-theme="light"] .routine-days,
+[data-theme="light"] .routine-exercises {
     scrollbar-color: #E5E7EB #F6F6F8;
 }
 
@@ -283,11 +289,13 @@ body {
 }
 
 .fade-in {
-    animation: fadeIn .28s ease both
+    animation: fadeIn .28s ease both;
+    will-change: transform, opacity;
 }
 
 .pop {
-    animation: pop .22s ease both
+    animation: pop .22s ease both;
+    will-change: transform, opacity;
 }
 
 /* ==================== HEADER ==================== */
@@ -462,6 +470,7 @@ header::after {
 @media (max-width: 767px) {
     .panel[aria-hidden="false"] {
         animation: panelFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        will-change: transform, opacity;
     }
 
     @keyframes panelFadeIn {

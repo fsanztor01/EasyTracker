@@ -1,6 +1,24 @@
 // Initialize theme on load (before DOMContentLoaded)
 ThemeUtils.init();
 
+// Lazy module loader
+const loadedModules = new Set();
+function loadModule(src) {
+    if (loadedModules.has(src)) {
+        return Promise.resolve();
+    }
+    return new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = src;
+        script.onload = () => {
+            loadedModules.add(src);
+            resolve();
+        };
+        script.onerror = reject;
+        document.head.appendChild(script);
+    });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     /* =================== Main Application =================== */
 
@@ -859,15 +877,24 @@ document.addEventListener('DOMContentLoaded', () => {
             const navId = panelToNav[panelId];
             if (!navId) return;
             
-            // Update bottom nav buttons
-            ['navDiary', 'navStats', 'navRoutines', 'navImport'].forEach(id => {
+            // Update bottom nav buttons (optimized: batch DOM updates)
+            const navIds = ['navDiary', 'navStats', 'navRoutines', 'navImport'];
+            const updates = [];
+            for (let i = 0; i < navIds.length; i++) {
+                const id = navIds[i];
                 const btn = $(`#${id}`);
                 if (btn) {
                     const isActive = id === navId;
-                    btn.setAttribute('aria-current', isActive ? 'page' : 'false');
-                    btn.classList.toggle('active', isActive);
+                    updates.push(() => {
+                        btn.setAttribute('aria-current', isActive ? 'page' : 'false');
+                        btn.classList.toggle('active', isActive);
+                    });
                 }
-            });
+            }
+            // Batch updates in single frame
+            if (updates.length) {
+                requestAnimationFrame(() => updates.forEach(fn => fn()));
+            }
         }
 
         function select(panelId) {
@@ -880,9 +907,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
 
-            panels.forEach(panel => {
-                panel.setAttribute('aria-hidden', panel.id === panelId ? 'false' : 'true');
-            });
+            // Batch panel updates (optimized loop)
+            for (let i = 0; i < panels.length; i++) {
+                panels[i].setAttribute('aria-hidden', panels[i].id === panelId ? 'false' : 'true');
+            }
             
             // Reset settings panel to main menu when switching away
             if (panelId !== 'panel-settings') {
@@ -893,13 +921,17 @@ document.addEventListener('DOMContentLoaded', () => {
             if (panelId === 'panel-diary') { renderSessions(); }
             if (panelId === 'panel-routines') { renderRoutines(); }
             if (panelId === 'panel-stats') { 
-                if (typeof buildStats === 'function') buildStats();
-                if (typeof buildChartState === 'function') buildChartState();
-                if (typeof renderArchivedCycles === 'function') renderArchivedCycles();
+                loadModule('js/modules/stats.js').then(() => {
+                    if (typeof buildStats === 'function') buildStats();
+                    if (typeof buildChartState === 'function') buildChartState();
+                    if (typeof renderArchivedCycles === 'function') renderArchivedCycles();
+                });
             }
             if (panelId === 'panel-import') { 
-                if (typeof initWeekSelector === 'function') initWeekSelector();
-                if (typeof renderImportRoutineList === 'function') renderImportRoutineList();
+                loadModule('js/modules/import.js').then(() => {
+                    if (typeof initWeekSelector === 'function') initWeekSelector();
+                    if (typeof renderImportRoutineList === 'function') renderImportRoutineList();
+                });
             }
         }
 

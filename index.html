@@ -5,7 +5,10 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>EasyTracker</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet"></noscript>
     <link rel="stylesheet" href="EasyTracker.css">
 </head>
 
@@ -1041,7 +1044,7 @@
     </div>
 
     <!-- Main Application -->
-    <!-- Utils -->
+    <!-- Utils (Critical - Load First) -->
     <script src="js/utils/dom.js"></script>
     <script src="js/utils/uuid.js"></script>
     <script src="js/utils/dates.js"></script>
@@ -1053,9 +1056,7 @@
     <script src="js/config/templates.js"></script>
     <!-- Storage -->
     <script src="js/utils/storage.js"></script>
-    <!-- Modules -->
-    <script src="js/modules/stats.js"></script>
-    <script src="js/modules/import.js"></script>
+    <!-- Modules (Lazy Load - Load on demand) -->
     <!-- Main App -->
     <script src="js/app.js"></script>
 
