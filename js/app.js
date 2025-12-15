@@ -883,6 +883,12 @@ document.addEventListener('DOMContentLoaded', () => {
             panels.forEach(panel => {
                 panel.setAttribute('aria-hidden', panel.id === panelId ? 'false' : 'true');
             });
+            
+            // Reset settings panel to main menu when switching away
+            if (panelId !== 'panel-settings') {
+                if (typeof showSettingsMain === 'function') showSettingsMain();
+            }
+            
             updateNav(panelId);
             if (panelId === 'panel-diary') { renderSessions(); }
             if (panelId === 'panel-routines') { renderRoutines(); }
@@ -7399,6 +7405,524 @@ document.addEventListener('DOMContentLoaded', () => {
         if (bmrValue) bmrValue.textContent = Math.round(bmr);
         if (tdeeValue) tdeeValue.textContent = tdee;
         if (recommendedCaloriesDiv) recommendedCaloriesDiv.textContent = goalText;
+    }
+
+    /* =================== Settings Menu =================== */
+    // Settings navigation
+    const settingsBtn = $('#settingsBtn');
+    const settingsMain = $('#settingsMain');
+    const settingsTheme = $('#settingsTheme');
+    const settingsProfile = $('#settingsProfile');
+    const settingsInfo = $('#settingsInfo');
+    const themeDarkBtn = $('#themeDarkBtn');
+    const themeLightBtn = $('#themeLightBtn');
+    const colorSwatches = $('#colorSwatches');
+
+    // Open settings panel
+    if (settingsBtn) {
+        settingsBtn.addEventListener('click', () => {
+            // Hide all other panels
+            $$('.panel').forEach(panel => {
+                panel.setAttribute('aria-hidden', 'true');
+            });
+            // Show settings panel
+            const settingsPanel = $('#panel-settings');
+            if (settingsPanel) {
+                settingsPanel.setAttribute('aria-hidden', 'false');
+                // Reset to main menu
+                showSettingsMain();
+            }
+            // Update navigation
+            ['navDiary', 'navStats', 'navRoutines', 'navImport'].forEach(id => {
+                const btn = $(`#${id}`);
+                if (btn) {
+                    btn.setAttribute('aria-current', 'false');
+                    btn.classList.remove('active');
+                }
+            });
+        });
+    }
+
+    // Swipe gesture support for mobile (swipe right to go back)
+    let touchStartX = 0;
+    let touchEndX = 0;
+    const settingsPanel = $('#panel-settings');
+    if (settingsPanel) {
+        settingsPanel.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        }, { passive: true });
+        
+        settingsPanel.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            const swipeThreshold = 50;
+            const swipeDistance = touchStartX - touchEndX;
+            
+            // Swipe right (go back)
+            if (swipeDistance < -swipeThreshold) {
+                const themePanel = $('#settingsTheme');
+                const profilePanel = $('#settingsProfile');
+                const infoPanel = $('#settingsInfo');
+                
+                if (themePanel && themePanel.style.display !== 'none') {
+                    showSettingsMain();
+                } else if (profilePanel && profilePanel.style.display !== 'none') {
+                    showSettingsMain();
+                } else if (infoPanel && infoPanel.style.display !== 'none') {
+                    showSettingsMain();
+                }
+            }
+        }, { passive: true });
+    }
+
+    function showSettingsMain() {
+        if (settingsMain) settingsMain.style.display = 'block';
+        if (settingsTheme) settingsTheme.style.display = 'none';
+        if (settingsProfile) settingsProfile.style.display = 'none';
+        if (settingsInfo) settingsInfo.style.display = 'none';
+    }
+
+    function showSettingsTheme() {
+        if (settingsMain) settingsMain.style.display = 'none';
+        if (settingsTheme) settingsTheme.style.display = 'block';
+        if (settingsProfile) settingsProfile.style.display = 'none';
+        if (settingsInfo) settingsInfo.style.display = 'none';
+        updateThemeButtons();
+        renderColorSwatches();
+    }
+
+    function showSettingsProfile() {
+        if (settingsMain) settingsMain.style.display = 'none';
+        if (settingsTheme) settingsTheme.style.display = 'none';
+        if (settingsProfile) settingsProfile.style.display = 'block';
+        if (settingsInfo) settingsInfo.style.display = 'none';
+        renderProfile();
+    }
+
+    function showSettingsInfo() {
+        if (settingsMain) settingsMain.style.display = 'none';
+        if (settingsTheme) settingsTheme.style.display = 'none';
+        if (settingsProfile) settingsProfile.style.display = 'none';
+        if (settingsInfo) settingsInfo.style.display = 'block';
+    }
+
+    // Navigation buttons
+    const settingsThemeBtn = $('#settingsThemeBtn');
+    const settingsProfileBtn = $('#settingsProfileBtn');
+    const settingsInfoBtn = $('#settingsInfoBtn');
+    const backFromTheme = $('#backFromTheme');
+    const backFromProfile = $('#backFromProfile');
+    const backFromInfo = $('#backFromInfo');
+
+    if (settingsThemeBtn) settingsThemeBtn.addEventListener('click', showSettingsTheme);
+    if (settingsProfileBtn) settingsProfileBtn.addEventListener('click', showSettingsProfile);
+    if (settingsInfoBtn) settingsInfoBtn.addEventListener('click', showSettingsInfo);
+    if (backFromTheme) backFromTheme.addEventListener('click', showSettingsMain);
+    if (backFromProfile) backFromProfile.addEventListener('click', showSettingsMain);
+    if (backFromInfo) backFromInfo.addEventListener('click', showSettingsMain);
+
+    // Theme toggle
+    function updateThemeButtons() {
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        if (themeDarkBtn && themeLightBtn) {
+            if (currentTheme === 'dark') {
+                themeDarkBtn.classList.remove('btn--ghost');
+                themeDarkBtn.classList.add('btn');
+                themeLightBtn.classList.remove('btn');
+                themeLightBtn.classList.add('btn--ghost');
+            } else {
+                themeDarkBtn.classList.remove('btn');
+                themeDarkBtn.classList.add('btn--ghost');
+                themeLightBtn.classList.remove('btn--ghost');
+                themeLightBtn.classList.add('btn');
+            }
+        }
+    }
+
+    if (themeDarkBtn) {
+        themeDarkBtn.addEventListener('click', () => {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            localStorage.setItem('trainingDiary.theme', 'dark');
+            updateThemeButtons();
+            updateThemeColors('dark');
+        });
+    }
+
+    if (themeLightBtn) {
+        themeLightBtn.addEventListener('click', () => {
+            document.documentElement.setAttribute('data-theme', 'light');
+            localStorage.setItem('trainingDiary.theme', 'light');
+            updateThemeButtons();
+            updateThemeColors('light');
+        });
+    }
+
+    // Color swatches - apply to both themes
+    function renderColorSwatches() {
+        if (!colorSwatches) return;
+        const prefs = loadColorPreferences();
+        colorSwatches.innerHTML = '';
+
+        Object.keys(COLOR_PRESETS).forEach(colorKey => {
+            const colors = COLOR_PRESETS[colorKey];
+            const swatch = document.createElement('button');
+            swatch.className = 'color-swatch';
+            swatch.setAttribute('aria-label', `Color ${COLOR_NAMES[colorKey]}`);
+            swatch.style.setProperty('--swatch-color', colors.dark.primary);
+            swatch.dataset.colorKey = colorKey;
+            
+            // Check if this color is selected for either theme
+            if (prefs.dark === colorKey || prefs.light === colorKey) {
+                swatch.classList.add('active');
+            }
+            
+            swatch.addEventListener('click', () => {
+                // Apply to both themes
+                setThemeColor('dark', colorKey);
+                setThemeColor('light', colorKey);
+                renderColorSwatches();
+            });
+            
+            colorSwatches.appendChild(swatch);
+        });
+    }
+
+    // Set color for a specific theme
+    function setThemeColor(theme, colorKey) {
+        const prefs = loadColorPreferences();
+        prefs[theme] = colorKey;
+        saveColorPreferences(prefs);
+
+        // Update if this is the current theme
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        if (currentTheme === theme) {
+            updateThemeColors(theme);
+        }
+    }
+
+    // Manual dialog
+    const btnManual = $('#btnManual');
+    if (btnManual) {
+        btnManual.addEventListener('click', () => {
+            const manualDialog = $('#manualDialog');
+            if (manualDialog) manualDialog.showModal();
+        });
+    }
+
+    // Profile handlers (from TrainTracker)
+    function generateAvatarUrl(style, seed) {
+        const styleMap = {
+            'avataaars': 'avataaars',
+            'pixel-art': 'pixel-art',
+            'adventurer': 'adventurer',
+            'big-smile': 'big-smile',
+            'bottts': 'bottts',
+            'fun-emoji': 'fun-emoji',
+            'icons': 'icons',
+            'identicon': 'identicon',
+            'lorelei': 'lorelei',
+            'micah': 'micah',
+            'miniavs': 'miniavs',
+            'notionists': 'notionists',
+            'open-peeps': 'open-peeps',
+            'personas': 'personas',
+            'rings': 'rings',
+            'shapes': 'shapes',
+            'thumbs': 'thumbs'
+        };
+        const apiStyle = styleMap[style] || 'avataaars';
+        const avatarSeed = seed || Math.random().toString(36).substring(2, 15);
+        return `https://api.dicebear.com/9.x/${apiStyle}/svg?seed=${encodeURIComponent(avatarSeed)}`;
+    }
+
+    function getCurrentAvatar() {
+        if (app.profile.photo) {
+            return app.profile.photo;
+        }
+        const seed = app.profile.avatarSeed || (app.profile.firstName + ' ' + app.profile.lastName).trim() || 'default';
+        const style = app.profile.avatarStyle || 'avataaars';
+        return generateAvatarUrl(style, seed);
+    }
+
+    function handleProfilePhotoChange(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        if (!file.type.startsWith('image/')) {
+            toast('Por favor selecciona un archivo de imagen', 'warn');
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = function (event) {
+            app.profile.photo = event.target.result;
+            save();
+            const avatar = $('#profileAvatar');
+            if (avatar) avatar.src = app.profile.photo;
+            const removeBtn = $('#removePhoto');
+            if (removeBtn) removeBtn.style.display = 'block';
+            toast('Foto de perfil actualizada', 'ok');
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function handleGenerateAvatar() {
+        app.profile.avatarSeed = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+        app.profile.photo = '';
+        save();
+        const avatar = $('#profileAvatar');
+        if (avatar) avatar.src = getCurrentAvatar();
+        const removeBtn = $('#removePhoto');
+        if (removeBtn) removeBtn.style.display = 'none';
+    }
+
+    function handleAvatarStyleChange() {
+        const styleSelect = $('#avatarStyle');
+        if (!styleSelect) return;
+        app.profile.avatarStyle = styleSelect.value;
+        app.profile.photo = '';
+        save();
+        const avatar = $('#profileAvatar');
+        if (avatar) avatar.src = getCurrentAvatar();
+        const removeBtn = $('#removePhoto');
+        if (removeBtn) removeBtn.style.display = 'none';
+    }
+
+    function handleRemovePhoto() {
+        app.profile.photo = '';
+        save();
+        const avatar = $('#profileAvatar');
+        if (avatar) avatar.src = getCurrentAvatar();
+        const photoInput = $('#profilePhoto');
+        if (photoInput) photoInput.value = '';
+        const removeBtn = $('#removePhoto');
+        if (removeBtn) removeBtn.style.display = 'none';
+        toast('Foto eliminada', 'ok');
+    }
+
+    function handleProfileSave(e) {
+        if (e) e.preventDefault();
+        const firstName = $('#profileFirstName')?.value.trim() || '';
+        const lastName = $('#profileLastName')?.value.trim() || '';
+        const height = $('#profileHeight')?.value.trim() || '';
+        const weight = $('#profileWeight')?.value.trim() || '';
+        const bodyFat = $('#profileBodyFat')?.value.trim() || '';
+        app.profile.firstName = firstName;
+        app.profile.lastName = lastName;
+        app.profile.height = height;
+        app.profile.weight = weight;
+        app.profile.bodyFat = bodyFat;
+        if (!app.profile.photo && !app.profile.avatarSeed) {
+            const nameSeed = (firstName + ' ' + lastName).trim() || 'default';
+            app.profile.avatarSeed = nameSeed;
+        }
+        if (weight || bodyFat) {
+            const today = new Date().toISOString().split('T')[0];
+            const existingEntry = app.profile.weightHistory?.find(entry => entry.date === today);
+            if (existingEntry) {
+                if (weight) existingEntry.weight = parseFloat(weight) || null;
+                if (bodyFat) existingEntry.bodyFat = parseFloat(bodyFat) || null;
+            } else {
+                if (!app.profile.weightHistory) app.profile.weightHistory = [];
+                app.profile.weightHistory.push({
+                    date: today,
+                    weight: weight ? parseFloat(weight) : null,
+                    bodyFat: bodyFat ? parseFloat(bodyFat) : null
+                });
+            }
+        }
+        save();
+        renderProfile();
+        toast('Perfil actualizado', 'ok');
+    }
+
+    function handleBodyMeasurementsSave(e) {
+        if (e) e.preventDefault();
+        const arms = $('#measurementArms')?.value.trim() || '';
+        const chest = $('#measurementChest')?.value.trim() || '';
+        const waist = $('#measurementWaist')?.value.trim() || '';
+        const hips = $('#measurementHips')?.value.trim() || '';
+        const legs = $('#measurementLegs')?.value.trim() || '';
+        const calves = $('#measurementCalves')?.value.trim() || '';
+        if (!arms && !chest && !waist && !hips && !legs && !calves) {
+            toast('Ingresa al menos una medida', 'warn');
+            return;
+        }
+        const today = new Date().toISOString().split('T')[0];
+        const existingEntry = app.profile.bodyMeasurementsHistory?.find(entry => entry.date === today);
+        const measurements = {
+            date: today,
+            arms: arms ? parseFloat(arms) : null,
+            chest: chest ? parseFloat(chest) : null,
+            waist: waist ? parseFloat(waist) : null,
+            hips: hips ? parseFloat(hips) : null,
+            legs: legs ? parseFloat(legs) : null,
+            calves: calves ? parseFloat(calves) : null
+        };
+        if (existingEntry) {
+            if (arms) existingEntry.arms = parseFloat(arms);
+            if (chest) existingEntry.chest = parseFloat(chest);
+            if (waist) existingEntry.waist = parseFloat(waist);
+            if (hips) existingEntry.hips = parseFloat(hips);
+            if (legs) existingEntry.legs = parseFloat(legs);
+            if (calves) existingEntry.calves = parseFloat(calves);
+        } else {
+            if (!app.profile.bodyMeasurementsHistory) app.profile.bodyMeasurementsHistory = [];
+            app.profile.bodyMeasurementsHistory.push(measurements);
+        }
+        $('#measurementArms').value = '';
+        $('#measurementChest').value = '';
+        $('#measurementWaist').value = '';
+        $('#measurementHips').value = '';
+        $('#measurementLegs').value = '';
+        $('#measurementCalves').value = '';
+        save();
+        renderProfile();
+        toast('Medidas guardadas', 'ok');
+    }
+
+    function handleAddNote(e) {
+        if (e) e.preventDefault();
+        const noteText = $('#noteText');
+        if (!noteText) return;
+        const text = noteText.value.trim();
+        if (!text) {
+            toast('Escribe algo en la nota', 'warn');
+            return;
+        }
+        if (!app.notes) app.notes = [];
+        app.notes.push({
+            id: uuid(),
+            text: text,
+            createdAt: new Date().toISOString()
+        });
+        save();
+        noteText.value = '';
+        renderNotes();
+        toast('Nota guardada', 'ok');
+    }
+
+    function deleteNote(noteId) {
+        if (!noteId) return;
+        if (!app.notes) app.notes = [];
+        app.notes = app.notes.filter(note => note.id !== noteId);
+        save();
+        renderNotes();
+        toast('Nota eliminada', 'ok');
+    }
+
+    function renderNotes() {
+        const notesList = $('#notesList');
+        const notesEmpty = $('#notesEmpty');
+        if (!notesList) return;
+        if (!app.notes || app.notes.length === 0) {
+            if (notesList) notesList.innerHTML = '';
+            if (notesEmpty) notesEmpty.hidden = false;
+            return;
+        }
+        if (notesEmpty) notesEmpty.hidden = true;
+        const sortedNotes = [...app.notes].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        notesList.innerHTML = sortedNotes.map(note => {
+            const date = new Date(note.createdAt).toLocaleDateString('es-ES', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            return `
+                <div class="note-item">
+                    <p>${escapeHtml(note.text)}</p>
+                    <div class="note-meta">
+                        <span>${date}</span>
+                        <button class="note-delete-btn js-delete-note" data-note-id="${note.id}" aria-label="Eliminar nota" title="Eliminar nota">✕</button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function renderProfile() {
+        const avatar = $('#profileAvatar');
+        if (avatar) avatar.src = getCurrentAvatar();
+        const photoInput = $('#profilePhoto');
+        if (photoInput) photoInput.value = '';
+        const styleSelect = $('#avatarStyle');
+        if (styleSelect) styleSelect.value = app.profile.avatarStyle || 'avataaars';
+        const removeBtn = $('#removePhoto');
+        if (removeBtn) removeBtn.style.display = app.profile.photo ? 'block' : 'none';
+        const firstNameInput = $('#profileFirstName');
+        if (firstNameInput) firstNameInput.value = app.profile.firstName || '';
+        const lastNameInput = $('#profileLastName');
+        if (lastNameInput) lastNameInput.value = app.profile.lastName || '';
+        const heightInput = $('#profileHeight');
+        if (heightInput) heightInput.value = app.profile.height || '';
+        const weightInput = $('#profileWeight');
+        if (weightInput) weightInput.value = app.profile.weight || '';
+        const bodyFatInput = $('#profileBodyFat');
+        if (bodyFatInput) bodyFatInput.value = app.profile.bodyFat || '';
+        const historyBody = $('#profileHistoryBody');
+        if (historyBody) {
+            const entries = [...(app.profile.weightHistory || [])].sort((a, b) => new Date(b.date) - new Date(a.date));
+            if (!entries.length) {
+                historyBody.innerHTML = '<tr><td colspan="3" style="padding:8px">Sin registros aún</td></tr>';
+            } else {
+                historyBody.innerHTML = entries.map(entry => {
+                    const date = new Date(entry.date).toLocaleDateString('es-ES', { year: 'numeric', month: 'short', day: 'numeric' });
+                    const hasWeight = typeof entry.weight === 'number' && Number.isFinite(entry.weight);
+                    const hasFat = typeof entry.bodyFat === 'number' && Number.isFinite(entry.bodyFat);
+                    const weight = hasWeight ? entry.weight.toFixed(1) : '—';
+                    const fat = hasFat ? entry.bodyFat.toFixed(1) : '—';
+                    return `<tr><td>${date}</td><td>${weight}</td><td>${fat}</td></tr>`;
+                }).join('');
+            }
+        }
+        const bodyMeasurementsHistoryBody = $('#bodyMeasurementsHistoryBody');
+        if (bodyMeasurementsHistoryBody) {
+            const entries = [...(app.profile.bodyMeasurementsHistory || [])].sort((a, b) => new Date(b.date) - new Date(a.date));
+            if (!entries.length) {
+                bodyMeasurementsHistoryBody.innerHTML = '<tr><td colspan="7" style="padding:8px; color:var(--muted)">Sin registros aún</td></tr>';
+            } else {
+                bodyMeasurementsHistoryBody.innerHTML = entries.map(entry => {
+                    const date = new Date(entry.date).toLocaleDateString('es-ES', { year: 'numeric', month: 'short', day: 'numeric' });
+                    const formatValue = (val) => (typeof val === 'number' && Number.isFinite(val)) ? val.toFixed(1) : '—';
+                    return `<tr>
+                                <td style="padding:8px; border-bottom:1px solid var(--border)">${date}</td>
+                                <td style="padding:8px; border-bottom:1px solid var(--border)">${formatValue(entry.arms)}</td>
+                                <td style="padding:8px; border-bottom:1px solid var(--border)">${formatValue(entry.chest)}</td>
+                                <td style="padding:8px; border-bottom:1px solid var(--border)">${formatValue(entry.waist)}</td>
+                                <td style="padding:8px; border-bottom:1px solid var(--border)">${formatValue(entry.hips)}</td>
+                                <td style="padding:8px; border-bottom:1px solid var(--border)">${formatValue(entry.legs)}</td>
+                                <td style="padding:8px; border-bottom:1px solid var(--border)">${formatValue(entry.calves)}</td>
+                            </tr>`;
+                }).join('');
+            }
+        }
+        renderNotes();
+    }
+
+    // Bind profile event listeners
+    const profilePhoto = $('#profilePhoto');
+    if (profilePhoto) profilePhoto.addEventListener('change', handleProfilePhotoChange);
+    const generateAvatar = $('#generateAvatar');
+    if (generateAvatar) generateAvatar.addEventListener('click', handleGenerateAvatar);
+    const avatarStyle = $('#avatarStyle');
+    if (avatarStyle) avatarStyle.addEventListener('change', handleAvatarStyleChange);
+    const removePhoto = $('#removePhoto');
+    if (removePhoto) removePhoto.addEventListener('click', handleRemovePhoto);
+    const saveProfile = $('#saveProfile');
+    if (saveProfile) saveProfile.addEventListener('click', handleProfileSave);
+    const saveBodyMeasurements = $('#saveBodyMeasurements');
+    if (saveBodyMeasurements) saveBodyMeasurements.addEventListener('click', handleBodyMeasurementsSave);
+    const calculateBMR = $('#calculateBMR');
+    if (calculateBMR) calculateBMR.addEventListener('click', handleBMRCalculate);
+    const addNote = $('#addNote');
+    if (addNote) addNote.addEventListener('click', handleAddNote);
+    const notesList = $('#notesList');
+    if (notesList) {
+        notesList.addEventListener('click', (ev) => {
+            const btn = ev.target.closest('.js-delete-note');
+            if (!btn) return;
+            ev.preventDefault();
+            deleteNote(btn.dataset.noteId);
+        });
     }
 
 });

@@ -19,8 +19,7 @@
                     <strong class="brand__title">EasyTracker</strong>
                 </div>
                 <div style="display: flex; gap: 8px; align-items: center;">
-                    <button class="theme-btn" id="themeToggle" aria-pressed="false" aria-label="Cambiar tema">🌙
-                        Oscuro</button>
+                    <button class="theme-btn" id="settingsBtn" aria-label="Ajustes" title="Ajustes">⚙️</button>
                 </div>
             </div>
         </header>
@@ -261,8 +260,307 @@
                         </div>
                     </div>
                     <div id="importRoutineList" class="routine-import__list"></div>
-                    <div class="routine-empty" id="importRoutineEmpty">Aún no tienes rutinas guardadas.</div>
+                    <div class="routine-empty" id="importRoutineEmpty">Aún no tienes rutinas guardadas.                    </div>
                 </article>
+            </section>
+
+            <!-- AJUSTES -->
+            <section class="panel" id="panel-settings" role="tabpanel" aria-labelledby="tab-settings" aria-hidden="true">
+                <!-- Menú principal de ajustes -->
+                <div class="settings-main" id="settingsMain">
+                    <article class="card pop" style="padding:16px">
+                        <h3 class="summary__title" style="margin-bottom:16px">Ajustes</h3>
+                        <div class="settings-menu">
+                            <button class="settings-menu-item" id="settingsThemeBtn">
+                                <span>🎨</span>
+                                <span>Tema</span>
+                                <span>→</span>
+                            </button>
+                            <button class="settings-menu-item" id="settingsProfileBtn">
+                                <span>👤</span>
+                                <span>Perfil</span>
+                                <span>→</span>
+                            </button>
+                            <button class="settings-menu-item" id="settingsInfoBtn">
+                                <span>ℹ️</span>
+                                <span>Información</span>
+                                <span>→</span>
+                            </button>
+                        </div>
+                    </article>
+                </div>
+
+                <!-- Sub-panel de Tema -->
+                <div class="settings-subpanel" id="settingsTheme" style="display:none">
+                    <article class="card pop" style="padding:16px">
+                        <div class="settings-header">
+                            <button class="btn btn--ghost" id="backFromTheme" aria-label="Volver">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M19 12H5M12 19l-7-7 7-7"/>
+                                </svg>
+                            </button>
+                            <h3 class="summary__title" style="margin:0; flex:1">Tema</h3>
+                        </div>
+
+                        <div class="field" style="margin-top:20px">
+                            <label class="label">Modo</label>
+                            <div style="display:flex; gap:8px">
+                                <button class="btn" id="themeDarkBtn" style="flex:1">🌙 Oscuro</button>
+                                <button class="btn btn--ghost" id="themeLightBtn" style="flex:1">☀️ Claro</button>
+                            </div>
+                        </div>
+
+                        <div class="field" style="margin-top:20px">
+                            <label class="label">Color de botones</label>
+                            <p style="color:var(--muted); font-size:0.85rem; margin-bottom:12px">El color seleccionado se aplicará a ambos temas</p>
+                            <div class="color-swatches" id="colorSwatches"></div>
+                        </div>
+                    </article>
+                </div>
+
+                <!-- Sub-panel de Perfil -->
+                <div class="settings-subpanel" id="settingsProfile" style="display:none">
+                    <article class="card pop" style="padding:16px; margin-bottom:12px">
+                        <div class="settings-header">
+                            <button class="btn btn--ghost" id="backFromProfile" aria-label="Volver">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M19 12H5M12 19l-7-7 7-7"/>
+                                </svg>
+                            </button>
+                            <h3 class="summary__title" style="margin:0; flex:1">Perfil</h3>
+                        </div>
+                        <div id="profileLevelDisplay" style="margin-top:16px">
+                            <!-- Se renderizará dinámicamente -->
+                        </div>
+                    </article>
+
+                    <article class="card pop" style="padding:16px">
+                        <h3 class="summary__title" style="margin-bottom:10px">Mi Perfil</h3>
+                        <div class="profile-layout">
+                            <div class="profile-avatar-wrapper">
+                                <img id="profileAvatar" class="profile-avatar" alt="Avatar" src="" />
+                                <div class="avatar-controls" style="display:grid; gap:10px; width:100%">
+                                    <div style="display:grid; grid-template-columns: 1fr auto; gap:10px; align-items:end">
+                                        <div class="field" style="margin-bottom:0">
+                                            <label class="label" for="avatarStyle">Estilo de avatar</label>
+                                            <select id="avatarStyle" class="input">
+                                                <option value="avataaars">Avataaars</option>
+                                                <option value="pixel-art">Pixel Art</option>
+                                                <option value="adventurer">Adventurer</option>
+                                                <option value="big-smile">Big Smile</option>
+                                                <option value="bottts">Bottts</option>
+                                                <option value="fun-emoji">Fun Emoji</option>
+                                                <option value="icons">Icons</option>
+                                                <option value="identicon">Identicon</option>
+                                                <option value="lorelei">Lorelei</option>
+                                                <option value="micah">Micah</option>
+                                                <option value="miniavs">Miniavs</option>
+                                                <option value="notionists">Notionists</option>
+                                                <option value="open-peeps">Open Peeps</option>
+                                                <option value="personas">Personas</option>
+                                                <option value="rings">Rings</option>
+                                                <option value="shapes">Shapes</option>
+                                                <option value="thumbs">Thumbs</option>
+                                            </select>
+                                        </div>
+                                        <button type="button" class="btn btn--ghost" id="generateAvatar"
+                                            style="white-space:nowrap">Generar nuevo avatar</button>
+                                    </div>
+                                    <label for="profilePhoto" style="width:100%">
+                                        <input id="profilePhoto" type="file" accept="image/*" class="input"
+                                            style="display:none" />
+                                        <button type="button" class="btn btn--ghost" style="width:100%"
+                                            onclick="document.getElementById('profilePhoto').click()">Subir foto
+                                            propia</button>
+                                    </label>
+                                    <button type="button" class="btn btn--ghost btn--danger" id="removePhoto"
+                                        style="display:none">Eliminar foto</button>
+                                </div>
+                            </div>
+                            <div class="profile-form">
+                                <div class="field"><label class="label" for="profileFirstName">Nombre</label><input
+                                        id="profileFirstName" class="input" placeholder="Nombre" /></div>
+                                <div class="field"><label class="label" for="profileLastName">Apellidos</label><input
+                                        id="profileLastName" class="input" placeholder="Apellidos" /></div>
+                                <div class="field"><label class="label" for="profileHeight">Altura (cm)</label><input
+                                        id="profileHeight" class="input" type="number" inputmode="decimal" min="0"
+                                        step="0.1" placeholder="Ej. 178" /></div>
+                                <div class="field"><label class="label" for="profileWeight">Peso actual (kg)</label><input
+                                        id="profileWeight" class="input" type="number" inputmode="decimal" min="0"
+                                        step="0.1" placeholder="Opcional" /></div>
+                                <div class="field"><label class="label" for="profileBodyFat">% grasa actual</label><input
+                                        id="profileBodyFat" class="input" type="number" inputmode="decimal" min="0"
+                                        step="0.1" placeholder="Opcional" /></div>
+                                <button class="btn" id="saveProfile" type="button">Actualizar perfil</button>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="card pop profile-history" style="padding:16px; margin-top:12px">
+                        <h3 class="summary__title" style="margin-bottom:8px">Historial de peso y % grasa</h3>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Peso (kg)</th>
+                                    <th>% Grasa</th>
+                                </tr>
+                            </thead>
+                            <tbody id="profileHistoryBody">
+                                <tr>
+                                    <td colspan="3" style="padding:8px">Sin registros aún</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </article>
+
+                    <article class="card pop" style="padding:16px; margin-top:12px">
+                        <h3 class="summary__title" style="margin-bottom:16px">Medidas Corporales</h3>
+                        <div class="body-measurements-form"
+                            style="display:grid; grid-template-columns: repeat(3, 1fr); gap:12px; margin-bottom:16px">
+                            <div class="field">
+                                <label class="label" for="measurementArms">Brazos (cm)</label>
+                                <input id="measurementArms" class="input" type="number" inputmode="decimal" min="0"
+                                    step="0.1" placeholder="Ej. 35.5" />
+                            </div>
+                            <div class="field">
+                                <label class="label" for="measurementChest">Pecho (cm)</label>
+                                <input id="measurementChest" class="input" type="number" inputmode="decimal" min="0"
+                                    step="0.1" placeholder="Ej. 100" />
+                            </div>
+                            <div class="field">
+                                <label class="label" for="measurementWaist">Cintura (cm)</label>
+                                <input id="measurementWaist" class="input" type="number" inputmode="decimal" min="0"
+                                    step="0.1" placeholder="Ej. 80" />
+                            </div>
+                            <div class="field">
+                                <label class="label" for="measurementHips">Caderas (cm)</label>
+                                <input id="measurementHips" class="input" type="number" inputmode="decimal" min="0"
+                                    step="0.1" placeholder="Ej. 95" />
+                            </div>
+                            <div class="field">
+                                <label class="label" for="measurementLegs">Piernas (cm)</label>
+                                <input id="measurementLegs" class="input" type="number" inputmode="decimal" min="0"
+                                    step="0.1" placeholder="Ej. 60" />
+                            </div>
+                            <div class="field">
+                                <label class="label" for="measurementCalves">Gemelos (cm)</label>
+                                <input id="measurementCalves" class="input" type="number" inputmode="decimal" min="0"
+                                    step="0.1" placeholder="Ej. 38" />
+                            </div>
+                            <button class="btn" id="saveBodyMeasurements" type="button" style="grid-column: 1 / -1;">Guardar
+                                medidas</button>
+                        </div>
+                        <div class="body-measurements-history">
+                            <h4 class="summary__title" style="margin-bottom:8px; font-size:1rem">Historial de medidas</h4>
+                            <div style="overflow-x:auto">
+                                <table style="width:100%; border-collapse:collapse; font-size:0.9rem">
+                                    <thead>
+                                        <tr>
+                                            <th style="padding:8px; border-bottom:1px solid var(--border); text-align:left">
+                                                Fecha</th>
+                                            <th style="padding:8px; border-bottom:1px solid var(--border); text-align:left">
+                                                Brazos</th>
+                                            <th style="padding:8px; border-bottom:1px solid var(--border); text-align:left">
+                                                Pecho</th>
+                                            <th style="padding:8px; border-bottom:1px solid var(--border); text-align:left">
+                                                Cintura</th>
+                                            <th style="padding:8px; border-bottom:1px solid var(--border); text-align:left">
+                                                Caderas</th>
+                                            <th style="padding:8px; border-bottom:1px solid var(--border); text-align:left">
+                                                Piernas</th>
+                                            <th style="padding:8px; border-bottom:1px solid var(--border); text-align:left">
+                                                Gemelos</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="bodyMeasurementsHistoryBody">
+                                        <tr>
+                                            <td colspan="7" style="padding:8px; color:var(--muted)">Sin registros aún</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="card pop" style="padding:16px; margin-top:12px">
+                        <h3 class="summary__title" style="margin-bottom:16px">Calculadora de TMB y Calorías</h3>
+                        <div class="bmr-calculator" style="display:grid; grid-template-columns: repeat(2, 1fr); gap:12px">
+                            <div class="field">
+                                <label class="label" for="bmrGender">Sexo</label>
+                                <select id="bmrGender" class="input">
+                                    <option value="male">Hombre</option>
+                                    <option value="female">Mujer</option>
+                                </select>
+                            </div>
+                            <div class="field">
+                                <label class="label" for="bmrAge">Edad</label>
+                                <input id="bmrAge" class="input" type="number" min="1" max="120" placeholder="Ej. 30" />
+                            </div>
+                            <div class="field">
+                                <label class="label" for="bmrActivity">Nivel de actividad</label>
+                                <select id="bmrActivity" class="input">
+                                    <option value="1.2">Sedentario (poco o ningún ejercicio)</option>
+                                    <option value="1.375">Ligera (ejercicio 1-3 días/semana)</option>
+                                    <option value="1.55">Moderada (ejercicio 3-5 días/semana)</option>
+                                    <option value="1.725">Intensa (ejercicio 6-7 días/semana)</option>
+                                    <option value="1.9">Muy intensa (ejercicio 2 veces/día)</option>
+                                </select>
+                            </div>
+                            <div class="field">
+                                <label class="label" for="bmrGoal">Objetivo</label>
+                                <select id="bmrGoal" class="input">
+                                    <option value="maintain">Mantener peso</option>
+                                    <option value="lose">Perder grasa</option>
+                                    <option value="gain">Ganar masa muscular</option>
+                                </select>
+                            </div>
+                            <button class="btn" id="calculateBMR" type="button"
+                                style="grid-column: 1 / -1;">Calcular</button>
+                        </div>
+                        <div id="bmrResults"
+                            style="margin-top:20px; padding:16px; background:var(--bg-secondary); border-radius:8px; display:none">
+                            <h4 class="summary__title" style="margin-bottom:12px; font-size:1rem">Resultados</h4>
+                            <div style="display:grid; gap:8px">
+                                <div><strong>TMB (Tasa Metabólica Basal):</strong> <span id="bmrValue">—</span> kcal/día
+                                </div>
+                                <div><strong>TDEE (Gasto Energético Total):</strong> <span id="tdeeValue">—</span> kcal/día
+                                </div>
+                                <div style="margin-top:8px; padding-top:8px; border-top:1px solid var(--border)">
+                                    <strong>Calorías recomendadas:</strong>
+                                    <div style="margin-top:4px; color:var(--accent)" id="recommendedCalories">—</div>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="card pop" style="padding:16px; margin-top:12px">
+                        <h3 class="summary__title" style="margin-bottom:8px">Notas rápidas</h3>
+                        <div class="notes-form">
+                            <label class="label" for="noteText">Nueva nota (máx. 200 caracteres)</label>
+                            <textarea id="noteText" class="input" maxlength="200"
+                                placeholder="Escribe tu nota..."></textarea>
+                            <button class="btn btn--secondary" id="addNote" type="button">Guardar nota</button>
+                        </div>
+                        <div class="notes-list" id="notesList"></div>
+                        <div class="routine-empty" id="notesEmpty">Aún no hay notas.</div>
+                    </article>
+                </div>
+
+                <!-- Sub-panel de Información -->
+                <div class="settings-subpanel" id="settingsInfo" style="display:none">
+                    <article class="card pop" style="padding:16px">
+                        <div class="settings-header">
+                            <button class="btn btn--ghost" id="backFromInfo" aria-label="Volver">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M19 12H5M12 19l-7-7 7-7"/>
+                                </svg>
+                            </button>
+                            <h3 class="summary__title" style="margin:0; flex:1">Información</h3>
+                        </div>
+                        <button class="btn" id="btnManual" style="width:100%; margin-top:20px">ℹ️ Abrir Manual de Usuario</button>
+                    </article>
+                </div>
             </section>
         </main>
 
@@ -431,9 +729,145 @@
                         style="display:none">Cancelar</button>
                 </div>
             </form>
-        </dialog>
+                </dialog>
 
-        <!-- Templates -->
+                <dialog id="manualDialog" aria-labelledby="manualTitle" aria-modal="true">
+                    <form method="dialog">
+                        <div class="modal__head">
+                            <h3 class="modal__title" id="manualTitle">Manual de Usuario - EasyTracker</h3>
+                            <button class="theme-btn" value="cancel" aria-label="Cerrar">✕</button>
+                        </div>
+                        <div class="modal__body">
+                            <div class="manual-content">
+                                <div class="manual-section">
+                                    <h2>📋 Tabla de Contenidos</h2>
+                                    <div class="manual-toc">
+                                        <ul>
+                                            <li><a href="#inicio">Inicio</a></li>
+                                            <li><a href="#diario">Diario de Entrenamientos</a></li>
+                                            <li><a href="#estadisticas">Estadísticas</a></li>
+                                            <li><a href="#rutinas">Rutinas</a></li>
+                                            <li><a href="#importar">Importar/Exportar</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                <div class="manual-section" id="inicio">
+                                    <h2>🏋️‍♂️ Inicio</h2>
+                                    <h3>¿Qué es EasyTracker?</h3>
+                                    <p>EasyTracker es una aplicación web para registrar y analizar tus entrenamientos,
+                                        ayudándote a
+                                        mejorar tu progreso y alcanzar tus metas.</p>
+
+                                    <h3>Navegación</h3>
+                                    <ul>
+                                        <li><strong>Navegación inferior:</strong> Acceso rápido a Diario, Estadísticas, Rutinas e
+                                            Importar
+                                        </li>
+                                        <li><strong>Ajustes:</strong> Botón de engranaje en la esquina superior derecha para acceder a Tema, Perfil e Información</li>
+                                    </ul>
+                                </div>
+
+                                <div class="manual-section" id="diario">
+                                    <h2>📝 Diario</h2>
+                                    <h3>Crear una sesión</h3>
+                                    <ul>
+                                        <li>Pulsa "+ Nueva sesión"</li>
+                                        <li>Ingresa el nombre (ej: "Pecho y tríceps")</li>
+                                        <li>Selecciona la fecha</li>
+                                        <li>Pulsa "Guardar"</li>
+                                    </ul>
+
+                                    <h3>Añadir ejercicios</h3>
+                                    <ul>
+                                        <li>Dentro de una sesión, pulsa "+ Ejercicio" en cualquier momento</li>
+                                        <li>No necesitas activar ningún modo de edición</li>
+                                        <li>Ingresa el nombre del ejercicio y pulsa "Guardar"</li>
+                                    </ul>
+
+                                    <h3>Registrar sets</h3>
+                                    <p>Para cada ejercicio, puedes añadir:</p>
+                                    <ul>
+                                        <li><strong>KG:</strong> Peso levantado</li>
+                                        <li><strong>Reps:</strong> Repeticiones realizadas</li>
+                                        <li><strong>RIR:</strong> Repeticiones en reserva (esfuerzo percibido)</li>
+                                    </ul>
+
+                                    <h3>Temporizador de descanso</h3>
+                                    <ul>
+                                        <li>Pulsa el botón ⏳ junto a cada set para activar el temporizador</li>
+                                        <li>En móvil, aparecerá una ventana flotante centrada en la pantalla</li>
+                                        <li>Cuando termine el tiempo, verás un mensaje de confirmación y se cerrará
+                                            automáticamente</li>
+                                    </ul>
+                                </div>
+
+                                <div class="manual-section" id="estadisticas">
+                                    <h2>📊 Estadísticas</h2>
+                                    <h3>Ver tu progreso</h3>
+                                    <ul>
+                                        <li>Ve a la pestaña "Estadísticas"</li>
+                                        <li>Selecciona la métrica que quieres analizar:
+                                            <ul>
+                                                <li>Volumen total</li>
+                                                <li>RIR promedio</li>
+                                                <li>Peso máximo</li>
+                                            </ul>
+                                        </li>
+                                        <li>Filtra por ejercicio específico o "Todos los ejercicios"</li>
+                                        <li>Elige el período a analizar</li>
+                                    </ul>
+                                </div>
+
+                                <div class="manual-section" id="rutinas">
+                                    <h2>🧩 Rutinas</h2>
+                                    <h3>Crear rutina personalizada</h3>
+                                    <ul>
+                                        <li>Ve a la pestaña "Rutinas"</li>
+                                        <li>Ingresa un nombre para tu rutina</li>
+                                        <li>Pulsa "+ Añadir día" para cada día de entrenamiento</li>
+                                        <li>Para cada día:
+                                            <ul>
+                                                <li>Asigna un nombre (ej: "Día 1 - Pecho")</li>
+                                                <li>Añade ejercicios con "+ Ejercicio"</li>
+                                                <li>Configura sets para cada ejercicio</li>
+                                            </ul>
+                                        </li>
+                                        <li>Pulsa "Guardar rutina"</li>
+                                    </ul>
+                                </div>
+
+                                <div class="manual-section" id="importar">
+                                    <h2>📥 Importar/Exportar</h2>
+                                    <h3>Importar entrenamientos</h3>
+                                    <ul>
+                                        <li>Ve a la pestaña "Importar"</li>
+                                        <li>Selecciona la semana objetivo</li>
+                                        <li>Elige un archivo JSON válido</li>
+                                        <li>Revisa la vista previa</li>
+                                        <li>Pulsa "Importar"</li>
+                                    </ul>
+
+                                    <h3>Exportar datos</h3>
+                                    <p>Puedes exportar tus datos en formato JSON:</p>
+                                    <ul>
+                                        <li><strong>Exportar sesiones:</strong> Pulsa "Exportar sesiones" en la sección
+                                            "Importar
+                                            entrenamientos" para descargar todos tus entrenamientos registrados.</li>
+                                        <li><strong>Exportar rutinas:</strong> En la sección "Rutinas creadas", pulsa "📤
+                                            Exportar
+                                            rutinas" para descargar todas tus rutinas personalizadas creadas.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal__actions">
+                            <button class="btn" value="cancel">Cerrar</button>
+                        </div>
+                    </form>
+                </dialog>
+
+                <!-- Templates -->
         <template id="tpl-session">
             <article class="session card pop" data-id="">
                 <div class="session__header">
