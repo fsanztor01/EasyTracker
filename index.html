@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description"
+        content="FitTracker - Tu compañero personal de entrenamiento. Registra entrenamientos, crea rutinas y visualiza tu progreso.">
+    <meta name="theme-color" content="#0A84FF">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <title>FitTracker</title>
+    <link rel="stylesheet" href="styles/main.css">
+</head>
+
+<body>
+    <!-- Main App Container -->
+    <div id="app" class="app-container">
+
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-content">
+                <h1 class="app-title">
+                    <span class="title-icon">💪</span>
+                    FitTracker
+                </h1>
+                <button id="themeToggle" class="theme-toggle" aria-label="Cambiar tema">
+                    <span class="theme-icon">🌙</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <nav class="nav-tabs">
+            <button class="nav-tab active" data-view="diary">
+                <span class="tab-icon">📅</span>
+                <span class="tab-label">Diario</span>
+            </button>
+            <button class="nav-tab" data-view="routines">
+                <span class="tab-icon">📋</span>
+                <span class="tab-label">Rutinas</span>
+            </button>
+            <button class="nav-tab" data-view="stats">
+                <span class="tab-icon">📊</span>
+                <span class="tab-label">Stats</span>
+            </button>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+
+            <!-- Diary View -->
+            <section id="diaryView" class="view-section active">
+                <div class="view-header">
+                    <h2 class="view-title">Diario de Entrenamiento</h2>
+                    <button id="addSessionBtn" class="btn btn-primary">
+                        <span class="btn-icon">+</span>
+                        Nueva Sesión
+                    </button>
+                </div>
+
+                <div id="diaryContent" class="diary-content">
+                    <!-- Sessions will be rendered here -->
+                </div>
+            </section>
+
+            <!-- Routines View -->
+            <section id="routinesView" class="view-section">
+                <div class="view-header">
+                    <h2 class="view-title">Mis Rutinas</h2>
+                    <div class="header-actions">
+                        <button id="addRoutineBtn" class="btn btn-primary">
+                            <span class="btn-icon">+</span>
+                            Nueva Rutina
+                        </button>
+                        <button id="importRoutineBtn" class="btn btn-secondary">
+                            <span class="btn-icon">📥</span>
+                            Importar
+                        </button>
+                    </div>
+                </div>
+
+                <div id="routinesContent" class="routines-content">
+                    <!-- Routines will be rendered here -->
+                </div>
+            </section>
+
+            <!-- Stats View -->
+            <section id="statsView" class="view-section">
+                <div class="view-header">
+                    <h2 class="view-title">Estadísticas</h2>
+                    <select id="statsPeriod" class="stats-period-selector">
+                        <option value="week">Esta Semana</option>
+                        <option value="month">Este Mes</option>
+                        <option value="year">Este Año</option>
+                        <option value="all">Todo</option>
+                    </select>
+                </div>
+
+                <div id="statsContent" class="stats-content">
+                    <!-- Stats will be rendered here -->
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Modal Container -->
+    <div id="modalContainer" class="modal-container"></div>
+
+    <!-- Toast Notifications -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- Scripts -->
+    <script src="js/utils/storage.js"></script>
+    <script src="js/utils/ui.js"></script>
+    <script src="js/modules/diary.js"></script>
+    <script src="js/modules/routines.js"></script>
+    <script src="js/modules/stats.js"></script>
+    <script src="js/app.js"></script>
+</body>
+
+</html>
