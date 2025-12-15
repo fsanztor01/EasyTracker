@@ -1493,210 +1493,199 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const body = card.querySelector('.session__body');
-            const exercisesData = session.exercises || [];
-            const exercisesContainer = document.createElement('div');
-            exercisesContainer.className = 'exercises-lazy-container';
-            exercisesContainer.style.display = 'none';
-            body.appendChild(exercisesContainer);
+            // Render exercises immediately (like TrainTracker) - no lazy loading
+            (session.exercises || []).forEach(ex => body.appendChild(renderExercise(session, ex)));
 
-            // Lazy render function - ONLY called when details opens
-            let exercisesRendered = false;
-            const renderExercisesLazy = () => {
-                if (exercisesRendered) return;
-                exercisesRendered = true;
-                exercisesContainer.style.display = '';
-
-                const isDesktop = window.matchMedia('(min-width: 768px)').matches;
-                const fragment = document.createDocumentFragment();
-                
-                // Render structure ONLY - no calculations
-                exercisesData.forEach(ex => {
-                    fragment.appendChild(renderExercise(session, ex, isDesktop, true));
-                });
-                exercisesContainer.appendChild(fragment);
-                
-                // Schedule calculations in idle time (non-blocking)
-                scheduleDOMUpdate(() => {
-                    const allSets = [];
-                    exercisesData.forEach(ex => {
-                        ex.sets?.forEach(set => {
-                            allSets.push({ session, ex, set });
-                        });
-                    });
-                    
-                    // Process in micro-batches (1 set at a time for extreme responsiveness)
-                    let idx = 0;
-                    const processNext = () => {
-                        if (idx < allSets.length) {
-                            updateSetCalculations(allSets[idx].session, allSets[idx].ex, allSets[idx].set);
-                            idx++;
-                            if (idx < allSets.length) {
-                                setTimeout(processNext, 0);
-                            }
-                        }
-                    };
-                    setTimeout(processNext, 0);
-                });
-            };
-
-            details._renderExercises = renderExercisesLazy;
-
+            // Move the "Añadir ejercicio" button to the end of the session body
             const addExBtn = card.querySelector('.js-add-ex');
-            if (addExBtn) {
+            if (addExBtn && body) {
                 addExBtn.classList.remove('btn--mobile');
-                exercisesContainer.appendChild(addExBtn);
+                body.appendChild(addExBtn);
             }
+
+            // Initialize edit UI state
+            updateSessionEditUI(session.id);
 
             dayBody.appendChild(card);
             details.appendChild(dayBody);
             fragment.appendChild(details);
 
-            // Toggle handler - instant response
-            details.addEventListener('toggle', function () {
+            // Add toggle event listener to trigger animation each time
+            details.addEventListener('toggle', function() {
                 if (this.open) {
-                    if (this._renderExercises) {
-                        this._renderExercises();
-                        delete this._renderExercises;
+                    // Remove animation class first to reset
+                    const sessionCard = this.querySelector('.session.card');
+                    if (sessionCard) {
+                        sessionCard.classList.remove('animate-in');
+                        // Force reflow to reset animation
+                        void sessionCard.offsetWidth;
+                        // Add class to trigger animation
+                        setTimeout(() => {
+                            sessionCard.classList.add('animate-in');
+                        }, 10);
                     }
-                    const sessionCard = this.querySelector('.session.card');
-                    if (sessionCard) sessionCard.classList.add('animate-in');
                 } else {
+                    // Remove animation class when closing
                     const sessionCard = this.querySelector('.session.card');
-                    if (sessionCard) sessionCard.classList.remove('animate-in');
+                    if (sessionCard) {
+                        sessionCard.classList.remove('animate-in');
+                    }
                 }
             });
 
-            // Render if already open
-            if (details.open && details._renderExercises) {
-                details._renderExercises();
-                delete details._renderExercises;
-                const sessionCard = details.querySelector('.session.card');
-                if (sessionCard) sessionCard.classList.add('animate-in');
+            // Trigger animation on initial open
+            if (details.open) {
+                setTimeout(() => {
+                    const sessionCard = details.querySelector('.session.card');
+                    if (sessionCard) {
+                        sessionCard.classList.add('animate-in');
+                    }
+                }, 50);
             }
         });
 
         container.appendChild(fragment);
 
-        // Update session edit UI in batch
-        scheduleDOMUpdate(() => {
-            sortedSessions.forEach(session => {
-                updateSessionEditUI(session.id);
-            });
-        });
-
         isRendering = false;
     }
-    // Helper function to update set calculations after initial render
-    function updateSetCalculations(session, ex, set) {
-        const container = $('#sessions');
-        if (!container) return;
-        
-        const sessionEl = container.querySelector(`.session[data-id="${session.id}"]`);
-        if (!sessionEl) return;
-        
-        const exerciseEl = sessionEl.querySelector(`.exercise[data-ex-id="${ex.id}"]`);
-        if (!exerciseEl) return;
-        
-        const setElement = exerciseEl.querySelector(`[data-set-id="${set.id}"]`);
-        if (!setElement) return;
-        
-        // Update progress
-        const progressEl = setElement.querySelector('.progress, .set-progress');
-        if (progressEl && progressEl.innerHTML.includes('...')) {
-            const cacheKey = `${getCacheKey(session.id, ex.id, set.id)}-${set.kg || ''}-${set.reps || ''}-${set.rir || ''}`;
-            let progressHTML = progressCache.get(cacheKey);
-            if (!progressHTML) {
-                progressHTML = progressText(session, ex, set);
-            }
-            const prLabel = set.isPR ? (set.prType === 'weight' ? 'Peso' : set.prType === 'volume' ? 'Volumen' : 'Reps') : '';
-            if (set.isPR) {
-                const badgeClass = progressEl.classList.contains('set-progress') ? 'pr-badge-set' : 'pr-badge';
-                progressHTML += `<span class="pr-badge ${badgeClass}">🏆 PR ${prLabel}</span>`;
-            }
-            progressEl.innerHTML = progressHTML;
-        }
-        
-        // Update 1RM
-        if (set.kg && set.reps && !setElement.querySelector('.onerm-display')) {
-            const onerm = calculate1RM(set.kg, set.reps);
-            if (onerm) {
-                const currentBest = app.onerm[ex.name] || 0;
-                const isPR = onerm > currentBest;
-                const onermHTML = `<span class="${isPR ? 'onerm-pr' : 'onerm-value'}">1RM: ${onerm.toFixed(1)} kg</span>`;
-                
-                const isDesktop = setElement.tagName === 'TR';
-                if (isDesktop) {
-                    const onermCell = document.createElement('td');
-                    onermCell.className = 'onerm-display';
-                    onermCell.innerHTML = onermHTML;
-                    setElement.appendChild(onermCell);
-                } else {
-                    const onermDiv = document.createElement('div');
-                    onermDiv.className = 'onerm-display';
-                    onermDiv.innerHTML = onermHTML;
-                    setElement.appendChild(onermDiv);
-                }
-            }
-        }
-    }
     
-    function renderExercise(session, ex, isDesktop, deferCalculations = false) {
+    function renderExercise(session, ex) {
         const block = $('#tpl-exercise').content.firstElementChild.cloneNode(true);
         block.dataset.exId = ex.id;
         const nameEl = block.querySelector('.exercise__name');
         nameEl.textContent = ex.name;
-        nameEl.dataset.sessionId = session.id;
-        nameEl.dataset.exId = ex.id;
-        nameEl.classList.add('js-editable-name');
+
+        // Make name editable on click (inline editing with save/cancel)
+        let isEditing = false;
+        nameEl.style.cursor = 'pointer';
+        nameEl.title = 'Clic para editar';
+
+        const makeEditable = (element) => {
+            element.addEventListener('click', function handleClick(e) {
+                // Prevent event bubbling if clicking on edit button
+                if (e.target.closest('.js-edit-exercise-name')) return;
+                if (isEditing) return;
+                isEditing = true;
+                const originalName = ex.name;
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.className = 'input';
+                input.value = originalName;
+                input.style.width = '100%';
+                input.style.maxWidth = '300px';
+                input.style.fontSize = 'inherit';
+                input.style.fontWeight = 'inherit';
+                const parentEl = element.parentElement;
+                element.replaceWith(input);
+                input.focus();
+                input.select();
+
+                // Create confirmation buttons container
+                const confirmContainer = document.createElement('div');
+                confirmContainer.style.display = 'flex';
+                confirmContainer.style.gap = '8px';
+                confirmContainer.style.marginTop = '8px';
+                confirmContainer.style.alignItems = 'center';
+
+                const saveBtn = document.createElement('button');
+                saveBtn.className = 'btn btn--small';
+                saveBtn.textContent = '💾 Guardar';
+                saveBtn.style.margin = '0';
+
+                const cancelBtn = document.createElement('button');
+                cancelBtn.className = 'btn btn--small btn--ghost';
+                cancelBtn.textContent = '✕ Cancelar';
+                cancelBtn.style.margin = '0';
+
+                confirmContainer.appendChild(saveBtn);
+                confirmContainer.appendChild(cancelBtn);
+
+                // Insert confirmation buttons after input
+                input.parentElement.insertBefore(confirmContainer, input.nextSibling);
+
+                const cleanup = () => {
+                    confirmContainer.remove();
+                    isEditing = false;
+                };
+
+                const saveChanges = () => {
+                    const newName = input.value.trim();
+                    if (newName && newName !== originalName) {
+                        if (updateExerciseName(session.id, ex.id, newName, originalName)) {
+                            // Update the name element with new name
+                            const newNameEl = document.createElement('div');
+                            newNameEl.className = 'exercise__name';
+                            newNameEl.textContent = newName;
+                            newNameEl.style.cursor = 'pointer';
+                            newNameEl.title = 'Clic para editar';
+                            input.replaceWith(newNameEl);
+                            makeEditable(newNameEl);
+                            cleanup();
+                        } else {
+                            // If update failed, restore original
+                            cancelChanges();
+                        }
+                    } else {
+                        cancelChanges();
+                    }
+                };
+
+                const cancelChanges = () => {
+                    const newNameEl = document.createElement('div');
+                    newNameEl.className = 'exercise__name';
+                    newNameEl.textContent = originalName;
+                    newNameEl.style.cursor = 'pointer';
+                    newNameEl.title = 'Clic para editar';
+                    input.replaceWith(newNameEl);
+                    makeEditable(newNameEl);
+                    cleanup();
+                };
+
+                saveBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    saveChanges();
+                });
+
+                cancelBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    cancelChanges();
+                });
+
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        saveChanges();
+                    } else if (e.key === 'Escape') {
+                        e.preventDefault();
+                        cancelChanges();
+                    }
+                });
+
+                // Don't close on blur if clicking on buttons
+                input.addEventListener('blur', (e) => {
+                    // Delay to allow button clicks to register
+                    setTimeout(() => {
+                        if (!confirmContainer.contains(document.activeElement) && document.activeElement !== input) {
+                            // Only cancel if focus moved outside the edit area
+                            if (!confirmContainer.contains(e.relatedTarget)) {
+                                cancelChanges();
+                            }
+                        }
+                    }, 200);
+                });
+            });
+        };
+
+        makeEditable(nameEl);
 
         // Add note button to exercise head
         const headEl = block.querySelector('.exercise__head');
         if (headEl) {
-            // Check if there are 2+ exercises to show reorder arrows
-            // Count from session data instead of DOM to ensure accuracy
-            const exerciseCount = (session.exercises || []).length;
-
-            // Get the buttons container (the div that contains + Set and X buttons)
-            const buttonsContainer = headEl.querySelector('div:last-child');
-
-            // Add reorder buttons if there are 2+ exercises
-            if (exerciseCount >= 2 && buttonsContainer) {
-                // Ensure buttons container is flex for horizontal alignment
-                buttonsContainer.style.display = 'flex';
-                buttonsContainer.style.alignItems = 'center';
-                buttonsContainer.style.gap = '6px';
-
-                const upBtn = document.createElement('button');
-                upBtn.className = 'btn btn--ghost btn--small exercise-reorder-btn exercise-reorder-up';
-                upBtn.setAttribute('aria-label', 'Mover ejercicio arriba');
-                upBtn.dataset.sessionId = session.id;
-                upBtn.dataset.exId = ex.id;
-                upBtn.dataset.direction = 'up';
-
-                const downBtn = document.createElement('button');
-                downBtn.className = 'btn btn--ghost btn--small exercise-reorder-btn exercise-reorder-down';
-                downBtn.setAttribute('aria-label', 'Mover ejercicio abajo');
-                downBtn.dataset.sessionId = session.id;
-                downBtn.dataset.exId = ex.id;
-                downBtn.dataset.direction = 'down';
-
-                const currentIndex = (session.exercises || []).findIndex(e => e.id === ex.id);
-                const setButtonDisabled = (btn, disabled) => {
-                    btn.disabled = disabled;
-                    if (disabled) {
-                        btn.style.opacity = '0.3';
-                        btn.style.cursor = 'not-allowed';
-                    }
-                };
-                setButtonDisabled(upBtn, currentIndex === 0);
-                setButtonDisabled(downBtn, currentIndex === exerciseCount - 1);
-
-                buttonsContainer.insertBefore(upBtn, buttonsContainer.firstChild);
-                buttonsContainer.insertBefore(downBtn, buttonsContainer.firstChild);
-            }
-
             const noteBtn = document.createElement('button');
             noteBtn.className = 'exercise-note-btn';
+            noteBtn.type = 'button';
             const hasNote = getExerciseNote(session.id, ex.id);
             if (hasNote) {
                 noteBtn.classList.add('has-note');
@@ -1707,47 +1696,24 @@ document.addEventListener('DOMContentLoaded', () => {
             noteBtn.setAttribute('aria-label', hasNote ? 'Editar nota del ejercicio' : 'Añadir nota del ejercicio');
             noteBtn.dataset.sessionId = session.id;
             noteBtn.dataset.exId = ex.id;
+            noteBtn.addEventListener('click', () => openExerciseNoteDialog(session.id, ex.id, ex.name));
             headEl.appendChild(noteBtn);
         }
 
+        // Render mobile cards
         const mobileContainer = block.querySelector('.sets-container');
+        (ex.sets || []).forEach(set => mobileContainer.appendChild(renderSetCard(session, ex, set)));
+
+        // Render desktop table
         const desktopTable = block.querySelector('.sets');
-        const sets = ex.sets || [];
+        (ex.sets || []).forEach(set => desktopTable.appendChild(renderSet(session, ex, set)));
 
-        if (isDesktop) {
-            // Hide mobile container to be safe (though it should be empty)
-            mobileContainer.style.display = 'none';
-            desktopTable.parentElement.parentElement.style.display = ''; // Ensure table container is visible
-
-            // Use document fragment for batch DOM insertion (better performance)
-            const fragment = document.createDocumentFragment();
-            sets.forEach(set => {
-                const row = renderSet(session, ex, set, deferCalculations);
-                fragment.appendChild(row);
-                // Cache DOM element reference for efficient updates
-                domElementCache.set(set, row);
-            });
-            desktopTable.appendChild(fragment);
-        } else {
-            // Hide desktop container
-            desktopTable.parentElement.parentElement.style.display = 'none';
-            mobileContainer.style.display = '';
-
-            // Render all sets at once for immediate complete loading
-            const fragment = document.createDocumentFragment();
-            sets.forEach((set, i) => {
-                const card = renderSetCard(session, ex, set, i, deferCalculations);
-                fragment.appendChild(card);
-                // Cache DOM element reference for efficient updates
-                domElementCache.set(set, card);
-            });
-            mobileContainer.appendChild(fragment);
-        }
-
+        // Display exercise note if exists
         const note = getExerciseNote(session.id, ex.id);
         if (note) {
             const noteDisplay = document.createElement('div');
             noteDisplay.className = 'exercise-note-display';
+            // Preserve line breaks in note display
             const noteText = escapeHtml(note).replace(/\n/g, '<br>');
             noteDisplay.innerHTML = `
                 <div class="exercise-note-text">${noteText}</div>
@@ -1756,6 +1722,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     <button class="exercise-note-delete" data-session-id="${session.id}" data-ex-id="${ex.id}" aria-label="Eliminar nota">🗑️</button>
                 </div>
             `;
+            noteDisplay.querySelector('.exercise-note-edit').addEventListener('click', () => openExerciseNoteDialog(session.id, ex.id, ex.name));
+            noteDisplay.querySelector('.exercise-note-delete').addEventListener('click', () => {
+                saveExerciseNote(session.id, ex.id, '');
+                refresh({ preserveTab: true });
+            });
             block.appendChild(noteDisplay);
         }
 
@@ -1779,7 +1750,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function renderSet(session, ex, set, deferCalculations = false) {
+    function renderSet(session, ex, set) {
         const row = $('#tpl-set').content.firstElementChild.cloneNode(true);
         row.dataset.setId = set.id;
         row.querySelector('.set-num').textContent = set.setNumber;
@@ -1799,17 +1770,34 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!rirInput.value && (set.planRir || set.rirTemplate)) rirInput.placeholder = set.planRir || set.rirTemplate;
         }
 
-        // ALWAYS defer calculations - show placeholder
+        // Add PR badge
         const progressCell = row.querySelector('.progress');
         if (progressCell) {
-            progressCell.innerHTML = '<span class="progress--same">...</span>';
+            let progressHTML = progressText(session, ex, set);
+            if (set.isPR) {
+                const prLabel = set.prType === 'weight' ? 'Peso' : set.prType === 'volume' ? 'Volumen' : 'Reps';
+                progressHTML += `<span class="pr-badge">🏆 PR ${prLabel}</span>`;
+            }
+            progressCell.innerHTML = progressHTML;
         }
-        // 1RM will be calculated later by updateSetCalculations
+
+        // Calculate and display 1RM
+        if (set.kg && set.reps) {
+            const onerm = calculate1RM(set.kg, set.reps);
+            if (onerm) {
+                const onermCell = document.createElement('td');
+                onermCell.className = 'onerm-display';
+                const currentBest = app.onerm[ex.name] || 0;
+                const isPR = onerm > currentBest;
+                onermCell.innerHTML = `<span class="${isPR ? 'onerm-pr' : 'onerm-value'}">1RM: ${onerm.toFixed(1)} kg</span>`;
+                row.appendChild(onermCell);
+            }
+        }
 
         return row;
     }
 
-    function renderSetCard(session, ex, set, setIndex = 0, deferCalculations = false) {
+    function renderSetCard(session, ex, set) {
         const card = $('#tpl-set-card').content.firstElementChild.cloneNode(true);
         card.dataset.setId = set.id;
         card.style.position = 'relative';
@@ -1830,12 +1818,29 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!rirInput.value && (set.planRir || set.rirTemplate)) rirInput.placeholder = set.planRir || set.rirTemplate;
         }
 
-        // ALWAYS defer calculations - show placeholder
+        // Add PR badge
         const progressEl = card.querySelector('.set-progress');
         if (progressEl) {
-            progressEl.innerHTML = '<span class="progress--same">...</span>';
+            let progressHTML = progressText(session, ex, set);
+            if (set.isPR) {
+                const prLabel = set.prType === 'weight' ? 'Peso' : set.prType === 'volume' ? 'Volumen' : 'Reps';
+                progressHTML += `<span class="pr-badge pr-badge-set">🏆 PR ${prLabel}</span>`;
+            }
+            progressEl.innerHTML = progressHTML;
         }
-        // 1RM will be calculated later by updateSetCalculations
+
+        // Calculate and display 1RM
+        if (set.kg && set.reps) {
+            const onerm = calculate1RM(set.kg, set.reps);
+            if (onerm) {
+                const onermDiv = document.createElement('div');
+                onermDiv.className = 'onerm-display';
+                const currentBest = app.onerm[ex.name] || 0;
+                const isPR = onerm > currentBest;
+                onermDiv.innerHTML = `<span class="${isPR ? 'onerm-pr' : 'onerm-value'}">1RM: ${onerm.toFixed(1)} kg</span>`;
+                card.appendChild(onermDiv);
+            }
+        }
 
         return card;
     }
@@ -4123,10 +4128,9 @@ document.addEventListener('DOMContentLoaded', () => {
         // OPTIMIZATION: Update DOM directly
         const sessionEl = document.querySelector(`.session[data-id="${sessionId}"]`);
         if (sessionEl) {
-            const container = sessionEl.querySelector('.exercises-lazy-container');
-            if (container) {
-                const isDesktop = window.matchMedia('(min-width: 768px)').matches;
-                container.appendChild(renderExercise(s, newEx, isDesktop));
+            const body = sessionEl.querySelector('.session__body');
+            if (body) {
+                body.appendChild(renderExercise(s, newEx));
             }
         }
     }
@@ -4248,12 +4252,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (isDesktop) {
                     const tbody = exEl.querySelector('.sets tbody');
                     if (tbody) {
-                        tbody.appendChild(renderSet(s, ex, newSet, false));
+                        tbody.appendChild(renderSet(s, ex, newSet));
                     }
                 } else {
                     const container = exEl.querySelector('.sets-container');
                     if (container) {
-                        container.appendChild(renderSetCard(s, ex, newSet, ex.sets.length - 1, false));
+                        container.appendChild(renderSetCard(s, ex, newSet));
                     }
                 }
             }
