@@ -257,7 +257,6 @@
         });
     }
 
-    // Función buildStats modificada - usa los mismos filtros compartidos que drawChart
     function buildStats() {
         const body = $('#statsBody');
         const sharedMetric = $('#sharedMetric');

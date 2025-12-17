@@ -385,8 +385,10 @@ header {
     top: 0;
     z-index: 100;
     padding: var(--spacing-md) var(--spacing-lg) calc(var(--spacing-md) + var(--safe-t));
-    background: var(--bg2);
-    border-bottom: 1px solid var(--border);
+    background: rgba(28, 28, 30, 0.3);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 @media (max-width: 767px) {
@@ -425,20 +427,26 @@ header {
 
 /* Simplified Theme Button */
 .theme-btn {
-    display: inline-grid;
-    grid-auto-flow: column;
-    place-items: center;
-    gap: var(--spacing-sm);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
     min-height: 44px;
-    padding: 0 var(--spacing-lg);
+    padding: 0;
     border-radius: var(--radius);
     cursor: pointer;
     background: transparent;
     border: 0;
     color: var(--text);
-    font-weight: 400;
-    font-size: 0.9375rem;
     transition: opacity 0.2s ease;
+}
+
+.theme-btn svg {
+    width: 22px;
+    height: 22px;
+    display: block;
+    flex-shrink: 0;
 }
 
 .theme-btn:hover {
@@ -4280,46 +4288,15 @@ dialog {
 
     /* Navigation button enhanced interactions */
     .nav-btn {
-        position: relative;
-        transition: color 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-            transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         -webkit-tap-highlight-color: transparent;
     }
 
-    .nav-btn::before {
-        content: '';
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        width: 0;
-        height: 0;
-        border-radius: 50%;
-        background: var(--primary);
-        opacity: 0;
-        transform: translate(-50%, -50%);
-        transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-            height 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-            opacity 0.3s ease;
-        z-index: -1;
+    .nav-btn:active:not([aria-current="page"]) {
+        opacity: 0.7;
     }
 
-    .nav-btn[aria-current="page"]::before {
-        width: 50px;
-        height: 50px;
-        opacity: 0.1;
-    }
-
-    .nav-btn:active {
-        transform: scale(0.9);
-    }
-
-    .nav-btn[aria-current="page"] {
-        transform: translateY(-2px);
-    }
-
-    .nav-btn[aria-current="page"] svg {
-        filter: drop-shadow(0 2px 4px rgba(94, 169, 255, 0.3));
-        transition: filter 0.3s ease;
+    .nav-btn[aria-current="page"]:active {
+        opacity: 0.8;
     }
 
 

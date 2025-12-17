@@ -5154,7 +5154,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Función buildStats modificada - usa los mismos filtros compartidos que drawChart
     function buildStats() {
         const body = $('#statsBody');
         const sharedMetric = $('#sharedMetric');
@@ -5568,7 +5567,6 @@ document.addEventListener('DOMContentLoaded', () => {
             sharedMetric.value = app.chartState.metric || 'volume';
             sharedMetric.onchange = () => {
                 app.chartState.metric = sharedMetric.value;
-                drawChart();
                 buildStats();
             };
         }
@@ -5642,7 +5640,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     app.chartState.exercise = exerciseName;
                 }
                 suggestionsDiv.style.display = 'none';
-                drawChart();
                 buildStats();
             };
 
@@ -5710,39 +5707,14 @@ document.addEventListener('DOMContentLoaded', () => {
             sharedPeriod.value = String(app.chartState.period || 8);
             sharedPeriod.onchange = () => {
                 app.chartState.period = +sharedPeriod.value;
-                drawChart();
                 buildStats();
             };
         }
 
         const chartTypeSelect = $('#chartType');
         if (chartTypeSelect) {
-            chartTypeSelect.onchange = () => {
-                drawChart();
-            };
         }
 
-        // Throttle resize events for better performance
-        let resizeTimeout;
-        window.addEventListener('resize', () => {
-            if (resizeTimeout) return;
-            resizeTimeout = requestAnimationFrame(() => {
-                resizeCanvas();
-                drawChart();
-                resizeTimeout = null;
-            });
-        }, { passive: true });
-        resizeCanvas();
-    }
-
-    function resizeCanvas() {
-        const canvas = $('#progressChart'); if (!canvas) return;
-        const dpr = Math.max(1, window.devicePixelRatio || 1);
-        const rect = canvas.getBoundingClientRect();
-        canvas.width = Math.floor(rect.width * dpr);
-        canvas.height = Math.floor((window.innerWidth < 420 ? 230 : 250) * dpr);
-        const ctx = canvas.getContext('2d');
-        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     }
 
     function weeklyData(period = 4, filter = 'all', metric = 'volume') {
@@ -5792,280 +5764,6 @@ document.addEventListener('DOMContentLoaded', () => {
             values.push(value);
         }
         return { weeks, values };
-    }
-
-    function drawChart() {
-        const canvas = $('#progressChart'); if (!canvas) return;
-        const ctx = canvas.getContext('2d'); if (!ctx) return;
-
-        // Ensure canvas dimensions match display size for sharpness
-        const dpr = Math.max(1, window.devicePixelRatio || 1);
-        const rect = canvas.getBoundingClientRect();
-
-        // Only resize if dimensions changed to avoid flickering
-        if (canvas.width !== Math.floor(rect.width * dpr) || canvas.height !== Math.floor(rect.height * dpr)) {
-            canvas.width = Math.floor(rect.width * dpr);
-            canvas.height = Math.floor(rect.height * dpr);
-            ctx.scale(dpr, dpr);
-        } else {
-            // Reset transform if not resizing, but ensure scale is correct
-            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-        }
-
-        // Clear with correct dimensions
-        ctx.clearRect(0, 0, rect.width, rect.height);
-
-        const chartTypeSelect = $('#chartType');
-        const chartType = chartTypeSelect ? chartTypeSelect.value : 'bar';
-
-        // Get theme colors
-        const style = getComputedStyle(document.documentElement);
-        const barColor = style.getPropertyValue('--primary').trim() || '#3b82f6';
-        const lineColor = style.getPropertyValue('--accent').trim() || '#10b981';
-        const gridColor = document.documentElement.getAttribute('data-theme') === 'light' ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.05)';
-        const textColor = style.getPropertyValue('--text').trim() || '#94a3b8';
-
-        const padding = { l: 50, r: 20, t: 30, b: 40 };
-        const w = rect.width;
-        const h = rect.height;
-
-        // Use shared filters
-        const sharedMetric = $('#sharedMetric');
-        const sharedExercise = $('#sharedExercise');
-        const sharedPeriod = $('#sharedPeriod');
-
-        const period = sharedPeriod ? parseInt(sharedPeriod.value) : (app.chartState.period || 8);
-
-        let filter = 'all';
-        if (sharedExercise) {
-            const exerciseValue = sharedExercise.value.trim();
-            filter = exerciseValue === '' ? 'all' : exerciseValue;
-        } else {
-            filter = app.chartState.exercise || 'all';
-        }
-
-        const metric = sharedMetric ? sharedMetric.value : (app.chartState.metric || 'volume');
-        const { weeks, values } = weeklyData(period, filter, metric);
-
-        if (chartType === 'pie') {
-            drawPieChart(ctx, canvas, weeks, values, metric, barColor, textColor, gridColor);
-        } else {
-            drawBarChart(ctx, canvas, weeks, values, metric, barColor, lineColor, gridColor, textColor, padding, w, h);
-        }
-    }
-
-    function drawBarChart(ctx, canvas, weeks, values, metric, barColor, lineColor, gridColor, textColor, padding, w, h) {
-        const vmax = Math.max(1, ...values) * 1.1; // Add 10% headroom
-        const cw = w - padding.l - padding.r;
-        const ch = h - padding.t - padding.b;
-        const barW = Math.min(40, (cw / weeks.length) * 0.6); // Cap bar width
-        const step = cw / weeks.length;
-        const isLight = document.documentElement.getAttribute('data-theme') === 'light';
-
-        // Background grid lines
-        ctx.strokeStyle = gridColor;
-        ctx.lineWidth = 1;
-        const ticks = 5;
-
-        ctx.textAlign = 'right';
-        ctx.textBaseline = 'middle';
-        ctx.fillStyle = textColor;
-        ctx.font = '11px Inter, system-ui, sans-serif';
-
-        for (let i = 0; i <= ticks; i++) {
-            const val = vmax * (i / ticks);
-            const y = padding.t + ch - (val / vmax) * ch;
-
-            // Grid line
-            ctx.beginPath();
-            ctx.moveTo(padding.l, y);
-            ctx.lineTo(padding.l + cw, y);
-            ctx.stroke();
-
-            // Y-axis label
-            let label = val >= 1000 ? (val / 1000).toFixed(1) + 'k' : Math.round(val).toLocaleString();
-            if (metric === 'rir') label = val.toFixed(1);
-            ctx.fillText(label, padding.l - 10, y);
-        }
-
-        // Bars
-        for (let i = 0; i < weeks.length; i++) {
-            const x = padding.l + i * step + (step - barW) / 2;
-            const val = values[i];
-            const barH = (val / vmax) * ch;
-            const y = padding.t + ch - barH;
-
-            if (barH > 0) {
-                // Gradient fill
-                const gradient = ctx.createLinearGradient(x, y, x, y + barH);
-                gradient.addColorStop(0, barColor);
-                gradient.addColorStop(1, adjustColorOpacity(barColor, 0.6));
-
-                ctx.fillStyle = gradient;
-
-                // Rounded top corners
-                const radius = Math.min(6, barW / 2);
-                ctx.beginPath();
-                ctx.moveTo(x, y + barH);
-                ctx.lineTo(x, y + radius);
-                ctx.quadraticCurveTo(x, y, x + radius, y);
-                ctx.lineTo(x + barW - radius, y);
-                ctx.quadraticCurveTo(x + barW, y, x + barW, y + radius);
-                ctx.lineTo(x + barW, y + barH);
-                ctx.closePath();
-                ctx.fill();
-
-                // Value label on hover or always if space permits (simplified to always for now)
-                if (weeks.length <= 8) {
-                    ctx.fillStyle = textColor;
-                    ctx.textAlign = 'center';
-                    ctx.font = 'bold 10px Inter, system-ui, sans-serif';
-                    let valLabel = val >= 1000 ? (val / 1000).toFixed(1) + 'k' : Math.round(val).toLocaleString();
-                    if (metric === 'rir') valLabel = val.toFixed(1);
-                    ctx.fillText(valLabel, x + barW / 2, y - 8);
-                }
-            }
-
-            // X-axis label
-            ctx.fillStyle = textColor;
-            ctx.textAlign = 'center';
-            ctx.font = '10px Inter, system-ui, sans-serif';
-            // Simplify week label if too many
-            let weekLabel = weeks[i].replace('Sem ', 'S');
-            if (weeks.length > 12 && i % 2 !== 0) weekLabel = ''; // Skip every other label if crowded
-            ctx.fillText(weekLabel, x + barW / 2, padding.t + ch + 15);
-        }
-    }
-
-    function adjustColorOpacity(color, opacity) {
-        // Simple hex to rgba converter
-        if (color.startsWith('#')) {
-            const r = parseInt(color.slice(1, 3), 16);
-            const g = parseInt(color.slice(3, 5), 16);
-            const b = parseInt(color.slice(5, 7), 16);
-            return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-        }
-        return color;
-    }
-
-    function drawPieChart(ctx, canvas, weeks, values, metric, barColor, textColor, gridColor) {
-        const rect = canvas.getBoundingClientRect();
-        const w = rect.width;
-        const h = rect.height;
-        const isLight = document.documentElement.getAttribute('data-theme') === 'light';
-
-        const centerX = w * 0.35; // Shift left to make room for legend
-        const centerY = h / 2;
-        const radius = Math.min(w, h) * 0.35;
-        const total = values.reduce((sum, val) => sum + val, 0);
-
-        if (total === 0) {
-            ctx.fillStyle = textColor;
-            ctx.font = '14px Inter, system-ui, sans-serif';
-            ctx.textAlign = 'center';
-            ctx.fillText('No hay datos disponibles', w / 2, centerY);
-            return;
-        }
-
-        let currentAngle = -Math.PI / 2;
-
-        // Premium palette
-        const colors = [
-            barColor,
-            '#10b981', // Emerald
-            '#f59e0b', // Amber
-            '#8b5cf6', // Violet
-            '#ec4899', // Pink
-            '#06b6d4', // Cyan
-            '#ef4444', // Red
-            '#6366f1', // Indigo
-            '#84cc16', // Lime
-            '#14b8a6'  // Teal
-        ];
-
-        // Draw slices
-        values.forEach((val, i) => {
-            if (val === 0) return;
-
-            const sliceAngle = (val / total) * 2 * Math.PI;
-            const color = colors[i % colors.length];
-
-            // Add gap
-            const gap = 0.02;
-            const start = currentAngle + gap;
-            const end = currentAngle + sliceAngle - gap;
-
-            ctx.beginPath();
-            ctx.moveTo(centerX, centerY);
-            ctx.arc(centerX, centerY, radius, start, end);
-            ctx.closePath();
-
-            // Gradient for depth
-            const gradient = ctx.createRadialGradient(centerX, centerY, radius * 0.4, centerX, centerY, radius);
-            gradient.addColorStop(0, color);
-            gradient.addColorStop(1, adjustColorOpacity(color, 0.8));
-
-            ctx.fillStyle = gradient;
-            ctx.fill();
-
-            // Border
-            ctx.strokeStyle = isLight ? '#ffffff' : '#1e1e1e';
-            ctx.lineWidth = 2;
-            ctx.stroke();
-
-            currentAngle += sliceAngle;
-        });
-
-        // Draw Legend
-        const legendX = w * 0.65;
-        const legendY = 40;
-        const lineHeight = 20;
-
-        ctx.textAlign = 'left';
-        ctx.textBaseline = 'middle';
-        ctx.font = '11px Inter, system-ui, sans-serif';
-
-        values.forEach((val, i) => {
-            if (val === 0) return;
-
-            const y = legendY + i * lineHeight;
-            // Don't draw if out of bounds
-            if (y > h - 20) return;
-
-            const color = colors[i % colors.length];
-            const percentage = ((val / total) * 100).toFixed(1) + '%';
-            const label = weeks[i];
-
-            // Color dot
-            ctx.fillStyle = color;
-            ctx.beginPath();
-            ctx.arc(legendX, y, 4, 0, Math.PI * 2);
-            ctx.fill();
-
-            // Text
-            ctx.fillStyle = textColor;
-            let valText = val >= 1000 ? (val / 1000).toFixed(1) + 'k' : Math.round(val).toLocaleString();
-            if (metric === 'rir') valText = val.toFixed(1);
-
-            ctx.fillText(`${label}: ${valText} (${percentage})`, legendX + 12, y);
-        });
-
-        // Draw total in center (Donut style)
-        ctx.beginPath();
-        ctx.arc(centerX, centerY, radius * 0.4, 0, Math.PI * 2);
-        ctx.fillStyle = isLight ? '#ffffff' : '#1e1e1e'; // Match background
-        ctx.fill();
-
-        ctx.fillStyle = textColor;
-        ctx.textAlign = 'center';
-        ctx.font = 'bold 12px Inter, system-ui, sans-serif';
-        ctx.fillText('Total', centerX, centerY - 8);
-
-        let totalText = total >= 1000 ? (total / 1000).toFixed(1) + 'k' : Math.round(total).toLocaleString();
-        if (metric === 'rir') totalText = (total / values.filter(v => v > 0).length).toFixed(1); // Avg for RIR
-
-        ctx.font = '11px Inter, system-ui, sans-serif';
-        ctx.fillText(totalText, centerX, centerY + 8);
     }
 
     /* =================== Import/Export =================== */
@@ -6579,7 +6277,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Play sound if available (optional)
         // const audio = new Audio('levelup.mp3');
-        // audio.play().catch(e => console.log('Audio play failed', e));
     }
 
     /* =================== Eventos =================== */
