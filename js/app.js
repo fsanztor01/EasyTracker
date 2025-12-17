@@ -918,7 +918,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             
             updateNav(panelId);
-            if (panelId === 'panel-diary') { renderSessions(); }
+            if (panelId === 'panel-diary') { 
+                renderSessions(); 
+                renderSummary(); 
+            }
             if (panelId === 'panel-routines') { renderRoutines(); }
             if (panelId === 'panel-stats') { 
                 renderSummary(); // Update weekly summary
@@ -3269,6 +3272,73 @@ document.addEventListener('DOMContentLoaded', () => {
     function deleteSession(id) {
         app.deleteTarget = { type: 'session', id };
         showConfirmDialog('¿Estás seguro de que quieres eliminar esta sesión? Esta acción no se puede deshacer.');
+    }
+
+    function copyLastWeekWorkout() {
+        const { ws } = getVisibleWeek();
+        const lastWeekStart = addDays(ws, -7);
+        const lastWeekEnd = addDays(lastWeekStart, 6);
+        lastWeekEnd.setHours(23, 59, 59, 999);
+
+        // Find sessions from last week
+        const lastWeekSessions = app.sessions.filter(s => {
+            const d = parseLocalDate(s.date);
+            return d >= lastWeekStart && d <= lastWeekEnd;
+        }).sort((a, b) => parseLocalDate(a.date) - parseLocalDate(b.date));
+
+        if (lastWeekSessions.length === 0) {
+            toast('No hay entrenamientos en la semana pasada para copiar', 'warn');
+            return;
+        }
+
+        // Get today's day of week (Monday=1, Sunday=7)
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        let todayDayOfWeek = today.getDay();
+        if (todayDayOfWeek === 0) todayDayOfWeek = 7; // Sunday = 7
+        const targetDayIndex = todayDayOfWeek - 1; // 0-6 for Monday-Sunday
+
+        // Find session from same day last week
+        const lastWeekSameDay = lastWeekSessions.find(s => {
+            const sDate = parseLocalDate(s.date);
+            let sDayOfWeek = sDate.getDay();
+            if (sDayOfWeek === 0) sDayOfWeek = 7;
+            return (sDayOfWeek - 1) === targetDayIndex;
+        });
+
+        if (!lastWeekSameDay) {
+            const dayNames = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'];
+            toast(`No hay entrenamiento del ${dayNames[targetDayIndex]} de la semana pasada`, 'warn');
+            return;
+        }
+
+        // Create new session with today's date
+        const newDate = toLocalISO(today);
+        const newSession = {
+            id: uuid(),
+            name: lastWeekSameDay.name,
+            date: newDate,
+            completed: false,
+            exercises: (lastWeekSameDay.exercises || []).map(ex => ({
+                id: uuid(),
+                name: ex.name,
+                sets: (ex.sets || []).map(set => ({
+                    id: uuid(),
+                    setNumber: set.setNumber || 1,
+                    kg: set.kg || '',
+                    reps: set.reps || '',
+                    rir: set.rir || '',
+                    planKg: set.planKg || '',
+                    planReps: set.planReps || '',
+                    planRir: set.planRir || ''
+                }))
+            }))
+        };
+
+        app.sessions.push(newSession);
+        save();
+        refresh();
+        toast('Entrenamiento copiado correctamente', 'ok');
     }
 
     function clearWeek() {
@@ -6385,6 +6455,7 @@ document.addEventListener('DOMContentLoaded', () => {
             $('#sessionDialog').showModal();
         });
 
+        // Limpiar semana
         $('#btnClearWeek').addEventListener('click', () => {
             clearWeek();
         });

@@ -1,15 +1,12 @@
 <!DOCTYPE html>
-<html lang="es" data-theme="dark">
+<html lang="es" data-theme="light">
 
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>EasyTracker</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-    <noscript><link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet"></noscript>
     <link rel="stylesheet" href="EasyTracker.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 
 <body>
@@ -31,9 +28,9 @@
             <!-- DIARIO -->
             <section class="panel" id="panel-diary" role="tabpanel" aria-labelledby="tab-diary" aria-hidden="false">
                 <div class="weekbar">
-                    <button class="btn btn--ghost" id="prevWeek">← Semana anterior</button>
+                    <button class="btn btn--ghost" id="prevWeek" aria-label="Semana anterior"><span>◀</span></button>
                     <div class="week-info" id="weekInfo">Semana actual</div>
-                    <button class="btn btn--ghost" id="nextWeek">Semana siguiente →</button>
+                    <button class="btn btn--ghost" id="nextWeek" aria-label="Semana siguiente"><span>▶</span></button>
                 </div>
 
                 <div class="diary-actions">
@@ -43,21 +40,8 @@
                     </button>
                 </div>
 
-                <div class="diary-content">
-                    <section class="sessions" id="sessions" aria-live="polite"></section>
-                    <div class="empty card pop" id="emptyState" hidden>
-                        <div aria-hidden="true" style="font-size:1.6rem">📝</div>
-                        <h3 style="margin:0">No hay entrenos esta semana</h3>
-                        <p style="margin:0">Crea una sesión o importa una plantilla.</p>
-                    </div>
-                </div>
-            </section>
-
-            <!-- ESTADISTICAS -->
-            <section class="panel" id="panel-stats" role="tabpanel" aria-labelledby="tab-stats" aria-hidden="true">
-                <!-- Resumen semanal -->
                 <article class="summary card pop" aria-labelledby="summaryTitle">
-                    <h2 class="summary__title" id="summaryTitle" style="margin-bottom:12px">Resumen semanal</h2>
+                    <h2 class="summary__title" id="summaryTitle">Resumen semanal</h2>
                     <div class="summary__grid">
                         <div class="kpi">
                             <div class="kpi__label">Sesiones</div>
@@ -78,6 +62,16 @@
                     </div>
                 </article>
 
+                <section class="sessions" id="sessions" aria-live="polite"></section>
+                <div class="empty card pop" id="emptyState" hidden>
+                    <div aria-hidden="true" style="font-size:1.6rem">📝</div>
+                    <h3 style="margin:0">No hay entrenos esta semana</h3>
+                    <p style="margin:0">Crea una sesión o importa una plantilla.</p>
+                </div>
+            </section>
+
+            <!-- ESTADISTICAS -->
+            <section class="panel" id="panel-stats" role="tabpanel" aria-labelledby="tab-stats" aria-hidden="true">
                 <!-- Filtros compartidos -->
                 <article class="card pop" style="padding:12px; margin-bottom:10px; margin-top:10px">
                     <h3 class="summary__title" style="margin-bottom:10px">Filtros</h3>

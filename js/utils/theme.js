@@ -144,10 +144,33 @@ const ThemeUtils = (() => {
     }
 
     function init() {
-        const savedTheme = localStorage.getItem(THEME_KEY) || 'dark';
+        // Check for saved theme, otherwise use system preference or default to light
+        let savedTheme = localStorage.getItem(THEME_KEY);
+        if (!savedTheme) {
+            // Use system preference if available, otherwise default to light
+            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                savedTheme = 'dark';
+            } else {
+                savedTheme = 'light';
+            }
+        }
         document.documentElement.setAttribute('data-theme', savedTheme);
         updateThemeButton(savedTheme);
         updateThemeColors(savedTheme);
+
+        // Listen for system theme changes
+        if (window.matchMedia) {
+            const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+            mediaQuery.addEventListener('change', (e) => {
+                // Only auto-switch if user hasn't manually set a preference
+                if (!localStorage.getItem(THEME_KEY)) {
+                    const newTheme = e.matches ? 'dark' : 'light';
+                    document.documentElement.setAttribute('data-theme', newTheme);
+                    updateThemeButton(newTheme);
+                    updateThemeColors(newTheme);
+                }
+            });
+        }
 
         const themeBtn = $('#themeToggle');
         if (themeBtn) {
