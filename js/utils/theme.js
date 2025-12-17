@@ -9,8 +9,8 @@ const ThemeUtils = (() => {
     // Color definitions: [primary, primary-600, accent, accent-600]
     const COLOR_PRESETS = {
         azul: {
-            dark: { primary: '#5ea9ff', primary600: '#0080e9', accent: '#5ea9ff', accent600: '#0080e9' },
-            light: { primary: '#5ea9ff', primary600: '#0080e9', accent: '#5ea9ff', accent600: '#0080e9' }
+            dark: { primary: '#2768F5', primary600: '#2731F5', accent: '#2768F5', accent600: '#2731F5' },
+            light: { primary: '#2768F5', primary600: '#2731F5', accent: '#2768F5', accent600: '#2731F5' }
         },
         rojo: {
             dark: { primary: '#ff6b6b', primary600: '#ff3b30', accent: '#ff6b6b', accent600: '#ff3b30' },

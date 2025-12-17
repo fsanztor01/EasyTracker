@@ -661,6 +661,11 @@
     }
 
     function buildChartState() {
+        // Initialize chartState if it doesn't exist
+        if (!app.chartState) {
+            app.chartState = { period: 8, exercise: 'all', metric: 'volume' };
+        }
+
         // Shared filters (used by both chart and stats)
         const sharedMetric = $('#sharedMetric');
         const sharedExercise = $('#sharedExercise');
@@ -671,7 +676,6 @@
             sharedMetric.value = app.chartState.metric || 'volume';
             sharedMetric.onchange = () => {
                 app.chartState.metric = sharedMetric.value;
-                drawChart();
                 buildStats();
             };
         }
@@ -745,7 +749,6 @@
                     app.chartState.exercise = exerciseName;
                 }
                 suggestionsDiv.style.display = 'none';
-                drawChart();
                 buildStats();
             };
 
@@ -813,49 +816,8 @@
             sharedPeriod.value = String(app.chartState.period || 8);
             sharedPeriod.onchange = () => {
                 app.chartState.period = +sharedPeriod.value;
-                drawChart();
                 buildStats();
             };
-        }
-
-        // Throttle resize events for better performance
-        let resizeTimeout;
-        window.addEventListener('resize', () => {
-            if (resizeTimeout) return;
-            resizeTimeout = requestAnimationFrame(() => {
-                resizeCanvas();
-                drawChart();
-                resizeTimeout = null;
-            });
-        }, { passive: true });
-        
-        // Initialize canvas and draw chart
-        resizeCanvas();
-        // Draw chart - use multiple attempts to ensure it renders
-        setTimeout(() => {
-            drawChart();
-        }, 100);
-        setTimeout(() => {
-            drawChart();
-        }, 300);
-        setTimeout(() => {
-            drawChart();
-        }, 500);
-    }
-
-    function resizeCanvas() {
-        const canvasPie = document.getElementById('progressChartPie');
-        if (!canvasPie) return;
-        
-        const dpr = Math.max(1, window.devicePixelRatio || 1);
-        const width = 300;
-        const height = 250;
-        
-        canvasPie.width = Math.floor(width * dpr);
-        canvasPie.height = Math.floor(height * dpr);
-        const ctx = canvasPie.getContext('2d');
-        if (ctx) {
-            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
         }
     }
 
@@ -908,199 +870,7 @@
         return { weeks, values };
     }
 
-    function drawChart() {
-        // Get theme colors
-        const style = getComputedStyle(document.documentElement);
-        const barColor = style.getPropertyValue('--primary').trim() || '#007AFF';
-        const gridColor = document.documentElement.getAttribute('data-theme') === 'light' ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.05)';
-        const textColor = style.getPropertyValue('--text').trim() || '#E5E5E7';
 
-        // Use shared filters
-        const sharedMetric = document.getElementById('sharedMetric');
-        const sharedExercise = document.getElementById('sharedExercise');
-        const sharedPeriod = document.getElementById('sharedPeriod');
-
-        const period = sharedPeriod ? parseInt(sharedPeriod.value) : (app.chartState.period || 8);
-
-        let filter = 'all';
-        if (sharedExercise) {
-            const exerciseValue = sharedExercise.value.trim();
-            filter = exerciseValue === '' ? 'all' : exerciseValue;
-        } else {
-            filter = app.chartState.exercise || 'all';
-        }
-
-        const metric = sharedMetric ? sharedMetric.value : (app.chartState.metric || 'volume');
-        const { weeks, values } = weeklyData(period, filter, metric);
-
-        // Draw Pie Chart
-        const canvasPie = document.getElementById('progressChartPie');
-        if (!canvasPie) {
-            return;
-        }
-        
-        const ctxPie = canvasPie.getContext('2d');
-        if (!ctxPie) {
-            return;
-        }
-
-        // Get actual dimensions from the element
-        const dpr = Math.max(1, window.devicePixelRatio || 1);
-        let width = canvasPie.offsetWidth || canvasPie.clientWidth || 300;
-        let height = canvasPie.offsetHeight || canvasPie.clientHeight || 250;
-        
-        // If dimensions are 0, use CSS computed values or defaults
-        if (width === 0 || height === 0) {
-            const rect = canvasPie.getBoundingClientRect();
-            width = rect.width > 0 ? rect.width : 300;
-            height = rect.height > 0 ? rect.height : 250;
-        }
-        
-        // Ensure minimum dimensions
-        if (width < 100) width = 300;
-        if (height < 100) height = 250;
-        
-        // Set canvas dimensions
-        canvasPie.width = Math.floor(width * dpr);
-        canvasPie.height = Math.floor(height * dpr);
-        ctxPie.scale(dpr, dpr);
-        
-        // Clear and draw
-        ctxPie.clearRect(0, 0, width, height);
-        drawPieChart(ctxPie, canvasPie, weeks, values, metric, barColor, textColor, gridColor);
-    }
-
-
-    function adjustColorOpacity(color, opacity) {
-        // Simple hex to rgba converter
-        if (color.startsWith('#')) {
-            const r = parseInt(color.slice(1, 3), 16);
-            const g = parseInt(color.slice(3, 5), 16);
-            const b = parseInt(color.slice(5, 7), 16);
-            return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-        }
-        return color;
-    }
-
-    function drawPieChart(ctx, canvas, weeks, values, metric, barColor, textColor, gridColor) {
-        const rect = canvas.getBoundingClientRect();
-        const w = rect.width;
-        const h = rect.height;
-        const isLight = document.documentElement.getAttribute('data-theme') === 'light';
-
-        const centerX = w * 0.35; // Shift left to make room for legend
-        const centerY = h / 2;
-        const radius = Math.min(w, h) * 0.35;
-        const total = values.reduce((sum, val) => sum + val, 0);
-
-        if (total === 0) {
-            ctx.fillStyle = textColor;
-            ctx.font = '14px Inter, system-ui, sans-serif';
-            ctx.textAlign = 'center';
-            ctx.fillText('No hay datos disponibles', w / 2, centerY);
-            return;
-        }
-
-        let currentAngle = -Math.PI / 2;
-
-        // Premium palette
-        const colors = [
-            barColor,
-            '#10b981', // Emerald
-            '#f59e0b', // Amber
-            '#8b5cf6', // Violet
-            '#ec4899', // Pink
-            '#06b6d4', // Cyan
-            '#ef4444', // Red
-            '#6366f1', // Indigo
-            '#84cc16', // Lime
-            '#14b8a6'  // Teal
-        ];
-
-        // Draw slices
-        values.forEach((val, i) => {
-            if (val === 0) return;
-
-            const sliceAngle = (val / total) * 2 * Math.PI;
-            const color = colors[i % colors.length];
-
-            // Add gap
-            const gap = 0.02;
-            const start = currentAngle + gap;
-            const end = currentAngle + sliceAngle - gap;
-
-            ctx.beginPath();
-            ctx.moveTo(centerX, centerY);
-            ctx.arc(centerX, centerY, radius, start, end);
-            ctx.closePath();
-
-            // Gradient for depth
-            const gradient = ctx.createRadialGradient(centerX, centerY, radius * 0.4, centerX, centerY, radius);
-            gradient.addColorStop(0, color);
-            gradient.addColorStop(1, adjustColorOpacity(color, 0.8));
-
-            ctx.fillStyle = gradient;
-            ctx.fill();
-
-            // Border
-            ctx.strokeStyle = isLight ? '#ffffff' : '#1e1e1e';
-            ctx.lineWidth = 2;
-            ctx.stroke();
-
-            currentAngle += sliceAngle;
-        });
-
-        // Draw Legend
-        const legendX = w * 0.65;
-        const legendY = 40;
-        const lineHeight = 20;
-
-        ctx.textAlign = 'left';
-        ctx.textBaseline = 'middle';
-        ctx.font = '11px Inter, system-ui, sans-serif';
-
-        values.forEach((val, i) => {
-            if (val === 0) return;
-
-            const y = legendY + i * lineHeight;
-            // Don't draw if out of bounds
-            if (y > h - 20) return;
-
-            const color = colors[i % colors.length];
-            const percentage = ((val / total) * 100).toFixed(1) + '%';
-            const label = weeks[i];
-
-            // Color dot
-            ctx.fillStyle = color;
-            ctx.beginPath();
-            ctx.arc(legendX, y, 4, 0, Math.PI * 2);
-            ctx.fill();
-
-            // Text
-            ctx.fillStyle = textColor;
-            let valText = val >= 1000 ? (val / 1000).toFixed(1) + 'k' : Math.round(val).toLocaleString();
-            if (metric === 'rir') valText = val.toFixed(1);
-
-            ctx.fillText(`${label}: ${valText} (${percentage})`, legendX + 12, y);
-        });
-
-        // Draw total in center (Donut style)
-        ctx.beginPath();
-        ctx.arc(centerX, centerY, radius * 0.4, 0, Math.PI * 2);
-        ctx.fillStyle = isLight ? '#ffffff' : '#1e1e1e'; // Match background
-        ctx.fill();
-
-        ctx.fillStyle = textColor;
-        ctx.textAlign = 'center';
-        ctx.font = 'bold 12px Inter, system-ui, sans-serif';
-        ctx.fillText('Total', centerX, centerY - 8);
-
-        let totalText = total >= 1000 ? (total / 1000).toFixed(1) + 'k' : Math.round(total).toLocaleString();
-        if (metric === 'rir') totalText = (total / values.filter(v => v > 0).length).toFixed(1); // Avg for RIR
-
-        ctx.font = '11px Inter, system-ui, sans-serif';
-        ctx.fillText(totalText, centerX, centerY + 8);
-    }
 
 // Make functions available globally
 window.getExerciseStatsForPeriod = getExerciseStatsForPeriod;
@@ -1110,8 +880,4 @@ window.resumeArchivedCycle = resumeArchivedCycle;
 window.renderArchivedCycles = renderArchivedCycles;
 window.buildStats = buildStats;
 window.buildChartState = buildChartState;
-window.resizeCanvas = resizeCanvas;
 window.weeklyData = weeklyData;
-window.drawChart = drawChart;
-window.drawPieChart = drawPieChart;
-window.adjustColorOpacity = adjustColorOpacity;

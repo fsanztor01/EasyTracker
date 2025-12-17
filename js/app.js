@@ -28,8 +28,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Color definitions: [primary, primary-600, accent, accent-600]
     const COLOR_PRESETS = {
         azul: {
-            dark: { primary: '#5ea9ff', primary600: '#0080e9', accent: '#5ea9ff', accent600: '#0080e9' },
-            light: { primary: '#5ea9ff', primary600: '#0080e9', accent: '#5ea9ff', accent600: '#0080e9' }
+            dark: { primary: '#2768F5', primary600: '#2731F5', accent: '#2768F5', accent600: '#2731F5' },
+            light: { primary: '#2768F5', primary600: '#2731F5', accent: '#2768F5', accent600: '#2731F5' }
         },
         rojo: {
             dark: { primary: '#ff6b6b', primary600: '#ff3b30', accent: '#ff6b6b', accent600: '#ff3b30' },
@@ -147,6 +147,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Update CSS variables for current theme
     function updateThemeColors(theme) {
+        // Use ThemeUtils if available, otherwise use local function
+        if (window.ThemeUtils && window.ThemeUtils.updateThemeColors) {
+            window.ThemeUtils.updateThemeColors(theme);
+            return;
+        }
+        
         const prefs = loadColorPreferences();
         const colorKey = prefs[theme] || 'azul';
         const colors = COLOR_PRESETS[colorKey][theme];
@@ -928,16 +934,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 loadModule('./js/modules/stats.js').then(() => {
                     if (typeof buildStats === 'function') buildStats();
                     if (typeof buildChartState === 'function') buildChartState();
-                    // Ensure chart is drawn multiple times to catch when panel becomes visible
-                    setTimeout(() => {
-                        if (typeof drawChart === 'function') drawChart();
-                    }, 100);
-                    setTimeout(() => {
-                        if (typeof drawChart === 'function') drawChart();
-                    }, 300);
-                    setTimeout(() => {
-                        if (typeof drawChart === 'function') drawChart();
-                    }, 600);
                     if (typeof renderArchivedCycles === 'function') renderArchivedCycles();
                 });
             }
@@ -1231,6 +1227,190 @@ document.addEventListener('DOMContentLoaded', () => {
     // IntersectionObserver for lazy loading calculations
     let calculationObserver = null;
     
+    /* =================== PERFORMANCE OPTIMIZATION UTILITIES =================== */
+    // Throttle function for scroll events
+    function throttle(func, limit) {
+        let inThrottle;
+        return function(...args) {
+            if (!inThrottle) {
+                func.apply(this, args);
+                inThrottle = true;
+                setTimeout(() => inThrottle = false, limit);
+            }
+        };
+    }
+    
+    // Debounce function for resize and other events
+    function debounce(func, wait) {
+        let timeout;
+        return function(...args) {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(this, args), wait);
+        };
+    }
+    
+    // Virtual scrolling manager for exercises and sets
+    class VirtualScrollManager {
+        constructor(container, itemHeight, buffer = 3) {
+            this.container = container;
+            this.itemHeight = itemHeight;
+            this.buffer = buffer; // Number of items to render outside viewport
+            this.visibleStart = 0;
+            this.visibleEnd = 0;
+            this.totalItems = 0;
+            this.items = [];
+            this.renderedItems = new Map();
+            this.observer = null;
+            this.scrollHandler = null;
+            this.isInitialized = false;
+        }
+        
+        init(items, renderFn) {
+            this.items = items;
+            this.totalItems = items.length;
+            this.renderFn = renderFn;
+            
+            if (this.totalItems === 0) {
+                this.container.innerHTML = '';
+                return;
+            }
+            
+            // Calculate visible range
+            this.updateVisibleRange();
+            
+            // Render initial visible items
+            this.render();
+            
+            // Setup scroll listener with throttling
+            this.scrollHandler = throttle(() => {
+                this.updateVisibleRange();
+                this.render();
+            }, 16); // ~60fps
+            
+            this.container.addEventListener('scroll', this.scrollHandler, { passive: true });
+            
+            // Setup IntersectionObserver for better performance
+            this.setupObserver();
+            
+            this.isInitialized = true;
+        }
+        
+        updateVisibleRange() {
+            const scrollTop = this.container.scrollTop || 0;
+            const containerHeight = this.container.clientHeight || this.container.offsetHeight;
+            
+            this.visibleStart = Math.max(0, Math.floor(scrollTop / this.itemHeight) - this.buffer);
+            this.visibleEnd = Math.min(
+                this.totalItems - 1,
+                Math.ceil((scrollTop + containerHeight) / this.itemHeight) + this.buffer
+            );
+        }
+        
+        render() {
+            requestAnimationFrame(() => {
+                // Remove items outside visible range
+                this.renderedItems.forEach((element, index) => {
+                    if (index < this.visibleStart || index > this.visibleEnd) {
+                        element.remove();
+                        this.renderedItems.delete(index);
+                    }
+                });
+                
+                // Add items in visible range
+                for (let i = this.visibleStart; i <= this.visibleEnd; i++) {
+                    if (!this.renderedItems.has(i) && this.items[i]) {
+                        const element = this.renderFn(this.items[i], i);
+                        if (element) {
+                            // Use transform to position items efficiently
+                            element.style.transform = `translateY(${i * this.itemHeight}px)`;
+                            element.style.position = 'absolute';
+                            element.style.top = '0';
+                            element.style.left = '0';
+                            element.style.right = '0';
+                            element.style.height = `${this.itemHeight}px`;
+                            element.dataset.virtualIndex = i;
+                            
+                            // Insert in correct position
+                            const existing = Array.from(this.container.children);
+                            let insertBefore = null;
+                            for (const child of existing) {
+                                const idx = parseInt(child.dataset.virtualIndex || '999999');
+                                if (idx > i) {
+                                    insertBefore = child;
+                                    break;
+                                }
+                            }
+                            if (insertBefore) {
+                                this.container.insertBefore(element, insertBefore);
+                            } else {
+                                this.container.appendChild(element);
+                            }
+                            
+                            this.renderedItems.set(i, element);
+                        }
+                    }
+                }
+                
+                // Update container height for proper scrolling
+                this.container.style.height = `${this.totalItems * this.itemHeight}px`;
+            });
+        }
+        
+        setupObserver() {
+            if (!window.IntersectionObserver) return;
+            
+            this.observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const index = parseInt(entry.target.dataset.virtualIndex);
+                        if (!isNaN(index)) {
+                            // Ensure item is rendered
+                            if (!this.renderedItems.has(index)) {
+                                this.updateVisibleRange();
+                                this.render();
+                            }
+                        }
+                    }
+                });
+            }, {
+                root: this.container,
+                rootMargin: `${this.buffer * this.itemHeight}px`,
+                threshold: 0
+            });
+        }
+        
+        destroy() {
+            if (this.scrollHandler) {
+                this.container.removeEventListener('scroll', this.scrollHandler);
+            }
+            if (this.observer) {
+                this.observer.disconnect();
+            }
+            this.renderedItems.clear();
+            this.isInitialized = false;
+        }
+        
+        updateItems(newItems) {
+            this.items = newItems;
+            this.totalItems = newItems.length;
+            this.renderedItems.clear();
+            this.updateVisibleRange();
+            this.render();
+        }
+    }
+    
+    // Cache for virtual scroll managers
+    const virtualScrollManagers = new WeakMap();
+    
+    // Get or create virtual scroll manager for a container
+    function getVirtualScrollManager(container, itemHeight, buffer = 3) {
+        if (!virtualScrollManagers.has(container)) {
+            const manager = new VirtualScrollManager(container, itemHeight, buffer);
+            virtualScrollManagers.set(container, manager);
+        }
+        return virtualScrollManagers.get(container);
+    }
+    
     // Batch update queue for DOM modifications
     const domUpdateQueue = [];
     let domUpdateScheduled = false;
@@ -1456,7 +1636,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // Render each session as its own day (collapsible <details> element)
-        sortedSessions.forEach(session => {
+        // Use requestAnimationFrame to batch renders for better performance
+        sortedSessions.forEach((session, sessionIndex) => {
             const dayKey = toLocalISO(parseLocalDate(session.date));
             const sessionId = session.id;
 
@@ -1571,11 +1752,19 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
+    // Optimized renderExercise with deferred set rendering
     function renderExercise(session, ex) {
         const block = $('#tpl-exercise').content.firstElementChild.cloneNode(true);
         block.dataset.exId = ex.id;
         const nameEl = block.querySelector('.exercise__name');
         nameEl.textContent = ex.name;
+        
+        // Use requestAnimationFrame for smooth rendering
+        requestAnimationFrame(() => {
+            block.style.opacity = '0';
+            block.style.transform = 'translateY(10px)';
+            block.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
+        });
 
         // Make name editable on click (inline editing with save/cancel)
         let isEditing = false;
@@ -1722,13 +1911,44 @@ document.addEventListener('DOMContentLoaded', () => {
             headEl.appendChild(noteBtn);
         }
 
-        // Render mobile cards
+        // Render mobile cards and desktop table with deferred rendering
         const mobileContainer = block.querySelector('.sets-container');
-        (ex.sets || []).forEach(set => mobileContainer.appendChild(renderSetCard(session, ex, set)));
-
-        // Render desktop table
         const desktopTable = block.querySelector('.sets');
-        (ex.sets || []).forEach(set => desktopTable.appendChild(renderSet(session, ex, set)));
+        const sets = ex.sets || [];
+        
+        // Use IntersectionObserver to render sets only when exercise is visible
+        if (sets.length > 10) {
+            // For exercises with many sets, use deferred rendering
+            renderSetsDeferred(session, ex, sets, mobileContainer, desktopTable, block);
+        } else {
+            // For small sets, render immediately but with animation
+            requestAnimationFrame(() => {
+                sets.forEach((set, index) => {
+                    requestAnimationFrame(() => {
+                        if (mobileContainer) {
+                            const card = renderSetCard(session, ex, set);
+                            card.style.opacity = '0';
+                            card.style.transform = 'translateY(5px)';
+                            mobileContainer.appendChild(card);
+                            requestAnimationFrame(() => {
+                                card.style.transition = 'opacity 0.15s ease, transform 0.15s ease';
+                                card.style.opacity = '1';
+                                card.style.transform = 'translateY(0)';
+                            });
+                        }
+                        if (desktopTable) {
+                            desktopTable.appendChild(renderSet(session, ex, set));
+                        }
+                    });
+                });
+                
+                // Fade in exercise block
+                requestAnimationFrame(() => {
+                    block.style.opacity = '1';
+                    block.style.transform = 'translateY(0)';
+                });
+            });
+        }
 
         // Display exercise note if exists
         const note = getExerciseNote(session.id, ex.id);
@@ -1753,6 +1973,93 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         return block;
+    }
+    
+    // Deferred rendering for exercises with many sets
+    function renderSetsDeferred(session, ex, sets, mobileContainer, desktopTable, exerciseBlock) {
+        if (!mobileContainer && !desktopTable) return;
+        
+        // Create intersection observer for the exercise block
+        if (!window.IntersectionObserver) {
+            // Fallback: render all sets immediately
+            sets.forEach(set => {
+                if (mobileContainer) mobileContainer.appendChild(renderSetCard(session, ex, set));
+                if (desktopTable) desktopTable.appendChild(renderSet(session, ex, set));
+            });
+            requestAnimationFrame(() => {
+                exerciseBlock.style.opacity = '1';
+                exerciseBlock.style.transform = 'translateY(0)';
+            });
+            return;
+        }
+        
+        let hasRendered = false;
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting && !hasRendered) {
+                    hasRendered = true;
+                    observer.disconnect();
+                    
+                    // Render sets in batches using requestAnimationFrame
+                    const batchSize = 5;
+                    let index = 0;
+                    
+                    const renderBatch = () => {
+                        const end = Math.min(index + batchSize, sets.length);
+                        for (let i = index; i < end; i++) {
+                            const set = sets[i];
+                            if (mobileContainer) {
+                                const card = renderSetCard(session, ex, set);
+                                card.style.opacity = '0';
+                                card.style.transform = 'translateY(5px)';
+                                mobileContainer.appendChild(card);
+                                requestAnimationFrame(() => {
+                                    card.style.transition = 'opacity 0.15s ease, transform 0.15s ease';
+                                    card.style.opacity = '1';
+                                    card.style.transform = 'translateY(0)';
+                                });
+                            }
+                            if (desktopTable) {
+                                desktopTable.appendChild(renderSet(session, ex, set));
+                            }
+                        }
+                        
+                        index = end;
+                        if (index < sets.length) {
+                            requestAnimationFrame(renderBatch);
+                        } else {
+                            // All sets rendered, fade in exercise block
+                            requestAnimationFrame(() => {
+                                exerciseBlock.style.opacity = '1';
+                                exerciseBlock.style.transform = 'translateY(0)';
+                            });
+                        }
+                    };
+                    
+                    requestAnimationFrame(renderBatch);
+                }
+            });
+        }, {
+            rootMargin: '100px' // Start rendering 100px before visible
+        });
+        
+        observer.observe(exerciseBlock);
+        
+        // Fallback: if not visible after 500ms, render anyway
+        setTimeout(() => {
+            if (!hasRendered) {
+                hasRendered = true;
+                observer.disconnect();
+                sets.forEach(set => {
+                    if (mobileContainer) mobileContainer.appendChild(renderSetCard(session, ex, set));
+                    if (desktopTable) desktopTable.appendChild(renderSet(session, ex, set));
+                });
+                requestAnimationFrame(() => {
+                    exerciseBlock.style.opacity = '1';
+                    exerciseBlock.style.transform = 'translateY(0)';
+                });
+            }
+        }, 500);
     }
 
     function openExerciseNoteDialog(sessionId, exId, exerciseName) {
