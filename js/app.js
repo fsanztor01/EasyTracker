@@ -646,11 +646,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const empty = $('#importRoutineEmpty');
         if (!list || !empty) return;
         list.innerHTML = '';
-        if (!app.routines.length) {
+        if (!app.routines || !app.routines.length) {
             empty.hidden = false;
+            list.hidden = true;
             return;
         }
         empty.hidden = true;
+        list.hidden = false;
 
         app.routines.forEach(routine => {
             const item = document.createElement('div');
@@ -671,9 +673,11 @@ document.addEventListener('DOMContentLoaded', () => {
             head.appendChild(info);
 
             const importBtn = document.createElement('button');
-            importBtn.className = 'btn btn--secondary btn--small js-import-user-routine';
+            importBtn.className = 'btn btn--secondary js-import-user-routine';
             importBtn.dataset.routineId = routine.id;
-            importBtn.textContent = 'Importar en semana visible';
+            importBtn.innerHTML = '<span style="margin-right: 6px;">📥</span> Importar';
+            importBtn.style.minHeight = '44px';
+            importBtn.style.padding = '10px 16px';
             head.appendChild(importBtn);
 
             item.appendChild(head);
@@ -689,11 +693,205 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    function renderCreatedRoutinesList() {
+        const list = $('#createdRoutinesList');
+        const empty = $('#noCreatedRoutinesEmpty');
+        if (!list || !empty) return;
+        
+        list.innerHTML = '';
+        
+        // Get created routines
+        const createdRoutines = [];
+        if (app.routines && app.routines.length > 0) {
+            app.routines.forEach(routine => {
+                createdRoutines.push({
+                    id: routine.id,
+                    name: routine.name || 'Rutina sin nombre',
+                    days: routine.days || [],
+                    isTemplate: false
+                });
+            });
+        }
+        
+        // Show empty state if no routines
+        if (createdRoutines.length === 0) {
+            empty.hidden = false;
+            list.hidden = true;
+            return;
+        }
+        
+        empty.hidden = true;
+        list.hidden = false;
+        
+        // Render created routines in 2x2 grid
+        createdRoutines.forEach(routine => {
+            const item = createRoutineItem(routine, false);
+            list.appendChild(item);
+        });
+    }
+    
+    function renderDefaultRoutinesList() {
+        const list = $('#defaultRoutinesList');
+        if (!list) return;
+        
+        list.innerHTML = '';
+        
+        // Get default templates
+        const defaultRoutines = [];
+        if (typeof templates !== 'undefined' && templates) {
+            Object.entries(templates).forEach(([key, days]) => {
+                const totalExercises = days.reduce((sum, day) => {
+                    const count = Array.isArray(day.ex) ? day.ex.length : 0;
+                    return sum + count;
+                }, 0);
+                defaultRoutines.push({
+                    id: `template-${key}`,
+                    name: (typeof templateLabels !== 'undefined' && templateLabels[key]) || `Rutina ${key}`,
+                    days: days,
+                    isTemplate: true,
+                    templateKey: key,
+                    meta: `${days.length} días · ${totalExercises} ejercicios`
+                });
+            });
+        }
+        
+        // Render default routines in 2x2 grid
+        defaultRoutines.forEach(routine => {
+            const item = createRoutineItem(routine, true);
+            list.appendChild(item);
+        });
+    }
+    
+    function createRoutineItem(routine, isTemplate) {
+        const item = document.createElement('div');
+        item.className = 'routine-item';
+        
+        // Different styling for templates vs created routines - smaller padding
+        if (isTemplate) {
+            item.style.cssText = 'padding: 10px; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface); transition: all 0.2s ease; cursor: pointer; border-left: 3px solid var(--primary);';
+        } else {
+            item.style.cssText = 'padding: 10px; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface); transition: all 0.2s ease; cursor: pointer; border-left: 3px solid var(--success);';
+        }
+        
+        item.addEventListener('mouseenter', () => {
+            item.style.background = 'var(--surface-2)';
+            item.style.borderColor = 'var(--primary)';
+            item.style.transform = 'translateY(-2px)';
+        });
+        item.addEventListener('mouseleave', () => {
+            item.style.background = 'var(--surface)';
+            item.style.borderColor = 'var(--border)';
+            item.style.transform = 'translateY(0)';
+        });
+        
+        // Icon based on routine type and name
+        let icon = '🧩';
+        if (isTemplate) {
+            const name = routine.name.toLowerCase();
+            if (name.includes('3 días') || name.includes('3 dias')) icon = '💪';
+            else if (name.includes('4 días') || name.includes('4 dias')) icon = '🔥';
+            else if (name.includes('5 días') || name.includes('5 dias')) icon = '🏋️';
+            else if (name.includes('ppl') || name.includes('6 días') || name.includes('6 dias')) icon = '⚡';
+            else icon = '🔥';
+        } else {
+            icon = '🧩'; // Puzzle piece for created routines
+        }
+        
+        // Compact vertical layout for grid - smaller gaps
+        const content = document.createElement('div');
+        content.style.cssText = 'display: flex; flex-direction: column; align-items: center; text-align: center; gap: 6px;';
+        
+        const iconEl = document.createElement('div');
+        iconEl.style.cssText = 'font-size: 1.4rem;';
+        iconEl.textContent = icon;
+        content.appendChild(iconEl);
+        
+        const info = document.createElement('div');
+        info.style.cssText = 'width: 100%;';
+        
+        const title = document.createElement('div');
+        title.className = 'routine-item-title';
+        title.style.cssText = 'font-weight: 600; font-size: 0.85rem; margin-bottom: 3px; color: var(--text);';
+        title.textContent = routine.name;
+        info.appendChild(title);
+        
+        if (routine.meta) {
+            const meta = document.createElement('div');
+            meta.className = 'routine-item-meta';
+            meta.style.cssText = 'font-size: 0.75rem; color: var(--muted); line-height: 1.3;';
+            meta.textContent = routine.meta;
+            info.appendChild(meta);
+        } else {
+            const totalExercises = (routine.days || []).reduce((sum, day) => sum + (day.exercises ? day.exercises.length : 0), 0);
+            const meta = document.createElement('div');
+            meta.className = 'routine-item-meta';
+            meta.style.cssText = 'font-size: 0.75rem; color: var(--muted); line-height: 1.3;';
+            meta.textContent = `${(routine.days || []).length} días · ${totalExercises} ejercicios`;
+            info.appendChild(meta);
+        }
+        
+        content.appendChild(info);
+        
+        // Action button - smaller
+        const actionBtn = document.createElement('button');
+        actionBtn.className = 'btn btn--ghost';
+        actionBtn.style.cssText = 'width: 100%; padding: 6px; min-height: 32px; font-size: 0.8rem; margin-top: 2px;';
+        
+        if (isTemplate) {
+            actionBtn.textContent = 'Usar';
+            actionBtn.classList.add('js-use-template');
+            actionBtn.dataset.template = routine.templateKey;
+        } else {
+            actionBtn.innerHTML = '<span style="margin-right: 3px;">📥</span> Importar';
+            actionBtn.classList.add('js-import-user-routine');
+            actionBtn.dataset.routineId = routine.id;
+        }
+        
+        content.appendChild(actionBtn);
+        item.appendChild(content);
+        
+        // Click handler
+        item.addEventListener('click', (e) => {
+            if (e.target.closest('button')) return; // Don't trigger if clicking button
+            if (isTemplate) {
+                if (typeof loadTemplateIntoBuilder === 'function') {
+                    loadTemplateIntoBuilder(routine.templateKey);
+                    showRoutineBuilder();
+                }
+            } else {
+                // Show routine details or import
+                actionBtn.click();
+            }
+        });
+        
+        return item;
+    }
+
     function renderRoutines() {
         renderDefaultRoutines();
         renderCreatedRoutines();
         renderImportRoutineList();
+        renderCreatedRoutinesList();
+        renderDefaultRoutinesList();
         updateRoutineDayTitles();
+    }
+    
+    function showRoutineBuilder() {
+        const builder = $('#routineBuilderCard');
+        const btn = $('#btnCreateNewRoutine');
+        if (builder) builder.style.display = 'block';
+        if (btn) btn.style.display = 'none';
+        // Scroll to builder
+        if (builder) builder.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+    
+    function hideRoutineBuilder() {
+        const builder = $('#routineBuilderCard');
+        const btn = $('#btnCreateNewRoutine');
+        if (builder) builder.style.display = 'none';
+        if (btn) btn.style.display = 'flex';
+        // Reset form
+        if (typeof resetRoutineBuilder === 'function') resetRoutineBuilder();
     }
 
     function loadTemplateIntoBuilder(key) {
@@ -838,6 +1036,7 @@ document.addEventListener('DOMContentLoaded', () => {
         save();
         renderRoutines();
         resetRoutineBuilder();
+        hideRoutineBuilder();
     }
 
     /* =================== Persistencia =================== */
@@ -876,7 +1075,7 @@ document.addEventListener('DOMContentLoaded', () => {
             'panel-diary': 'navDiary',
             'panel-stats': 'navStats',
             'panel-routines': 'navRoutines',
-            'panel-import': 'navImport'
+            'panel-settings': 'navSettings'
         };
 
         function updateNav(panelId) {
@@ -884,7 +1083,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!navId) return;
             
             // Update bottom nav buttons (optimized: batch DOM updates)
-            const navIds = ['navDiary', 'navStats', 'navRoutines', 'navImport'];
+            const navIds = ['navDiary', 'navStats', 'navRoutines', 'navSettings'];
             const updates = [];
             for (let i = 0; i < navIds.length; i++) {
                 const id = navIds[i];
@@ -943,6 +1142,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (typeof renderImportRoutineList === 'function') renderImportRoutineList();
                 });
             }
+            if (panelId === 'panel-settings') {
+                if (typeof showSettingsMain === 'function') showSettingsMain();
+            }
         }
 
         // Bottom nav bindings
@@ -950,7 +1152,7 @@ document.addEventListener('DOMContentLoaded', () => {
             navDiary: 'panel-diary',
             navStats: 'panel-stats',
             navRoutines: 'panel-routines',
-            navImport: 'panel-import'
+            navSettings: 'panel-settings'
         };
         Object.keys(navBindings).forEach(navId => {
             const btn = $(`#${navId}`);
@@ -958,6 +1160,39 @@ document.addEventListener('DOMContentLoaded', () => {
                 btn.addEventListener('click', () => select(navBindings[navId]));
             }
         });
+        
+        // Button to navigate to import panel from routines
+        const btnGoToImport = $('#btnGoToImport');
+        if (btnGoToImport) {
+            btnGoToImport.addEventListener('click', () => {
+                select('panel-import');
+            });
+        }
+        
+        // Button to go back from import panel to routines
+        const btnBackFromImport = $('#btnBackFromImport');
+        if (btnBackFromImport) {
+            btnBackFromImport.addEventListener('click', () => {
+                select('panel-routines');
+            });
+        }
+        
+        // Button to create new routine
+        const btnCreateNewRoutine = $('#btnCreateNewRoutine');
+        if (btnCreateNewRoutine) {
+            btnCreateNewRoutine.addEventListener('click', () => {
+                showRoutineBuilder();
+            });
+        }
+        
+        // Button to cancel routine builder
+        const cancelRoutineBuilder = $('#cancelRoutineBuilder');
+        if (cancelRoutineBuilder) {
+            cancelRoutineBuilder.addEventListener('click', () => {
+                hideRoutineBuilder();
+            });
+        }
+        
 
         select('panel-diary');
     }
@@ -1421,11 +1656,12 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Setup global event delegation (once)
     function setupDiaryEventDelegation() {
-        if (diaryEventDelegationSetup) return;
-        diaryEventDelegationSetup = true;
-        
         const container = $('#sessions');
         if (!container) return;
+        
+        // Only set up once to avoid duplicate listeners
+        if (diaryEventDelegationSetup) return;
+        diaryEventDelegationSetup = true;
         
         // Single listener for all input events (delegation)
         container.addEventListener('input', (e) => {
@@ -1590,6 +1826,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const container = $('#sessions');
         const emptyState = $('#emptyState');
         if (!container) return;
+        
+        // Setup event delegation for diary inputs (ensure it's set up after container exists)
+        setupDiaryEventDelegation();
 
         // Preserve user's open/closed state of sessions across re-renders
         const prevDetails = Array.from(container.querySelectorAll('details'));
@@ -1635,6 +1874,9 @@ document.addEventListener('DOMContentLoaded', () => {
             return parseLocalDate(a.date) - parseLocalDate(b.date);
         });
 
+        // Find the first non-completed session (the "current day")
+        const firstNonCompletedIndex = sortedSessions.findIndex(s => !s.completed);
+
         // Render each session as its own day (collapsible <details> element)
         // Use requestAnimationFrame to batch renders for better performance
         sortedSessions.forEach((session, sessionIndex) => {
@@ -1647,11 +1889,14 @@ document.addEventListener('DOMContentLoaded', () => {
             details.dataset.dayKey = dayKey;
             details.dataset.sessionId = sessionId;
 
-            // Restore previous user state if available; otherwise open non-completed sessions by default
+            // Restore previous user state if available
+            // Otherwise: only open the first non-completed day (current day)
+            // If all are completed, all remain closed
             if (hadPrev) {
                 details.open = prevOpen.has(dayKey) || prevOpen.has(sessionId);
             } else {
-                details.open = !session.completed;
+                // Only open if this is the first non-completed session
+                details.open = (firstNonCompletedIndex !== -1 && sessionIndex === firstNonCompletedIndex);
             }
 
             const summary = document.createElement('summary');
@@ -4710,9 +4955,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // Debounced save function for frequent updates (e.g., typing in inputs)
     // This will be initialized inside DOMContentLoaded to access the save function
     var debouncedSave = function () {
-        // Fallback: if save is not available yet, do nothing
-        // This will be replaced when DOMContentLoaded runs
-        if (typeof save === 'function') {
+        // Use window.debouncedSave if available (from storage.js), otherwise fallback
+        if (typeof window.debouncedSave === 'function') {
+            window.debouncedSave();
+        } else if (typeof save === 'function') {
             save();
         }
     };
@@ -5154,568 +5400,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function buildStats() {
-        const body = $('#statsBody');
-        const sharedMetric = $('#sharedMetric');
-        const sharedExercise = $('#sharedExercise');
-        const sharedPeriod = $('#sharedPeriod');
-
-        if (!body) return;
-
-        if (app.sessions.length === 0) {
-            body.innerHTML = '<tr><td colspan="7" style="padding:16px">No hay datos suficientes</td></tr>';
-            return;
-        }
-
-        // Use shared filters (same as chart)
-        const metric = sharedMetric ? sharedMetric.value : (app.chartState.metric || 'volume');
-        // For input field, check value or use 'all' if empty
-        let exerciseFilter = 'all';
-        if (sharedExercise) {
-            const exerciseValue = sharedExercise.value.trim();
-            exerciseFilter = exerciseValue === '' ? 'all' : exerciseValue;
-        } else {
-            exerciseFilter = app.chartState.exercise || 'all';
-        }
-        const period = sharedPeriod ? parseInt(sharedPeriod.value) : (app.chartState.period || 8);
-
-        // Get exercises to show (filtered by exerciseFilter)
-        const allExercises = new Set();
-        app.sessions.forEach(s => {
-            (s.exercises || []).forEach(e => {
-                if (exerciseFilter === 'all' || e.name === exerciseFilter) {
-                    allExercises.add(e.name);
-                }
-            });
-        });
-
-        // Calculate current period stats (same logic as weeklyData)
-        const base = startOfWeek();
-        const currentPeriodSessions = [];
-        for (let i = period - 1; i >= 0; i--) {
-            const ws = addDays(base, -i * 7), we = addDays(ws, 6);
-            const subset = app.sessions.filter(s => {
-                const d = parseLocalDate(s.date);
-                return d >= ws && d <= we;
-            });
-            currentPeriodSessions.push(...subset);
-        }
-
-        // Calculate comparison period stats (previous period of same length)
-        const comparisonPeriodSessions = [];
-        for (let i = period * 2 - 1; i >= period; i--) {
-            const ws = addDays(base, -i * 7), we = addDays(ws, 6);
-            const subset = app.sessions.filter(s => {
-                const d = parseLocalDate(s.date);
-                return d >= ws && d <= we;
-            });
-            comparisonPeriodSessions.push(...subset);
-        }
-
-        const rows = [...allExercises].map(exerciseName => {
-            // Calculate stats for current period
-            let currentValue = 0;
-            let currentStats = { maxKg: 0, totalReps: 0, totalVol: 0, rirSum: 0, rirCount: 0, sessionCount: 0 };
-
-            currentPeriodSessions.forEach(s => {
-                const ex = (s.exercises || []).find(e => e.name === exerciseName);
-                if (!ex) return;
-                currentStats.sessionCount++;
-                (ex.sets || []).forEach(st => {
-                    const kg = parseFloat(st.kg) || 0;
-                    const reps = parseReps(st.reps);
-                    const rir = parseRIR(st.rir);
-                    currentStats.maxKg = Math.max(currentStats.maxKg, kg);
-                    if (reps > 0) {
-                        currentStats.totalReps += reps;
-                        currentStats.totalVol += kg * reps;
-                    }
-                    if (rir > 0) {
-                        currentStats.rirSum += rir;
-                        currentStats.rirCount++;
-                    }
-                });
-            });
-
-            const currentAvgRir = currentStats.rirCount > 0 ? currentStats.rirSum / currentStats.rirCount : 0;
-
-            // Calculate stats for comparison period
-            let comparisonValue = 0;
-            let comparisonStats = { maxKg: 0, totalReps: 0, totalVol: 0, rirSum: 0, rirCount: 0, sessionCount: 0 };
-
-            comparisonPeriodSessions.forEach(s => {
-                const ex = (s.exercises || []).find(e => e.name === exerciseName);
-                if (!ex) return;
-                comparisonStats.sessionCount++;
-                (ex.sets || []).forEach(st => {
-                    const kg = parseFloat(st.kg) || 0;
-                    const reps = parseReps(st.reps);
-                    const rir = parseRIR(st.rir);
-                    comparisonStats.maxKg = Math.max(comparisonStats.maxKg, kg);
-                    if (reps > 0) {
-                        comparisonStats.totalReps += reps;
-                        comparisonStats.totalVol += kg * reps;
-                    }
-                    if (rir > 0) {
-                        comparisonStats.rirSum += rir;
-                        comparisonStats.rirCount++;
-                    }
-                });
-            });
-
-            const comparisonAvgRir = comparisonStats.rirCount > 0 ? comparisonStats.rirSum / comparisonStats.rirCount : 0;
-
-            // Calculate metric value based on selected metric
-            if (metric === 'volume') {
-                currentValue = currentStats.totalVol;
-                comparisonValue = comparisonStats.totalVol;
-            } else if (metric === 'weight') {
-                currentValue = currentStats.maxKg;
-                comparisonValue = comparisonStats.maxKg;
-            } else if (metric === 'rir') {
-                currentValue = currentAvgRir;
-                comparisonValue = comparisonAvgRir;
-            }
-
-            // Calculate progress - compare current period with previous period of same length
-            let progressText = 'Sin datos';
-            let progressClass = 'progress--same';
-            let baseValue = comparisonValue;
-
-            // Check if comparison period has sufficient data
-            // Group comparison period sessions by week to verify we have enough weeks
-            const comparisonWeeks = new Set();
-            comparisonPeriodSessions.forEach(s => {
-                const d = parseLocalDate(s.date);
-                const weekStart = startOfWeek(d);
-                const weekKey = weekStart.toISOString().split('T')[0];
-                comparisonWeeks.add(weekKey);
-            });
-
-            // Check if comparison period has sessions for this exercise
-            const hasComparisonData = comparisonPeriodSessions.some(s => {
-                const ex = (s.exercises || []).find(e => e.name === exerciseName);
-                return ex && ex.sets && ex.sets.length > 0;
-            });
-
-            // Check if comparison period has enough weeks (should match current period length)
-            const hasEnoughWeeks = comparisonWeeks.size >= period;
-
-            // If no comparison period data for this exercise OR not enough weeks, compare with first week of data
-            // But only if we have at least 2 weeks of data to compare
-            if ((comparisonValue === 0 || !hasComparisonData || !hasEnoughWeeks) && currentValue > 0) {
-                // Find first week with this exercise
-                const allSessionsWithExercise = [...app.sessions]
-                    .filter(s => {
-                        const ex = (s.exercises || []).find(e => e.name === exerciseName);
-                        return ex && ex.sets && ex.sets.length > 0;
-                    })
-                    .sort((a, b) => new Date(a.date) - new Date(b.date));
-
-                if (allSessionsWithExercise.length > 0) {
-                    // Group sessions by week
-                    const sessionsByWeek = new Map();
-                    allSessionsWithExercise.forEach(s => {
-                        const d = parseLocalDate(s.date);
-                        const weekStart = startOfWeek(d);
-                        const weekKey = weekStart.toISOString().split('T')[0];
-
-                        if (!sessionsByWeek.has(weekKey)) {
-                            sessionsByWeek.set(weekKey, []);
-                        }
-                        sessionsByWeek.get(weekKey).push(s);
-                    });
-
-                    // Get first week
-                    const firstWeekKey = Array.from(sessionsByWeek.keys()).sort()[0];
-                    const firstWeekSessions = sessionsByWeek.get(firstWeekKey);
-
-                    // Calculate stats for first week
-                    const firstWeekStats = { maxKg: 0, totalReps: 0, totalVol: 0, rirSum: 0, rirCount: 0 };
-                    firstWeekSessions.forEach(s => {
-                        const ex = s.exercises.find(e => e.name === exerciseName);
-                        if (ex) {
-                            ex.sets.forEach(st => {
-                                const kg = parseFloat(st.kg) || 0;
-                                const reps = parseReps(st.reps);
-                                const rir = parseRIR(st.rir);
-                                firstWeekStats.maxKg = Math.max(firstWeekStats.maxKg, kg);
-                                if (reps > 0) {
-                                    firstWeekStats.totalReps += reps;
-                                    firstWeekStats.totalVol += kg * reps;
-                                }
-                                if (rir > 0) {
-                                    firstWeekStats.rirSum += rir;
-                                    firstWeekStats.rirCount++;
-                                }
-                            });
-                        }
-                    });
-
-                    const firstWeekAvgRir = firstWeekStats.rirCount > 0 ? firstWeekStats.rirSum / firstWeekStats.rirCount : 0;
-
-                    // Get first week value based on metric
-                    // When no comparison period exists, compare last week of current period with first week
-                    // This gives a meaningful progress percentage (week-to-week comparison)
-                    const lastWeekSessions = [];
-                    const lastWeekStart = addDays(base, -(period - 1) * 7);
-                    const lastWeekEnd = addDays(lastWeekStart, 6);
-                    currentPeriodSessions.forEach(s => {
-                        const d = parseLocalDate(s.date);
-                        if (d >= lastWeekStart && d <= lastWeekEnd) {
-                            lastWeekSessions.push(s);
-                        }
-                    });
-
-                    // Calculate last week stats
-                    const lastWeekStats = { maxKg: 0, totalVol: 0, rirSum: 0, rirCount: 0 };
-                    lastWeekSessions.forEach(s => {
-                        const ex = (s.exercises || []).find(e => e.name === exerciseName);
-                        if (ex) {
-                            ex.sets.forEach(st => {
-                                const kg = parseFloat(st.kg) || 0;
-                                const reps = parseReps(st.reps);
-                                const rir = parseRIR(st.rir);
-                                lastWeekStats.maxKg = Math.max(lastWeekStats.maxKg, kg);
-                                if (reps > 0) {
-                                    lastWeekStats.totalVol += kg * reps;
-                                }
-                                if (rir > 0) {
-                                    lastWeekStats.rirSum += rir;
-                                    lastWeekStats.rirCount++;
-                                }
-                            });
-                        }
-                    });
-                    const lastWeekAvgRir = lastWeekStats.rirCount > 0 ? lastWeekStats.rirSum / lastWeekStats.rirCount : 0;
-
-                    // Compare last week with first week (week-to-week comparison)
-                    // Always use week-to-week comparison when no comparison period exists
-                    // Check if we have multiple weeks of data
-                    const weeksWithData = Array.from(sessionsByWeek.keys()).sort();
-                    const hasMultipleWeeks = weeksWithData.length > 1;
-
-                    if (metric === 'volume') {
-                        // Use last week volume, or if no data in last week, use the most recent week with data
-                        if (lastWeekStats.totalVol > 0) {
-                            currentValue = lastWeekStats.totalVol;
-                        } else {
-                            // Find most recent week with data
-                            const weeksWithDataReversed = weeksWithData.slice().reverse();
-                            for (const weekKey of weeksWithDataReversed) {
-                                const weekSessions = sessionsByWeek.get(weekKey);
-                                let weekVol = 0;
-                                weekSessions.forEach(s => {
-                                    const ex = s.exercises.find(e => e.name === exerciseName);
-                                    if (ex) {
-                                        ex.sets.forEach(st => {
-                                            const kg = parseFloat(st.kg) || 0;
-                                            const reps = parseReps(st.reps);
-                                            if (reps > 0) {
-                                                weekVol += kg * reps;
-                                            }
-                                        });
-                                    }
-                                });
-                                if (weekVol > 0) {
-                                    currentValue = weekVol;
-                                    break;
-                                }
-                            }
-                        }
-                        // Only compare if we have multiple weeks, otherwise use current period total
-                        // Only compare if we have multiple weeks, otherwise don't set baseValue (will show "Primer registro")
-                        if (hasMultipleWeeks && firstWeekStats.totalVol > 0) {
-                            baseValue = firstWeekStats.totalVol;
-                        } else {
-                            // If all data is in one week, don't set baseValue to show "Primer registro"
-                            baseValue = 0;
-                            currentValue = currentStats.totalVol;
-                        }
-                    } else if (metric === 'weight') {
-                        if (lastWeekStats.maxKg > 0) {
-                            currentValue = lastWeekStats.maxKg;
-                        } else {
-                            // Find most recent week with data
-                            const weeksWithDataReversed = weeksWithData.slice().reverse();
-                            for (const weekKey of weeksWithDataReversed) {
-                                const weekSessions = sessionsByWeek.get(weekKey);
-                                let weekMaxKg = 0;
-                                weekSessions.forEach(s => {
-                                    const ex = s.exercises.find(e => e.name === exerciseName);
-                                    if (ex) {
-                                        ex.sets.forEach(st => {
-                                            const kg = parseFloat(st.kg) || 0;
-                                            weekMaxKg = Math.max(weekMaxKg, kg);
-                                        });
-                                    }
-                                });
-                                if (weekMaxKg > 0) {
-                                    currentValue = weekMaxKg;
-                                    break;
-                                }
-                            }
-                        }
-                        // Only compare if we have multiple weeks, otherwise don't set baseValue (will show "Primer registro")
-                        if (hasMultipleWeeks && firstWeekStats.maxKg > 0) {
-                            baseValue = firstWeekStats.maxKg;
-                        } else {
-                            // If all data is in one week, don't set baseValue to show "Primer registro"
-                            baseValue = 0;
-                            currentValue = currentStats.maxKg;
-                        }
-                    } else if (metric === 'rir') {
-                        if (lastWeekAvgRir > 0) {
-                            currentValue = lastWeekAvgRir;
-                        } else {
-                            // Find most recent week with data
-                            const weeksWithDataReversed = weeksWithData.slice().reverse();
-                            for (const weekKey of weeksWithDataReversed) {
-                                const weekSessions = sessionsByWeek.get(weekKey);
-                                let rirSum = 0, rirCount = 0;
-                                weekSessions.forEach(s => {
-                                    const ex = s.exercises.find(e => e.name === exerciseName);
-                                    if (ex) {
-                                        ex.sets.forEach(st => {
-                                            const rir = parseRIR(st.rir);
-                                            if (rir > 0) {
-                                                rirSum += rir;
-                                                rirCount++;
-                                            }
-                                        });
-                                    }
-                                });
-                                if (rirCount > 0) {
-                                    currentValue = rirSum / rirCount;
-                                    break;
-                                }
-                            }
-                        }
-                        // Only compare if we have multiple weeks, otherwise don't set baseValue (will show "Primer registro")
-                        if (hasMultipleWeeks && firstWeekAvgRir > 0) {
-                            baseValue = firstWeekAvgRir;
-                        } else {
-                            // If all data is in one week, don't set baseValue to show "Primer registro"
-                            baseValue = 0;
-                            currentValue = currentAvgRir;
-                        }
-                    }
-                }
-            }
-
-            if (baseValue > 0) {
-                const diff = ((currentValue - baseValue) / baseValue * 100);
-                // If difference is very small (less than 0.1%), treat as same
-                if (Math.abs(diff) < 0.1) {
-                    // Check if we have multiple weeks of data
-                    const weeksWithData = Array.from(new Set(
-                        [...app.sessions]
-                            .filter(s => {
-                                const ex = (s.exercises || []).find(e => e.name === exerciseName);
-                                return ex && ex.sets && ex.sets.length > 0;
-                            })
-                            .map(s => {
-                                const d = parseLocalDate(s.date);
-                                return startOfWeek(d).toISOString().split('T')[0];
-                            })
-                    ));
-
-                    if (weeksWithData.length <= 1) {
-                        // All data in one week - show as first record
-                        progressText = 'Primer registro';
-                        progressClass = 'progress--up';
-                    } else {
-                        progressText = '0%';
-                        progressClass = 'progress--same';
-                    }
-                } else if (diff > 0) {
-                    progressText = `+${diff.toFixed(1)}%`;
-                    progressClass = 'progress--up';
-                } else {
-                    progressText = `${diff.toFixed(1)}%`;
-                    progressClass = 'progress--down';
-                }
-            } else if (currentValue > 0) {
-                progressText = 'Primer registro';
-                progressClass = 'progress--up';
-            }
-
-            return `
-                <tr>
-                    <td><strong>${exerciseName}</strong></td>
-                    <td>${currentStats.sessionCount}</td>
-                    <td>${currentStats.maxKg} kg</td>
-                    <td>${currentStats.totalReps}</td>
-                    <td>${currentStats.totalVol.toLocaleString()} kg</td>
-                    <td>${currentAvgRir > 0 ? currentAvgRir.toFixed(1) : '–'}</td>
-                    <td class="${progressClass}">${progressText}</td>
-                </tr>
-            `;
-        }).join('');
-
-        body.innerHTML = rows || '<tr><td colspan="7" style="padding:16px">No hay datos suficientes</td></tr>';
-    }
-
-    function buildChartState() {
-        // Shared filters (used by both chart and stats)
-        const sharedMetric = $('#sharedMetric');
-        const sharedExercise = $('#sharedExercise');
-        const sharedPeriod = $('#sharedPeriod');
-
-        // Initialize shared filters with current state
-        if (sharedMetric) {
-            sharedMetric.value = app.chartState.metric || 'volume';
-            sharedMetric.onchange = () => {
-                app.chartState.metric = sharedMetric.value;
-                buildStats();
-            };
-        }
-
-        if (sharedExercise) {
-            // Get all exercises
-            const allExercises = new Set();
-            app.sessions.forEach(s => {
-                (s.exercises || []).forEach(e => allExercises.add(e.name));
-            });
-            const exercisesList = [...allExercises].sort();
-
-            // Set initial value
-            const currentExercise = app.chartState.exercise || 'all';
-            if (currentExercise === 'all') {
-                sharedExercise.value = '';
-                sharedExercise.placeholder = 'Todos los ejercicios';
-            } else {
-                sharedExercise.value = currentExercise;
-            }
-
-            const suggestionsDiv = $('#exerciseSuggestions');
-            let highlightedIndex = -1;
-
-            // Function to filter and show suggestions
-            const showSuggestions = (query) => {
-                if (!suggestionsDiv) return;
-
-                const queryLower = query.toLowerCase().trim();
-                let filtered = [];
-
-                if (queryLower === '') {
-                    // Show "Todos los ejercicios" option
-                    filtered = [{ name: 'all', display: 'Todos los ejercicios' }];
-                } else {
-                    // Filter exercises that start with the query
-                    filtered = exercisesList
-                        .filter(ex => ex.toLowerCase().startsWith(queryLower))
-                        .map(ex => ({ name: ex, display: ex }));
-                }
-
-                if (filtered.length === 0) {
-                    suggestionsDiv.style.display = 'none';
-                    return;
-                }
-
-                suggestionsDiv.innerHTML = '';
-                filtered.forEach((item, index) => {
-                    const div = document.createElement('div');
-                    div.className = `exercise-suggestion-item ${item.name === 'all' ? 'all-exercises' : ''}`;
-                    div.textContent = item.display;
-                    div.dataset.exercise = item.name;
-                    div.addEventListener('click', () => {
-                        selectExercise(item.name);
-                    });
-                    suggestionsDiv.appendChild(div);
-                });
-
-                suggestionsDiv.style.display = 'block';
-                highlightedIndex = -1;
-            };
-
-            // Function to select an exercise
-            const selectExercise = (exerciseName) => {
-                if (exerciseName === 'all') {
-                    sharedExercise.value = '';
-                    sharedExercise.placeholder = 'Todos los ejercicios';
-                    app.chartState.exercise = 'all';
-                } else {
-                    sharedExercise.value = exerciseName;
-                    app.chartState.exercise = exerciseName;
-                }
-                suggestionsDiv.style.display = 'none';
-                buildStats();
-            };
-
-            // Input event listener
-            sharedExercise.addEventListener('input', (e) => {
-                const query = e.target.value;
-                showSuggestions(query);
-            });
-
-            // Focus event listener
-            sharedExercise.addEventListener('focus', () => {
-                if (sharedExercise.value.trim() === '') {
-                    showSuggestions('');
-                } else {
-                    showSuggestions(sharedExercise.value);
-                }
-            });
-
-            // Keyboard navigation
-            sharedExercise.addEventListener('keydown', (e) => {
-                const items = suggestionsDiv.querySelectorAll('.exercise-suggestion-item');
-                if (items.length === 0) return;
-
-                if (e.key === 'ArrowDown') {
-                    e.preventDefault();
-                    highlightedIndex = Math.min(highlightedIndex + 1, items.length - 1);
-                    items.forEach((item, idx) => {
-                        item.classList.toggle('highlighted', idx === highlightedIndex);
-                    });
-                    items[highlightedIndex].scrollIntoView({ block: 'nearest' });
-                } else if (e.key === 'ArrowUp') {
-                    e.preventDefault();
-                    highlightedIndex = Math.max(highlightedIndex - 1, -1);
-                    items.forEach((item, idx) => {
-                        item.classList.toggle('highlighted', idx === highlightedIndex);
-                    });
-                    if (highlightedIndex >= 0) {
-                        items[highlightedIndex].scrollIntoView({ block: 'nearest' });
-                    }
-                } else if (e.key === 'Enter') {
-                    e.preventDefault();
-                    if (highlightedIndex >= 0 && items[highlightedIndex]) {
-                        const exerciseName = items[highlightedIndex].dataset.exercise;
-                        selectExercise(exerciseName);
-                    } else if (items.length > 0) {
-                        // Select first item if nothing is highlighted
-                        const exerciseName = items[0].dataset.exercise;
-                        selectExercise(exerciseName);
-                    }
-                } else if (e.key === 'Escape') {
-                    suggestionsDiv.style.display = 'none';
-                    sharedExercise.blur();
-                }
-            });
-
-            // Close suggestions when clicking outside
-            document.addEventListener('click', (e) => {
-                if (!sharedExercise.contains(e.target) && !suggestionsDiv.contains(e.target)) {
-                    suggestionsDiv.style.display = 'none';
-                }
-            });
-        }
-
-        if (sharedPeriod) {
-            sharedPeriod.value = String(app.chartState.period || 8);
-            sharedPeriod.onchange = () => {
-                app.chartState.period = +sharedPeriod.value;
-                buildStats();
-            };
-        }
-
-        const chartTypeSelect = $('#chartType');
-        if (chartTypeSelect) {
-        }
-
-    }
+    // buildStats() and buildChartState() are now in stats.js module
+    // Removed old implementation to use new redesign
 
     function weeklyData(period = 4, filter = 'all', metric = 'volume') {
         const weeks = [], values = [];
@@ -6169,17 +5855,35 @@ document.addEventListener('DOMContentLoaded', () => {
         if (ev) ev.preventDefault();
         const key = app.tmpTemplateKey; if (!key) return;
         const arr = templates[key] || [];
-        const { ws } = getVisibleWeek(); // SIEMPRE desde lunes de la semana visible
+        
+        // Get selected week from targetWeek selector (if in import panel) or use visible week
+        const targetWeekSelect = $('#targetWeek');
+        let targetWeekStart;
+        if (targetWeekSelect && targetWeekSelect.value !== '') {
+            const offset = +targetWeekSelect.value;
+            // Calculate the exact Monday of the target week (forcing 00:00 local time)
+            targetWeekStart = startOfWeek(addDays(new Date(), offset * 7));
+            targetWeekStart.setHours(0, 0, 0, 0);
+        } else {
+            // Fallback to visible week if selector not available
+            const { ws } = getVisibleWeek();
+            targetWeekStart = ws;
+        }
+        
         const toAdd = arr.map((it, idx) => ({
             id: uuid(),
             name: it.name,
-            date: toLocalISO(addDays(ws, idx)),
+            date: toLocalISO(addDays(targetWeekStart, idx)),
             completed: false,
             exercises: it.ex.map(n => ({ id: uuid(), name: n, sets: [{ id: uuid(), setNumber: 1, kg: '', reps: '', rir: '' }] }))
         }));
         app.sessions = [...app.sessions, ...toAdd];
         save(); refresh(); $('#templateDialog').close();
-        toast(`Plantilla «${key}» importada en la semana visible`, 'ok');
+        
+        // Format week range for toast message
+        const weekEnd = addDays(targetWeekStart, 6);
+        const weekRange = `${targetWeekStart.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })} – ${weekEnd.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })}`;
+        toast(`Plantilla «${key}» importada en la semana del ${weekRange}`, 'ok');
     }
 
     function importRoutineIntoWeek(routineId) {
@@ -6188,7 +5892,21 @@ document.addEventListener('DOMContentLoaded', () => {
             toast('Rutina no encontrada', 'err');
             return;
         }
-        const { ws } = getVisibleWeek();
+        
+        // Get selected week from targetWeek selector (same as import sessions)
+        const targetWeekSelect = $('#targetWeek');
+        let targetWeekStart;
+        if (targetWeekSelect && targetWeekSelect.value !== '') {
+            const offset = +targetWeekSelect.value;
+            // Calculate the exact Monday of the target week (forcing 00:00 local time)
+            targetWeekStart = startOfWeek(addDays(new Date(), offset * 7));
+            targetWeekStart.setHours(0, 0, 0, 0);
+        } else {
+            // Fallback to visible week if selector not available
+            const { ws } = getVisibleWeek();
+            targetWeekStart = ws;
+        }
+        
         const days = routine.days || [];
         if (!days.length) {
             toast('La rutina no tiene días definidos', 'warn');
@@ -6197,7 +5915,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const toAdd = days.map((day, idx) => ({
             id: uuid(),
             name: day.name || `Sesión ${idx + 1}`,
-            date: toLocalISO(addDays(ws, idx)),
+            date: toLocalISO(addDays(targetWeekStart, idx)),
             completed: false,
             exercises: (day.exercises || []).map(ex => ({
                 id: uuid(),
@@ -6218,7 +5936,11 @@ document.addEventListener('DOMContentLoaded', () => {
         app.sessions = [...app.sessions, ...toAdd];
         save();
         refresh();
-        toast(`Rutina «${routine.name}» importada en la semana visible`, 'ok');
+        
+        // Format week range for toast message
+        const weekEnd = addDays(targetWeekStart, 6);
+        const weekRange = `${targetWeekStart.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })} – ${weekEnd.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })}`;
+        toast(`Rutina «${routine.name}» importada en la semana del ${weekRange}`, 'ok');
     }
 
     /* =================== Selector de semana (panel Importar) =================== */
@@ -7535,7 +7257,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     /* =================== Settings Menu =================== */
     // Settings navigation
-    const settingsBtn = $('#settingsBtn');
     const settingsMain = $('#settingsMain');
     const settingsTheme = $('#settingsTheme');
     const settingsProfile = $('#settingsProfile');
@@ -7543,31 +7264,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const themeDarkBtn = $('#themeDarkBtn');
     const themeLightBtn = $('#themeLightBtn');
     const colorSwatches = $('#colorSwatches');
-
-    // Open settings panel
-    if (settingsBtn) {
-        settingsBtn.addEventListener('click', () => {
-            // Hide all other panels
-            $$('.panel').forEach(panel => {
-                panel.setAttribute('aria-hidden', 'true');
-            });
-            // Show settings panel
-            const settingsPanel = $('#panel-settings');
-            if (settingsPanel) {
-                settingsPanel.setAttribute('aria-hidden', 'false');
-                // Reset to main menu
-                showSettingsMain();
-            }
-            // Update navigation
-            ['navDiary', 'navStats', 'navRoutines', 'navImport'].forEach(id => {
-                const btn = $(`#${id}`);
-                if (btn) {
-                    btn.setAttribute('aria-current', 'false');
-                    btn.classList.remove('active');
-                }
-            });
-        });
-    }
 
     // Swipe gesture support for mobile (swipe right to go back)
     let touchStartX = 0;

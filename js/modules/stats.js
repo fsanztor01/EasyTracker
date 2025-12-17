@@ -257,16 +257,68 @@
         });
     }
 
-    function buildStats() {
-        const body = $('#statsBody');
-        const sharedMetric = $('#sharedMetric');
-        const sharedExercise = $('#sharedExercise');
-        const sharedPeriod = $('#sharedPeriod');
+    // Helper function to calculate exercise stats (extracted for reuse)
+    function calculateExerciseStats(exerciseName, sessions, metric) {
+        let currentStats = { maxKg: 0, totalReps: 0, totalVol: 0, rirSum: 0, rirCount: 0, sessionCount: 0 };
 
-        if (!body) return;
+        sessions.forEach(s => {
+            const ex = (s.exercises || []).find(e => e.name === exerciseName);
+            if (!ex) return;
+            currentStats.sessionCount++;
+            (ex.sets || []).forEach(st => {
+                const kg = parseFloat(st.kg) || 0;
+                const reps = window.parseReps ? window.parseReps(st.reps) : (parseFloat(st.reps) || 0);
+                const rir = window.parseRIR ? window.parseRIR(st.rir) : (parseFloat(st.rir) || 0);
+                
+                if (kg > 0) {
+                    currentStats.maxKg = Math.max(currentStats.maxKg, kg);
+                }
+                
+                if (reps > 0) {
+                    currentStats.totalReps += reps;
+                    if (kg > 0) {
+                        currentStats.totalVol += kg * reps;
+                    }
+                }
+                
+                if (rir > 0) {
+                    currentStats.rirSum += rir;
+                    currentStats.rirCount++;
+                }
+            });
+        });
+
+        const currentAvgRir = currentStats.rirCount > 0 ? currentStats.rirSum / currentStats.rirCount : 0;
+        let currentValue = 0;
+        if (metric === 'volume') {
+            currentValue = currentStats.totalVol;
+        } else if (metric === 'weight') {
+            currentValue = currentStats.maxKg;
+        } else if (metric === 'rir') {
+            currentValue = currentAvgRir;
+        }
+
+        return { currentStats, currentAvgRir, currentValue };
+    }
+
+    function buildStats() {
+        const listContainer = document.getElementById('statsListContainer');
+        const chartContainer = document.getElementById('statsChartContainer');
+        const exerciseList = document.getElementById('statsExerciseList');
+        const circularChart = document.getElementById('statsCircularChart');
+        const chartDetails = document.getElementById('statsChartDetails');
+        const sharedMetric = document.getElementById('sharedMetric');
+        const sharedExercise = document.getElementById('sharedExercise');
+        const sharedPeriod = document.getElementById('sharedPeriod');
+
+        if (!listContainer || !chartContainer || !exerciseList || !circularChart || !chartDetails) {
+            console.warn('Stats containers not found');
+            return;
+        }
 
         if (app.sessions.length === 0) {
-            body.innerHTML = '<tr><td colspan="7" style="padding:16px">No hay datos suficientes</td></tr>';
+            listContainer.style.display = 'none';
+            chartContainer.style.display = 'none';
             return;
         }
 
@@ -315,348 +367,295 @@
             comparisonPeriodSessions.push(...subset);
         }
 
-        const rows = [...allExercises].map(exerciseName => {
-            // Calculate stats for current period
-            let currentValue = 0;
-            let currentStats = { maxKg: 0, totalReps: 0, totalVol: 0, rirSum: 0, rirCount: 0, sessionCount: 0 };
-
-            currentPeriodSessions.forEach(s => {
-                const ex = (s.exercises || []).find(e => e.name === exerciseName);
-                if (!ex) return;
-                currentStats.sessionCount++;
-                (ex.sets || []).forEach(st => {
-                    const kg = parseFloat(st.kg) || 0;
-                    const reps = parseReps(st.reps);
-                    const rir = parseRIR(st.rir);
-                    currentStats.maxKg = Math.max(currentStats.maxKg, kg);
-                    if (reps > 0) {
-                        currentStats.totalReps += reps;
-                        currentStats.totalVol += kg * reps;
-                    }
-                    if (rir > 0) {
-                        currentStats.rirSum += rir;
-                        currentStats.rirCount++;
-                    }
-                });
-            });
-
-            const currentAvgRir = currentStats.rirCount > 0 ? currentStats.rirSum / currentStats.rirCount : 0;
-
-            // Calculate stats for comparison period
-            let comparisonValue = 0;
-            let comparisonStats = { maxKg: 0, totalReps: 0, totalVol: 0, rirSum: 0, rirCount: 0, sessionCount: 0 };
-
-            comparisonPeriodSessions.forEach(s => {
-                const ex = (s.exercises || []).find(e => e.name === exerciseName);
-                if (!ex) return;
-                comparisonStats.sessionCount++;
-                (ex.sets || []).forEach(st => {
-                    const kg = parseFloat(st.kg) || 0;
-                    const reps = parseReps(st.reps);
-                    const rir = parseRIR(st.rir);
-                    comparisonStats.maxKg = Math.max(comparisonStats.maxKg, kg);
-                    if (reps > 0) {
-                        comparisonStats.totalReps += reps;
-                        comparisonStats.totalVol += kg * reps;
-                    }
-                    if (rir > 0) {
-                        comparisonStats.rirSum += rir;
-                        comparisonStats.rirCount++;
-                    }
-                });
-            });
-
-            const comparisonAvgRir = comparisonStats.rirCount > 0 ? comparisonStats.rirSum / comparisonStats.rirCount : 0;
-
-            // Calculate metric value based on selected metric
-            if (metric === 'volume') {
-                currentValue = currentStats.totalVol;
-                comparisonValue = comparisonStats.totalVol;
-            } else if (metric === 'weight') {
-                currentValue = currentStats.maxKg;
-                comparisonValue = comparisonStats.maxKg;
-            } else if (metric === 'rir') {
-                currentValue = currentAvgRir;
-                comparisonValue = comparisonAvgRir;
-            }
-
-            // Calculate progress - compare current period with previous period of same length
+        // Calculate stats for each exercise
+        const exerciseData = [...allExercises].map(exerciseName => {
+            // Get ALL sessions with this exercise (not just current period) for accurate stats
+            const allSessionsWithExercise = [...app.sessions]
+                .filter(s => {
+                    const ex = (s.exercises || []).find(e => e.name === exerciseName);
+                    return ex && ex.sets && ex.sets.length > 0;
+                })
+                .sort((a, b) => new Date(a.date) - new Date(b.date));
+            
+            // Calculate stats from ALL sessions, not just current period
+            const { currentStats, currentAvgRir, currentValue } = calculateExerciseStats(exerciseName, allSessionsWithExercise, metric);
+            
+            // Calculate progress from first record to last record
             let progressText = 'Sin datos';
             let progressClass = 'progress--same';
-            let baseValue = comparisonValue;
-
-            // Check if comparison period has sufficient data
-            // Group comparison period sessions by week to verify we have enough weeks
-            const comparisonWeeks = new Set();
-            comparisonPeriodSessions.forEach(s => {
-                const d = parseLocalDate(s.date);
-                const weekStart = startOfWeek(d);
-                const weekKey = weekStart.toISOString().split('T')[0];
-                comparisonWeeks.add(weekKey);
-            });
-
-            // Check if comparison period has sessions for this exercise
-            const hasComparisonData = comparisonPeriodSessions.some(s => {
-                const ex = (s.exercises || []).find(e => e.name === exerciseName);
-                return ex && ex.sets && ex.sets.length > 0;
-            });
-
-            // Check if comparison period has enough weeks (should match current period length)
-            const hasEnoughWeeks = comparisonWeeks.size >= period;
-
-            // If no comparison period data for this exercise OR not enough weeks, compare with first week of data
-            // But only if we have at least 2 weeks of data to compare
-            if ((comparisonValue === 0 || !hasComparisonData || !hasEnoughWeeks) && currentValue > 0) {
-                // Find first week with this exercise
-                const allSessionsWithExercise = [...app.sessions]
-                    .filter(s => {
-                        const ex = (s.exercises || []).find(e => e.name === exerciseName);
-                        return ex && ex.sets && ex.sets.length > 0;
-                    })
-                    .sort((a, b) => new Date(a.date) - new Date(b.date));
-
-                if (allSessionsWithExercise.length > 0) {
-                    // Group sessions by week
-                    const sessionsByWeek = new Map();
-                    allSessionsWithExercise.forEach(s => {
-                        const d = parseLocalDate(s.date);
-                        const weekStart = startOfWeek(d);
-                        const weekKey = weekStart.toISOString().split('T')[0];
-
-                        if (!sessionsByWeek.has(weekKey)) {
-                            sessionsByWeek.set(weekKey, []);
-                        }
-                        sessionsByWeek.get(weekKey).push(s);
-                    });
-
-                    // Get first week
-                    const firstWeekKey = Array.from(sessionsByWeek.keys()).sort()[0];
-                    const firstWeekSessions = sessionsByWeek.get(firstWeekKey);
-
-                    // Calculate stats for first week
-                    const firstWeekStats = { maxKg: 0, totalReps: 0, totalVol: 0, rirSum: 0, rirCount: 0 };
-                    firstWeekSessions.forEach(s => {
-                        const ex = s.exercises.find(e => e.name === exerciseName);
-                        if (ex) {
-                            ex.sets.forEach(st => {
-                                const kg = parseFloat(st.kg) || 0;
-                                const reps = parseReps(st.reps);
-                                const rir = parseRIR(st.rir);
-                                firstWeekStats.maxKg = Math.max(firstWeekStats.maxKg, kg);
-                                if (reps > 0) {
-                                    firstWeekStats.totalReps += reps;
-                                    firstWeekStats.totalVol += kg * reps;
-                                }
-                                if (rir > 0) {
-                                    firstWeekStats.rirSum += rir;
-                                    firstWeekStats.rirCount++;
-                                }
-                            });
-                        }
-                    });
-
-                    const firstWeekAvgRir = firstWeekStats.rirCount > 0 ? firstWeekStats.rirSum / firstWeekStats.rirCount : 0;
-
-                    // Get first week value based on metric
-                    // When no comparison period exists, compare last week of current period with first week
-                    // This gives a meaningful progress percentage (week-to-week comparison)
-                    const lastWeekSessions = [];
-                    const lastWeekStart = addDays(base, -(period - 1) * 7);
-                    const lastWeekEnd = addDays(lastWeekStart, 6);
-                    currentPeriodSessions.forEach(s => {
-                        const d = parseLocalDate(s.date);
-                        if (d >= lastWeekStart && d <= lastWeekEnd) {
-                            lastWeekSessions.push(s);
-                        }
-                    });
-
-                    // Calculate last week stats
-                    const lastWeekStats = { maxKg: 0, totalVol: 0, rirSum: 0, rirCount: 0 };
-                    lastWeekSessions.forEach(s => {
-                        const ex = (s.exercises || []).find(e => e.name === exerciseName);
-                        if (ex) {
-                            ex.sets.forEach(st => {
-                                const kg = parseFloat(st.kg) || 0;
-                                const reps = parseReps(st.reps);
-                                const rir = parseRIR(st.rir);
-                                lastWeekStats.maxKg = Math.max(lastWeekStats.maxKg, kg);
-                                if (reps > 0) {
-                                    lastWeekStats.totalVol += kg * reps;
-                                }
-                                if (rir > 0) {
-                                    lastWeekStats.rirSum += rir;
-                                    lastWeekStats.rirCount++;
-                                }
-                            });
-                        }
-                    });
-                    const lastWeekAvgRir = lastWeekStats.rirCount > 0 ? lastWeekStats.rirSum / lastWeekStats.rirCount : 0;
-
-                    // Compare last week with first week (week-to-week comparison)
-                    // Always use week-to-week comparison when no comparison period exists
-                    // Check if we have multiple weeks of data
-                    const weeksWithData = Array.from(sessionsByWeek.keys()).sort();
-                    const hasMultipleWeeks = weeksWithData.length > 1;
-
-                    if (metric === 'volume') {
-                        // Use last week volume, or if no data in last week, use the most recent week with data
-                        if (lastWeekStats.totalVol > 0) {
-                            currentValue = lastWeekStats.totalVol;
-                        } else {
-                            // Find most recent week with data
-                            const weeksWithDataReversed = weeksWithData.slice().reverse();
-                            for (const weekKey of weeksWithDataReversed) {
-                                const weekSessions = sessionsByWeek.get(weekKey);
-                                let weekVol = 0;
-                                weekSessions.forEach(s => {
-                                    const ex = s.exercises.find(e => e.name === exerciseName);
-                                    if (ex) {
-                                        ex.sets.forEach(st => {
-                                            const kg = parseFloat(st.kg) || 0;
-                                            const reps = parseReps(st.reps);
-                                            if (reps > 0) {
-                                                weekVol += kg * reps;
-                                            }
-                                        });
-                                    }
-                                });
-                                if (weekVol > 0) {
-                                    currentValue = weekVol;
-                                    break;
-                                }
+            
+            if (allSessionsWithExercise.length > 0) {
+                // Find first session with actual volume data (skip empty sessions)
+                let firstSessionWithData = null;
+                let firstVolume = 0;
+                for (let i = 0; i < allSessionsWithExercise.length; i++) {
+                    const session = allSessionsWithExercise[i];
+                    const ex = (session.exercises || []).find(e => e.name === exerciseName);
+                    if (ex && ex.sets) {
+                        let sessionVolume = 0;
+                        ex.sets.forEach(st => {
+                            const kg = parseFloat(st.kg) || 0;
+                            const reps = parseReps(st.reps);
+                            if (reps > 0 && kg > 0) {
+                                sessionVolume += kg * reps;
                             }
-                        }
-                        // Only compare if we have multiple weeks, otherwise use current period total
-                        // Only compare if we have multiple weeks, otherwise don't set baseValue (will show "Primer registro")
-                        if (hasMultipleWeeks && firstWeekStats.totalVol > 0) {
-                            baseValue = firstWeekStats.totalVol;
-                        } else {
-                            // If all data is in one week, don't set baseValue to show "Primer registro"
-                            baseValue = 0;
-                            currentValue = currentStats.totalVol;
-                        }
-                    } else if (metric === 'weight') {
-                        if (lastWeekStats.maxKg > 0) {
-                            currentValue = lastWeekStats.maxKg;
-                        } else {
-                            // Find most recent week with data
-                            const weeksWithDataReversed = weeksWithData.slice().reverse();
-                            for (const weekKey of weeksWithDataReversed) {
-                                const weekSessions = sessionsByWeek.get(weekKey);
-                                let weekMaxKg = 0;
-                                weekSessions.forEach(s => {
-                                    const ex = s.exercises.find(e => e.name === exerciseName);
-                                    if (ex) {
-                                        ex.sets.forEach(st => {
-                                            const kg = parseFloat(st.kg) || 0;
-                                            weekMaxKg = Math.max(weekMaxKg, kg);
-                                        });
-                                    }
-                                });
-                                if (weekMaxKg > 0) {
-                                    currentValue = weekMaxKg;
-                                    break;
-                                }
-                            }
-                        }
-                        // Only compare if we have multiple weeks, otherwise don't set baseValue (will show "Primer registro")
-                        if (hasMultipleWeeks && firstWeekStats.maxKg > 0) {
-                            baseValue = firstWeekStats.maxKg;
-                        } else {
-                            // If all data is in one week, don't set baseValue to show "Primer registro"
-                            baseValue = 0;
-                            currentValue = currentStats.maxKg;
-                        }
-                    } else if (metric === 'rir') {
-                        if (lastWeekAvgRir > 0) {
-                            currentValue = lastWeekAvgRir;
-                        } else {
-                            // Find most recent week with data
-                            const weeksWithDataReversed = weeksWithData.slice().reverse();
-                            for (const weekKey of weeksWithDataReversed) {
-                                const weekSessions = sessionsByWeek.get(weekKey);
-                                let rirSum = 0, rirCount = 0;
-                                weekSessions.forEach(s => {
-                                    const ex = s.exercises.find(e => e.name === exerciseName);
-                                    if (ex) {
-                                        ex.sets.forEach(st => {
-                                            const rir = parseRIR(st.rir);
-                                            if (rir > 0) {
-                                                rirSum += rir;
-                                                rirCount++;
-                                            }
-                                        });
-                                    }
-                                });
-                                if (rirCount > 0) {
-                                    currentValue = rirSum / rirCount;
-                                    break;
-                                }
-                            }
-                        }
-                        // Only compare if we have multiple weeks, otherwise don't set baseValue (will show "Primer registro")
-                        if (hasMultipleWeeks && firstWeekAvgRir > 0) {
-                            baseValue = firstWeekAvgRir;
-                        } else {
-                            // If all data is in one week, don't set baseValue to show "Primer registro"
-                            baseValue = 0;
-                            currentValue = currentAvgRir;
+                        });
+                        if (sessionVolume > 0) {
+                            firstSessionWithData = session;
+                            firstVolume = sessionVolume;
+                            break;
                         }
                     }
                 }
-            }
-
-            if (baseValue > 0) {
-                const diff = ((currentValue - baseValue) / baseValue * 100);
-                // If difference is very small (less than 0.1%), treat as same
-                if (Math.abs(diff) < 0.1) {
-                    // Check if we have multiple weeks of data
-                    const weeksWithData = Array.from(new Set(
-                        [...app.sessions]
-                            .filter(s => {
-                                const ex = (s.exercises || []).find(e => e.name === exerciseName);
-                                return ex && ex.sets && ex.sets.length > 0;
-                            })
-                            .map(s => {
-                                const d = parseLocalDate(s.date);
-                                return startOfWeek(d).toISOString().split('T')[0];
-                            })
-                    ));
-
-                    if (weeksWithData.length <= 1) {
-                        // All data in one week - show as first record
-                        progressText = 'Primer registro';
-                        progressClass = 'progress--up';
-                    } else {
+                
+                // Calculate total volume for last session (newest)
+                let lastVolume = 0;
+                const lastSession = allSessionsWithExercise[allSessionsWithExercise.length - 1];
+                const lastEx = (lastSession.exercises || []).find(e => e.name === exerciseName);
+                if (lastEx && lastEx.sets) {
+                    lastEx.sets.forEach(st => {
+                        const kg = parseFloat(st.kg) || 0;
+                        const reps = parseReps(st.reps);
+                        if (reps > 0 && kg > 0) {
+                            lastVolume += kg * reps;
+                        }
+                    });
+                }
+                
+                // Calculate progress based on volume (primary metric for progress)
+                if (firstVolume > 0 && lastVolume > 0) {
+                    const diff = ((lastVolume - firstVolume) / firstVolume) * 100;
+                    if (Math.abs(diff) < 0.1) {
                         progressText = '0%';
                         progressClass = 'progress--same';
+                    } else if (diff > 0) {
+                        progressText = `+${diff.toFixed(1)}%`;
+                        progressClass = 'progress--up';
+                    } else {
+                        progressText = `${diff.toFixed(1)}%`;
+                        progressClass = 'progress--down';
                     }
-                } else if (diff > 0) {
-                    progressText = `+${diff.toFixed(1)}%`;
+                } else if (lastVolume > 0 && firstVolume === 0) {
+                    // If no first session with data but last has volume, it's the first record
+                    progressText = 'Primer registro';
                     progressClass = 'progress--up';
-                } else {
-                    progressText = `${diff.toFixed(1)}%`;
-                    progressClass = 'progress--down';
+                } else if (allSessionsWithExercise.length === 1 && lastVolume > 0) {
+                    // Only one session with data
+                    progressText = 'Primer registro';
+                    progressClass = 'progress--up';
                 }
-            } else if (currentValue > 0) {
-                progressText = 'Primer registro';
-                progressClass = 'progress--up';
             }
 
-            return `
-                <tr>
-                    <td><strong>${exerciseName}</strong></td>
-                    <td>${currentStats.sessionCount}</td>
-                    <td>${currentStats.maxKg} kg</td>
-                    <td>${currentStats.totalReps}</td>
-                    <td>${currentStats.totalVol.toLocaleString()} kg</td>
-                    <td>${currentAvgRir > 0 ? currentAvgRir.toFixed(1) : '–'}</td>
-                    <td class="${progressClass}">${progressText}</td>
-                </tr>
-            `;
-        }).join('');
+            return {
+                exerciseName,
+                currentStats,
+                currentAvgRir,
+                currentValue,
+                progressText,
+                progressClass,
+                metric
+            };
+        });
 
-        body.innerHTML = rows || '<tr><td colspan="7" style="padding:16px">No hay datos suficientes</td></tr>';
+        // Show/hide containers based on filter
+        if (exerciseFilter === 'all') {
+            // Show list, hide chart
+            listContainer.style.display = 'block';
+            chartContainer.style.display = 'none';
+            
+            // Render vertical list
+            renderExerciseList(exerciseData, metric, period);
+        } else {
+            // Render circular chart for single exercise
+            const exerciseDataItem = exerciseData.find(e => e.exerciseName === exerciseFilter);
+            if (exerciseDataItem && exerciseDataItem.currentStats.sessionCount > 0 && exerciseDataItem.progressText !== '0%' && exerciseDataItem.progressText !== 'Sin datos') {
+                // Show chart, hide list
+                listContainer.style.display = 'none';
+                chartContainer.style.display = 'block';
+                renderCircularChart(exerciseDataItem, metric, period);
+            } else {
+                // No data found or 0% progress, show list with empty state
+                chartContainer.style.display = 'none';
+                listContainer.style.display = 'block';
+                exerciseList.innerHTML = '<div class="stats-empty-state">No se encontraron datos para este ejercicio</div>';
+            }
+        }
+    }
+
+    function renderExerciseList(exerciseData, metric, period) {
+        const exerciseList = document.getElementById('statsExerciseList');
+        if (!exerciseList) return;
+
+        // Sort: exercises with data first, then "Sin datos"
+        const withData = exerciseData.filter(e => e.currentValue > 0);
+        const withoutData = exerciseData.filter(e => e.currentValue === 0);
+        
+        // Sort with data by current value (descending)
+        withData.sort((a, b) => b.currentValue - a.currentValue);
+
+        if (withData.length === 0 && withoutData.length === 0) {
+            exerciseList.innerHTML = '<div class="stats-empty-state">Sin entrenamientos registrados</div>';
+            return;
+        }
+
+        exerciseList.innerHTML = '';
+
+        // Render exercises with data
+        withData.forEach(exercise => {
+            const item = document.createElement('div');
+            item.className = 'stats-exercise-item';
+            
+            // Always show: Volumen, Max KG, and Progreso
+            const volume = exercise.currentStats.totalVol.toLocaleString();
+            const maxKg = exercise.currentStats.maxKg;
+            
+            // Calculate progress percentage for display
+            let progressDisplay = '';
+            if (exercise.progressText === 'Sin datos') {
+                progressDisplay = '<span class="stats-progress-percentage stats-progress-percentage--none">Sin datos</span>';
+            } else if (exercise.progressText === 'Primer registro') {
+                progressDisplay = '<span class="stats-progress-percentage stats-progress-percentage--none">Primer registro</span>';
+            } else {
+                // Mostrar porcentaje con color según mejora/empeora
+                const isPositive = exercise.progressClass === 'progress--up';
+                const percentageClass = isPositive ? 'stats-progress-percentage--up' : 'stats-progress-percentage--down';
+                progressDisplay = `<span class="stats-progress-percentage ${percentageClass}">${exercise.progressText}</span>`;
+            }
+            
+            item.innerHTML = `
+                <div class="stats-exercise-header">
+                    <div class="stats-exercise-name">${exercise.exerciseName}</div>
+                </div>
+                <div class="stats-exercise-metrics">
+                    <div class="stats-metric-row">
+                        <span class="stats-metric-label">Volumen:</span>
+                        <span class="stats-metric-value">${volume} kg</span>
+                    </div>
+                    <div class="stats-metric-row">
+                        <span class="stats-metric-label">Max KG:</span>
+                        <span class="stats-metric-value">${maxKg} kg</span>
+                    </div>
+                    <div class="stats-metric-row">
+                        <span class="stats-metric-label">Progreso:</span>
+                        <span class="stats-metric-value">${progressDisplay}</span>
+                    </div>
+                </div>
+            `;
+            
+            exerciseList.appendChild(item);
+        });
+
+        // Render exercises without data at the bottom
+        if (withoutData.length > 0) {
+            const noDataSection = document.createElement('div');
+            noDataSection.className = 'stats-no-data-section';
+            noDataSection.innerHTML = '<div class="stats-no-data-title">Sin datos</div>';
+            
+            withoutData.forEach(exercise => {
+                const item = document.createElement('div');
+                item.className = 'stats-exercise-item stats-exercise-item--no-data';
+                item.innerHTML = `
+                    <div class="stats-exercise-name">${exercise.exerciseName}</div>
+                    <div class="stats-exercise-metric stats-exercise-metric--muted">Sin entrenamientos registrados</div>
+                `;
+                noDataSection.appendChild(item);
+            });
+            
+            exerciseList.appendChild(noDataSection);
+        }
+    }
+
+    function renderCircularChart(exerciseData, metric, period) {
+        const circularChart = document.getElementById('statsCircularChart');
+        const chartDetails = document.getElementById('statsChartDetails');
+        if (!circularChart || !chartDetails) return;
+
+        // Get containers
+        const chartContainer = document.getElementById('statsChartContainer');
+        const listContainer = document.getElementById('statsListContainer');
+        const exerciseList = document.getElementById('statsExerciseList');
+        
+        // Don't show chart if progress is 0% or no data
+        if (exerciseData.progressText === '0%' || exerciseData.progressText === 'Sin datos' || exerciseData.currentStats.sessionCount === 0) {
+            if (chartContainer) chartContainer.style.display = 'none';
+            if (listContainer) listContainer.style.display = 'block';
+            if (exerciseList) {
+                exerciseList.innerHTML = '<div class="stats-empty-state">No se encontraron datos para este ejercicio</div>';
+            }
+            return;
+        }
+
+        // Calculate progress percentage from progressText
+        let progressPercent = 0;
+        if (exerciseData.progressText && exerciseData.progressText !== 'Primer registro' && exerciseData.progressText !== 'Sin datos') {
+            const match = exerciseData.progressText.match(/[+-]?(\d+\.?\d*)/);
+            if (match) {
+                progressPercent = parseFloat(match[0]);
+            }
+        } else if (exerciseData.progressText === 'Primer registro') {
+            progressPercent = 100;
+        }
+
+        // Normalize to 0-100 for display
+        const displayPercent = Math.min(Math.abs(progressPercent), 100);
+        const circumference = 2 * Math.PI * 45; // radius = 45
+        const offset = circumference - (displayPercent / 100) * circumference;
+
+        // Format period text
+        const periodText = period === 4 ? 'Últimas 4 semanas' : period === 8 ? 'Últimas 8 semanas' : `Últimas ${period} semanas`;
+
+        // Chart color based on progress
+        const chartColor = progressPercent >= 0 ? 'var(--success, #4caf50)' : 'var(--danger, #ff4444)';
+
+        circularChart.innerHTML = `
+            <div class="stats-chart-wrapper">
+                <svg class="stats-circular-svg" viewBox="0 0 100 100">
+                    <circle class="stats-circular-bg" cx="50" cy="50" r="45" fill="none" stroke="var(--border, rgba(255,255,255,0.1))" stroke-width="8"/>
+                    <circle class="stats-circular-progress" cx="50" cy="50" r="45" fill="none" stroke="${chartColor}" stroke-width="8" 
+                        stroke-dasharray="${circumference}" stroke-dashoffset="${circumference}" 
+                        stroke-linecap="round" transform="rotate(-90 50 50)"/>
+                </svg>
+                <div class="stats-chart-center">
+                    <div class="stats-chart-percentage">${displayPercent.toFixed(0)}%</div>
+                    <div class="stats-chart-label">${exerciseData.progressText === 'Primer registro' ? 'Nuevo' : exerciseData.progressText}</div>
+                </div>
+            </div>
+            <div class="stats-chart-title">${exerciseData.exerciseName}</div>
+            <div class="stats-chart-subtitle">Progreso desde el primer registro</div>
+        `;
+
+        // Animate the chart
+        requestAnimationFrame(() => {
+            const progressCircle = circularChart.querySelector('.stats-circular-progress');
+            if (progressCircle) {
+                progressCircle.style.transition = 'stroke-dashoffset 1s ease-out';
+                progressCircle.style.strokeDashoffset = offset;
+            }
+        });
+
+        // Details - Remove duplicate volume, show all stats
+        chartDetails.innerHTML = `
+            <div class="stats-detail-item">
+                <div class="stats-detail-label">Sesiones</div>
+                <div class="stats-detail-value">${exerciseData.currentStats.sessionCount}</div>
+            </div>
+            <div class="stats-detail-item">
+                <div class="stats-detail-label">KG máximo</div>
+                <div class="stats-detail-value">${exerciseData.currentStats.maxKg} kg</div>
+            </div>
+            <div class="stats-detail-item">
+                <div class="stats-detail-label">Total reps</div>
+                <div class="stats-detail-value">${exerciseData.currentStats.totalReps}</div>
+            </div>
+            <div class="stats-detail-item">
+                <div class="stats-detail-label">Volumen total</div>
+                <div class="stats-detail-value">${exerciseData.currentStats.totalVol.toLocaleString()} kg</div>
+            </div>
+            <div class="stats-detail-item">
+                <div class="stats-detail-label">RIR promedio</div>
+                <div class="stats-detail-value">${exerciseData.currentAvgRir > 0 ? exerciseData.currentAvgRir.toFixed(1) : '–'}</div>
+            </div>
+        `;
     }
 
     function buildChartState() {
@@ -666,9 +665,9 @@
         }
 
         // Shared filters (used by both chart and stats)
-        const sharedMetric = $('#sharedMetric');
-        const sharedExercise = $('#sharedExercise');
-        const sharedPeriod = $('#sharedPeriod');
+        const sharedMetric = document.getElementById('sharedMetric');
+        const sharedExercise = document.getElementById('sharedExercise');
+        const sharedPeriod = document.getElementById('sharedPeriod');
 
         // Initialize shared filters with current state
         if (sharedMetric) {
@@ -696,7 +695,7 @@
                 sharedExercise.value = currentExercise;
             }
 
-            const suggestionsDiv = $('#exerciseSuggestions');
+            const suggestionsDiv = document.getElementById('exerciseSuggestions');
             let highlightedIndex = -1;
 
             // Function to filter and show suggestions

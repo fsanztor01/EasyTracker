@@ -17,15 +17,6 @@
                 <div class="brand" aria-label="Developed by FJ-Sanz">
                     <strong class="brand__title">Developed by FJ-Sanz</strong>
                 </div>
-                <div style="display: flex; gap: 8px; align-items: center;">
-                    <button class="theme-btn" id="settingsBtn" aria-label="Ajustes" title="Ajustes">
-                        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                            stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
-                            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1Z" />
-                        </svg>
-                    </button>
-                </div>
             </div>
         </header>
 
@@ -121,28 +112,15 @@
                     </div>
                 </article>
 
-                <article class="card pop" style="padding:10px; margin-top:10px">
-                    <h3 class="summary__title" style="margin-bottom:6px">Estadísticas detalladas</h3>
-                    <div class="stats-table-container">
-                        <table class="table stats-table" id="statsTable">
-                            <thead>
-                                <tr>
-                                    <th>Ejercicio</th>
-                                    <th>Sesiones</th>
-                                    <th>KG máximo</th>
-                                    <th>Total reps</th>
-                                    <th>Volumen total</th>
-                                    <th>RIR promedio</th>
-                                    <th>Progreso (%)</th>
-                                </tr>
-                            </thead>
-                            <tbody id="statsBody">
-                                <tr>
-                                    <td colspan="7" style="padding:16px">No hay datos suficientes</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                <!-- Contenedor para lista de ejercicios (cuando "Todos los ejercicios" está seleccionado) -->
+                <article class="card pop" id="statsListContainer" style="padding:16px; margin-top:10px; display:none;">
+                    <div id="statsExerciseList" class="stats-exercise-list"></div>
+                </article>
+
+                <!-- Contenedor para gráfico circular (cuando un ejercicio específico está seleccionado) -->
+                <article class="card pop" id="statsChartContainer" style="padding:16px; margin-top:10px; display:none;">
+                    <div id="statsCircularChart" class="stats-circular-chart"></div>
+                    <div id="statsChartDetails" class="stats-chart-details"></div>
                 </article>
             </section>
 
@@ -150,111 +128,165 @@
             <section class="panel" id="panel-routines" role="tabpanel" aria-labelledby="tab-routines"
                 aria-hidden="true">
                 <div class="routine-panel">
-                    <article class="card pop routine-card">
-                        <h3 class="summary__title" style="margin-bottom:6px">Crear rutina personalizada</h3>
-                        <div class="field">
-                            <label class="label" for="routineName">Nombre de la rutina</label>
-                            <input id="routineName" class="input" placeholder="Ej. Fuerza 4 días" />
+                    <!-- Title -->
+                    <h2 class="summary__title routines-section-title" style="margin-bottom: 16px; font-size: 1.3rem;">Mis rutinas</h2>
+                    
+                    <!-- Import/Export Management -->
+                    <button class="btn btn--ghost routines-import-btn" id="btnGoToImport" style="width: 100%; padding: 12px; min-height: 44px; font-size: 0.95rem; margin-bottom: 16px; display: flex; align-items: center; justify-content: center; gap: 8px; background: rgba(100, 100, 110, 0.15); border: 1px solid var(--border);">
+                        <span>📁</span>
+                        <span>Gestión de Importación/Exportación</span>
+                    </button>
+                    
+                    <!-- Create New Routine Button -->
+                    <button class="btn" id="btnCreateNewRoutine" style="width: 100%; padding: 14px; min-height: 48px; font-size: 1rem; margin-bottom: 16px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                        <span style="font-size: 1.2rem;">+</span>
+                        <span>Crear nueva rutina</span>
+                    </button>
+                    
+                    <!-- Routine Builder (Hidden by default) -->
+                    <article class="card pop routine-builder-card" id="routineBuilderCard" style="display: none; padding: 16px; margin-bottom: 16px;">
+                        <div class="field" style="margin-bottom: 12px;">
+                            <label class="label" for="routineName" style="margin-bottom: 6px; font-size: 0.9rem;">Nombre (opcional)</label>
+                            <input id="routineName" class="input" placeholder="Ej. Fuerza 4 días" style="padding: 10px; font-size: 0.95rem;" />
                         </div>
-                        <div class="routine-builder__controls">
-                            <button class="btn btn--ghost" id="addRoutineDay">+ Añadir día</button>
-                            <button class="btn btn--secondary" id="saveRoutine">Guardar rutina</button>
-                            <button class="btn btn--ghost" id="resetRoutine">Limpiar</button>
+                        <div style="margin-bottom: 12px;">
+                            <button class="btn" id="addRoutineDay" style="width: 100%; padding: 12px; min-height: 44px; font-size: 0.95rem;">
+                                + Añadir día
+                            </button>
                         </div>
                         <div class="routine-days" id="routineDays"></div>
-                        <p style="color:var(--muted); font-size:.85rem; margin:10px 0 0">
-                            Añade días, ejercicios y sets para construir tu rutina personalizada.
-                        </p>
+                        <div style="display: flex; gap: 8px; margin-top: 16px;">
+                            <button class="btn" id="saveRoutine" style="flex: 1; padding: 12px; min-height: 44px; font-size: 0.95rem;">
+                                Guardar rutina
+                            </button>
+                            <button class="btn btn--ghost" id="cancelRoutineBuilder" style="flex: 1; padding: 12px; min-height: 44px; font-size: 0.95rem;">
+                                Cancelar
+                            </button>
+                        </div>
                     </article>
-                    <hr class="routine-separator" />
-                    <details class="card pop routine-card">
-                        <summary class="summary__title" style="margin-bottom:6px; cursor:pointer; list-style:none; display:flex; align-items:center; gap:8px">
-                            <span>▶</span>
-                            <span>Rutinas creadas</span>
-                        </summary>
-                        <div class="routine-created__list" id="createdRoutineList" style="margin-top:10px"></div>
-                        <div class="routine-empty" id="noCreatedRoutines">Todavía no has creado rutinas.</div>
-                    </details>
-                    <details class="card pop routine-card">
-                        <summary class="summary__title" style="margin-bottom:6px; cursor:pointer; list-style:none; display:flex; align-items:center; gap:8px">
-                            <span>▶</span>
-                            <span>Rutinas por defecto</span>
-                        </summary>
-                        <div class="routine-default__list" id="defaultRoutineList" style="margin-top:10px"></div>
-                    </details>
+                    
+                    <!-- Created Routines List -->
+                    <article class="card pop" style="padding: 12px; margin-bottom: 12px;">
+                        <h3 class="summary__title" style="margin: 0 0 10px 0; font-size: 1rem;">Rutinas creadas</h3>
+                        <div id="createdRoutinesList" class="all-routines-list" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;"></div>
+                        <div class="routine-empty" id="noCreatedRoutinesEmpty" style="text-align: center; padding: 30px 20px; color: var(--muted);">
+                            <div style="font-size: 2.5rem; margin-bottom: 10px;">⭐</div>
+                            <div style="font-size: 1rem; font-weight: 600; margin-bottom: 5px; color: var(--text);">¡Crea tu primera rutina!</div>
+                            <div style="font-size: 0.85rem;">Pulsa el botón de arriba para empezar</div>
+                        </div>
+                    </article>
+                    
+                    <!-- Default Routines List -->
+                    <article class="card pop" style="padding: 12px; margin-bottom: 12px;">
+                        <h3 class="summary__title" style="margin: 0 0 10px 0; font-size: 1rem;">Rutinas por defecto</h3>
+                        <div id="defaultRoutinesList" class="all-routines-list" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;"></div>
+                    </article>
+                    
+                    <!-- Legacy lists (hidden, kept for functionality) -->
+                    <div style="display: none;">
+                        <div class="routine-created__list" id="createdRoutineList"></div>
+                        <div class="routine-empty" id="noCreatedRoutines"></div>
+                        <div class="routine-default__list" id="defaultRoutineList"></div>
+                    </div>
                 </div>
             </section>
 
             <!-- IMPORTAR -->
-            <section class="panel" id="panel-import" role="tabpanel" aria-labelledby="tab-import" aria-hidden="true">
-                <article class="card pop import-section">
-                    <h3 class="summary__title">Importar entrenamientos</h3>
-                    <div class="field">
-                        <label class="label" for="targetWeek">Semana objetivo</label>
-                        <select id="targetWeek" class="input" aria-describedby="targetHelp"></select>
-                        <div id="targetHelp" style="color:var(--muted); font-size:.9rem">Las sesiones se ubicarán (lunes
-                            a
-                            domingo) en la semana seleccionada.</div>
+            <section class="panel import-panel" id="panel-import" role="tabpanel" aria-labelledby="tab-import" aria-hidden="true">
+                <!-- Back Button -->
+                <button class="btn btn--ghost" id="btnBackFromImport" style="margin-bottom: 16px; padding: 12px 16px; min-height: 44px; display: flex; align-items: center; gap: 8px;">
+                    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px;">
+                        <path d="M19 12H5" />
+                        <path d="M12 19l-7-7 7-7" />
+                    </svg>
+                    <span class="import-panel-text">Atrás</span>
+                </button>
+                <!-- Section 1: Import/Export Sessions -->
+                <article class="card pop import-section" style="padding: 16px; margin-bottom: 16px;">
+                    <h3 class="summary__title import-panel-title" style="margin: 0 0 12px 0; font-size: 1.1rem;">Importar / Exportar sesiones</h3>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 16px;">
+                        <button class="btn btn--ghost" onclick="document.getElementById('fileInput').click()" 
+                            style="padding: 12px; min-height: 48px; font-size: 0.95rem; display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                            <span style="font-size: 1.5rem;">📄</span>
+                            <span>Importar sesiones</span>
+                        </button>
+                        <button class="btn btn--ghost" id="btnExport" 
+                            style="padding: 12px; min-height: 48px; font-size: 0.95rem; display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                            <span style="font-size: 1.5rem;">🖨️</span>
+                            <span>Exportar sesiones</span>
+                        </button>
                     </div>
-                    <div class="field">
-                        <label class="label" for="fileInput">Archivo JSON</label>
-                        <input id="fileInput" type="file" accept="application/json,.json" class="input"
-                            aria-describedby="fileHelp" style="display:none" />
-                        <button type="button" class="btn btn--ghost"
-                            onclick="document.getElementById('fileInput').click()" style="width:100%">Seleccionar
-                            archivo</button>
-                        <div id="fileHelp" style="color:var(--muted); font-size:.9rem; margin-top:8px">Se valida el
-                            contenido antes de
-                            integrarlo.</div>
+                    <input id="fileInput" type="file" accept="application/json,.json" style="display:none" />
+                    <div class="field" style="margin-bottom: 12px;">
+                        <label class="label" for="targetWeek" style="margin-bottom: 6px; font-size: 0.9rem;">📅 Semana</label>
+                        <select id="targetWeek" class="input" style="padding: 10px; font-size: 0.95rem;"></select>
                     </div>
                     <div id="importAlert" class="toast toast--err hidden" role="alert" aria-live="assertive"></div>
                     <div id="importErrorList" class="import-error-list hidden"></div>
-                    <div id="preview" class="card hidden" style="padding:10px; margin-top:8px">
-                        <strong>Vista previa:</strong>
-                        <ul id="previewList" style="margin:6px 0 0 16px; padding:0; list-style:disc"></ul>
+                    <div id="preview" class="card hidden" style="padding:10px; margin-bottom: 12px; background: var(--surface-2);">
+                        <div style="font-weight: 600; margin-bottom: 6px; font-size: 0.9rem;">Vista previa:</div>
+                        <ul id="previewList" style="margin:0; padding-left: 18px; list-style:disc; font-size: 0.9rem;"></ul>
                     </div>
-                    <div class="modal__actions" style="padding:0; margin-top:8px">
-                        <button class="btn btn--secondary" id="btnImport">Importar</button>
-                        <button class="btn btn--ghost" id="btnExport">Exportar sesiones</button>
+                    <button class="btn" id="btnImport" style="width:100%; padding: 12px; font-size: 0.95rem; min-height: 44px;">
+                        ✅ Importar
+                    </button>
+                </article>
+
+                <!-- Section 2: Quick Templates -->
+                <article class="card pop" style="padding: 16px; margin-bottom: 16px;">
+                    <h4 class="summary__title" style="margin:0 0 12px 0; font-size: 1rem;">Plantillas rápidas</h4>
+                    <div class="template-buttons" id="templateButtons" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
+                        <button class="btn btn--ghost" data-template="3day" style="padding: 12px; min-height: 56px; font-size: 0.95rem;">
+                            <span style="font-size: 1.3rem; display: block; margin-bottom: 4px;">💪</span>
+                            <span>3 días</span>
+                        </button>
+                        <button class="btn btn--ghost" data-template="4day" style="padding: 12px; min-height: 56px; font-size: 0.95rem;">
+                            <span style="font-size: 1.3rem; display: block; margin-bottom: 4px;">🔥</span>
+                            <span>4 días</span>
+                        </button>
+                        <button class="btn btn--ghost" data-template="5day" style="padding: 12px; min-height: 56px; font-size: 0.95rem;">
+                            <span style="font-size: 1.3rem; display: block; margin-bottom: 4px;">🏋️</span>
+                            <span>5 días</span>
+                        </button>
+                        <button class="btn btn--ghost" data-template="ppl" style="padding: 12px; min-height: 56px; font-size: 0.95rem;">
+                            <span style="font-size: 1.3rem; display: block; margin-bottom: 4px;">⚡</span>
+                            <span>PPL 6 días</span>
+                        </button>
                     </div>
                 </article>
 
-                <article class="card pop" style="padding:12px; margin-top:10px">
-                    <h4 class="summary__title" style="margin:0">Plantillas rápidas</h4>
-                    <div class="template-buttons" id="templateButtons" style="margin-top:8px">
-                        <button class="btn btn--ghost" data-template="3day">💪 3 días</button>
-                        <button class="btn btn--ghost" data-template="4day">🔥 4 días</button>
-                        <button class="btn btn--ghost" data-template="5day">🏋️ 5 días</button>
-                        <button class="btn btn--ghost" data-template="ppl">⚡ PPL 6 días</button>
-                    </div>
-                </article>
-
-                <article class="card pop" style="padding:12px; margin-top:10px">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px">
-                        <h4 class="summary__title" style="margin:0">Rutinas creadas</h4>
-                        <div style="display:flex; gap:8px; align-items:center">
-                            <button class="btn btn--ghost" id="btnImportRoutines"
-                                style="font-size:0.85rem; padding:6px 12px">🧑🏼‍💻​ Importar rutinas</button>
-                            <button class="btn btn--ghost" id="btnExportRoutines"
-                                style="font-size:0.85rem; padding:6px 12px">📤 Exportar rutinas</button>
+                <!-- Section 3: Saved Routines -->
+                <article class="card pop" style="padding: 16px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px">
+                        <h4 class="summary__title import-panel-title" style="margin:0; font-size: 1rem;">📁 Rutinas guardadas</h4>
+                        <div style="display:flex; gap:6px; align-items:center">
+                            <button class="btn btn--ghost" id="btnImportRoutines" style="padding: 6px 10px; font-size: 0.85rem; min-height: 36px;">
+                                📥 Importar
+                            </button>
+                            <button class="btn btn--ghost" id="btnExportRoutines" style="padding: 6px 10px; font-size: 0.85rem; min-height: 36px;">
+                                📤 Exportar
+                            </button>
                         </div>
                     </div>
                     <input id="routineFileInput" type="file" accept="application/json,.json" style="display:none" />
-                    <div id="routineFileInputContainer" style="display:none; margin-bottom:8px">
-                        <div id="routineImportAlert" class="toast toast--err hidden" role="alert" aria-live="assertive">
-                        </div>
+                    <div id="routineFileInputContainer" style="display:none; margin-bottom:16px">
+                        <div id="routineImportAlert" class="toast toast--err hidden" role="alert" aria-live="assertive"></div>
                         <div id="routineImportErrorList" class="import-error-list hidden"></div>
-                        <div id="routinePreview" class="card hidden" style="padding:10px; margin-top:8px">
-                            <strong>Vista previa:</strong>
-                            <ul id="routinePreviewList" style="margin:6px 0 0 16px; padding:0; list-style:disc"></ul>
+                        <div id="routinePreview" class="card hidden" style="padding:12px; margin-bottom: 16px; background: var(--surface-2);">
+                            <div class="import-panel-text" style="font-weight: 600; margin-bottom: 8px;">Vista previa:</div>
+                            <ul id="routinePreviewList" class="import-panel-text" style="margin:0; padding-left: 20px; list-style:disc"></ul>
                         </div>
-                        <div class="modal__actions" style="padding:0; margin-top:8px">
-                            <button class="btn btn--secondary" id="btnConfirmImportRoutines">Importar</button>
-                            <button class="btn btn--ghost" id="btnCancelImportRoutines">Cancelar</button>
+                        <div style="display: flex; gap: 12px;">
+                            <button class="btn" id="btnConfirmImportRoutines" style="flex: 1; padding: 14px; min-height: 48px;">✅ Importar</button>
+                            <button class="btn btn--ghost" id="btnCancelImportRoutines" style="flex: 1; padding: 14px; min-height: 48px;">✕ Cancelar</button>
                         </div>
                     </div>
                     <div id="importRoutineList" class="routine-import__list"></div>
-                    <div class="routine-empty" id="importRoutineEmpty">Aún no tienes rutinas guardadas.                    </div>
+                    <div class="routine-empty" id="importRoutineEmpty" style="text-align: center; padding: 40px 20px; color: var(--muted);">
+                        <div style="font-size: 3rem; margin-bottom: 12px;">📝</div>
+                        <div style="font-size: 1.1rem; font-weight: 600; margin-bottom: 8px; color: var(--text);">Crea tu primera rutina</div>
+                        <div style="font-size: 0.9rem;">Ve a "Rutinas" para empezar</div>
+                    </div>
                 </article>
             </section>
 
@@ -591,13 +623,13 @@
                 </svg>
                 <span>Rutinas</span>
             </button>
-            <button class="nav-btn" id="navImport" aria-label="Importar">
-                <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                    <polyline points="7 10 12 15 17 10" />
-                    <line x1="12" y1="15" x2="12" y2="3" />
+            <button class="nav-btn" id="navSettings" aria-label="Ajustes">
+                <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1Z" />
                 </svg>
-                <span>Importar</span>
+                <span>Ajustes</span>
             </button>
         </nav>
 
