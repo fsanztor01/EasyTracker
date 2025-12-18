@@ -887,13 +887,13 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Click handler - removed for created routines (only buttons work now)
         if (isTemplate) {
-            item.addEventListener('click', (e) => {
-                if (e.target.closest('button')) return; // Don't trigger if clicking button
+        item.addEventListener('click', (e) => {
+            if (e.target.closest('button')) return; // Don't trigger if clicking button
                 if (typeof loadTemplateIntoBuilder === 'function') {
                     loadTemplateIntoBuilder(routine.templateKey);
                     showRoutineBuilder();
-                }
-            });
+            }
+        });
         }
         // For created routines, clicking the panel does nothing - only buttons work
         

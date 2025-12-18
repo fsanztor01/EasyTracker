@@ -11,15 +11,6 @@
 <body>
     <!-- MAIN APPLICATION -->
     <div id="mainApp">
-        <!-- HEADER -->
-        <header>
-            <div class="topbar">
-                <div class="brand" aria-label="Developed by FJ-Sanz">
-                    <strong class="brand__title">Developed by FJ-Sanz</strong>
-                </div>
-            </div>
-        </header>
-
         <main class="container fade-in" id="main">
             <!-- DIARIO -->
             <section class="panel" id="panel-diary" role="tabpanel" aria-labelledby="tab-diary" aria-hidden="false">
@@ -93,14 +84,21 @@
                         <div class="chart-control-group">
                             <label class="chart-control-label" for="sharedPeriod">Periodo</label>
                             <select id="sharedPeriod" class="chart-select" aria-label="Selecciona periodo de semanas">
-                                <option value="4">Últimas 4 semanas</option>
-                                <option value="8" selected>Últimas 8 semanas</option>
+                                <option value="4" selected>Últimas 4 semanas</option>
+                                <option value="8">Últimas 8 semanas</option>
                                 <option value="12">Últimas 12 semanas</option>
                             </select>
                         </div>
                     </div>
                 </article>
 
+                <!-- Aggregated Circular Chart (All Exercises) -->
+                <article class="card pop" id="aggregatedChartContainer" style="padding:16px; margin-top:10px; margin-bottom:10px; position: relative;">
+                    <button type="button" id="weekInfoBtn" class="btn" style="position: absolute; top: 12px; right: 12px; min-width: 36px; height: 36px; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; z-index: 10; background: var(--card-bg, rgba(255,255,255,0.1)); border: 1px solid var(--border, rgba(255,255,255,0.2));" title="Información de semanas">
+                        📈
+                    </button>
+                    <div id="aggregatedCircularChart" class="aggregated-circular-chart"></div>
+                </article>
 
                 <!-- Ciclos archivados -->
                 <article class="card pop" style="padding:12px; margin-top:10px; margin-bottom:10px">
@@ -427,15 +425,15 @@
                     <article class="card pop" style="padding:16px; margin-bottom:12px">
                         <h3 class="summary__title" style="margin-bottom:10px">Datos Corporales</h3>
                         <div class="profile-form">
-                            <div class="field"><label class="label" for="profileHeight">Altura (cm)</label><input
-                                    id="profileHeight" class="input" type="number" inputmode="decimal" min="0"
-                                    step="0.1" placeholder="Ej. 178" /></div>
-                            <div class="field"><label class="label" for="profileWeight">Peso actual (kg)</label><input
-                                    id="profileWeight" class="input" type="number" inputmode="decimal" min="0"
-                                    step="0.1" placeholder="Opcional" /></div>
-                            <div class="field"><label class="label" for="profileBodyFat">% grasa actual</label><input
-                                    id="profileBodyFat" class="input" type="number" inputmode="decimal" min="0"
-                                    step="0.1" placeholder="Opcional" /></div>
+                                <div class="field"><label class="label" for="profileHeight">Altura (cm)</label><input
+                                        id="profileHeight" class="input" type="number" inputmode="decimal" min="0"
+                                        step="0.1" placeholder="Ej. 178" /></div>
+                                <div class="field"><label class="label" for="profileWeight">Peso actual (kg)</label><input
+                                        id="profileWeight" class="input" type="number" inputmode="decimal" min="0"
+                                        step="0.1" placeholder="Opcional" /></div>
+                                <div class="field"><label class="label" for="profileBodyFat">% grasa actual</label><input
+                                        id="profileBodyFat" class="input" type="number" inputmode="decimal" min="0"
+                                        step="0.1" placeholder="Opcional" /></div>
                             <button class="btn" id="saveBodyTrack" type="button">Guardar datos</button>
                         </div>
                     </article>
@@ -935,6 +933,22 @@
                         </div>
                     </form>
                 </dialog>
+
+        <!-- Week Info Dialog -->
+        <dialog id="weekInfoDialog" aria-labelledby="weekInfoTitle" aria-modal="true">
+            <form method="dialog">
+                <div class="modal__head">
+                    <h3 class="modal__title" id="weekInfoTitle">Información de Semanas</h3>
+                    <button class="theme-btn" value="cancel" aria-label="Cerrar">Cerrar</button>
+                </div>
+                <div class="modal__body">
+                    <div id="weekInfoContent"></div>
+                </div>
+                <div class="modal__actions">
+                    <button class="btn" value="cancel">Cerrar</button>
+                </div>
+            </form>
+        </dialog>
 
                 <!-- Templates -->
         <template id="tpl-session">

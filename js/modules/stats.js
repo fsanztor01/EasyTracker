@@ -257,6 +257,276 @@
         });
     }
 
+    // Calculate aggregated metric across ALL exercises for a given period
+    function calculateAggregatedMetric(period, metric) {
+        const base = startOfWeek();
+        const periodSessions = [];
+        
+        // Get sessions for the specified period
+        for (let i = period - 1; i >= 0; i--) {
+            const ws = addDays(base, -i * 7);
+            const we = addDays(ws, 6);
+            const subset = app.sessions.filter(s => {
+                const d = parseLocalDate(s.date);
+                return d >= ws && d <= we;
+            });
+            periodSessions.push(...subset);
+        }
+
+        let totalVolume = 0;
+        let maxWeight = 0;
+        let rirSum = 0;
+        let rirCount = 0;
+
+        // Aggregate data from ALL exercises in all sessions
+        periodSessions.forEach(session => {
+            (session.exercises || []).forEach(ex => {
+                (ex.sets || []).forEach(set => {
+                    const kg = parseFloat(set.kg) || 0;
+                    const reps = window.parseReps ? window.parseReps(set.reps) : (parseFloat(set.reps) || 0);
+                    const rir = window.parseRIR ? window.parseRIR(set.rir) : (parseFloat(set.rir) || 0);
+
+                    // Volume: sum of all kg * reps
+                    if (reps > 0 && kg > 0) {
+                        totalVolume += kg * reps;
+                    }
+
+                    // Max weight: highest kg across all exercises
+                    if (kg > 0) {
+                        maxWeight = Math.max(maxWeight, kg);
+                    }
+
+                    // Average RIR: sum and count for average calculation
+                    if (rir > 0) {
+                        rirSum += rir;
+                        rirCount++;
+                    }
+                });
+            });
+        });
+
+        // Return the requested metric
+        if (metric === 'volume') {
+            return totalVolume;
+        } else if (metric === 'weight') {
+            return maxWeight;
+        } else if (metric === 'rir') {
+            return rirCount > 0 ? (rirSum / rirCount) : 0;
+        }
+
+        return 0;
+    }
+
+    // Calculate metric per week for the specified period
+    function calculateWeeklyMetrics(period, metric) {
+        const base = startOfWeek();
+        const weeklyData = [];
+
+        // Calculate metric for each week
+        for (let i = period - 1; i >= 0; i--) {
+            const ws = addDays(base, -i * 7);
+            const we = addDays(ws, 6);
+            const weekSessions = app.sessions.filter(s => {
+                const d = parseLocalDate(s.date);
+                return d >= ws && d <= we;
+            });
+
+            let weekVolume = 0;
+            let weekMaxWeight = 0;
+            let weekRirSum = 0;
+            let weekRirCount = 0;
+
+            // Aggregate data from ALL exercises in this week's sessions
+            weekSessions.forEach(session => {
+                (session.exercises || []).forEach(ex => {
+                    (ex.sets || []).forEach(set => {
+                        const kg = parseFloat(set.kg) || 0;
+                        const reps = window.parseReps ? window.parseReps(set.reps) : (parseFloat(set.reps) || 0);
+                        const rir = window.parseRIR ? window.parseRIR(set.rir) : (parseFloat(set.rir) || 0);
+
+                        if (reps > 0 && kg > 0) {
+                            weekVolume += kg * reps;
+                        }
+
+                        if (kg > 0) {
+                            weekMaxWeight = Math.max(weekMaxWeight, kg);
+                        }
+
+                        if (rir > 0) {
+                            weekRirSum += rir;
+                            weekRirCount++;
+                        }
+                    });
+                });
+            });
+
+            let weekValue = 0;
+            if (metric === 'volume') {
+                weekValue = weekVolume;
+            } else if (metric === 'weight') {
+                weekValue = weekMaxWeight;
+            } else if (metric === 'rir') {
+                weekValue = weekRirCount > 0 ? (weekRirSum / weekRirCount) : 0;
+            }
+
+            weeklyData.push({
+                weekNumber: period - i,
+                value: weekValue
+            });
+        }
+
+        return weeklyData;
+    }
+
+    // Generate fixed color for each week number
+    // Week 1 always has color 1, Week 2 always has color 2, etc.
+    function getWeekColor(weekNumber) {
+        // Fixed color palette - each week number maps to a specific color
+        const weekColors = {
+            1: '#3b82f6',  // Blue - Semana 1
+            2: '#10b981',  // Green - Semana 2
+            3: '#f59e0b',  // Amber - Semana 3
+            4: '#ef4444',  // Red - Semana 4
+            5: '#8b5cf6',  // Purple - Semana 5
+            6: '#06b6d4',  // Cyan - Semana 6
+            7: '#ec4899',  // Pink - Semana 7
+            8: '#84cc16',  // Lime - Semana 8
+            9: '#f97316',  // Orange - Semana 9
+            10: '#6366f1', // Indigo - Semana 10
+            11: '#14b8a6', // Teal - Semana 11
+            12: '#a855f7'  // Violet - Semana 12
+        };
+
+        // Return the fixed color for this week number, or default to first color if week > 12
+        return weekColors[weekNumber] || weekColors[1];
+    }
+
+    // Render aggregated circular chart (all exercises combined) with weekly segments
+    function renderAggregatedCircularChart(metric, period) {
+        const chartContainer = document.getElementById('aggregatedCircularChart');
+        if (!chartContainer) return;
+
+        // Calculate aggregated value (total)
+        const totalValue = calculateAggregatedMetric(period, metric);
+
+        // Calculate weekly metrics
+        const weeklyData = calculateWeeklyMetrics(period, metric);
+
+        // Format display value and label
+        let displayValue = '';
+        let metricLabel = '';
+
+        if (metric === 'volume') {
+            metricLabel = 'Volumen total';
+            displayValue = totalValue.toLocaleString('es-ES', { maximumFractionDigits: 0 });
+        } else if (metric === 'rir') {
+            metricLabel = 'RIR promedio';
+            displayValue = totalValue.toFixed(1);
+        } else if (metric === 'weight') {
+            metricLabel = 'Peso máximo';
+            displayValue = totalValue.toLocaleString('es-ES', { maximumFractionDigits: 1 });
+        }
+
+        // Chart dimensions
+        const size = 200;
+        const center = size / 2;
+        const radius = 70;
+        const circumference = 2 * Math.PI * radius;
+        const strokeWidth = 12;
+        const bgColor = 'var(--border, rgba(255,255,255,0.1))';
+
+        // Calculate total for percentage calculation
+        const total = weeklyData.reduce((sum, week) => sum + week.value, 0);
+        
+        // Build weekly arcs - each arc starts where the previous one ended
+        let accumulatedLength = 0;
+        const weeklyArcs = weeklyData.map((week, index) => {
+            const percentage = total > 0 ? (week.value / total) * 100 : (100 / period);
+            const arcLength = (percentage / 100) * circumference;
+            
+            // Start offset: where this arc begins (from accumulated length)
+            const startOffset = circumference - accumulatedLength;
+            // End offset: where this arc ends (after adding its length)
+            const endOffset = circumference - (accumulatedLength + arcLength);
+            
+            const weekColor = getWeekColor(week.weekNumber);
+            
+            // Update accumulated length for next arc
+            accumulatedLength += arcLength;
+            
+            return {
+                weekNumber: week.weekNumber,
+                color: weekColor,
+                startOffset: startOffset,
+                endOffset: endOffset,
+                arcLength: arcLength,
+                percentage: percentage
+            };
+        });
+
+        // Format period text
+        const periodText = period === 4 ? 'Últimas 4 semanas' : period === 8 ? 'Últimas 8 semanas' : `Últimas ${period} semanas`;
+
+        // Build SVG arcs for each week
+        // Each arc uses stroke-dasharray to show only its portion
+        const arcsHTML = weeklyArcs.map((arc, index) => {
+            // For each arc, we need to show only its portion
+            // stroke-dasharray: [visible length, gap length (rest of circle)]
+            // stroke-dashoffset: where to start drawing (rotated to the right position)
+            const dashArray = `${arc.arcLength} ${circumference - arc.arcLength}`;
+            // Set final position directly (no animation)
+            const dashOffset = arc.startOffset;
+            
+            return `
+                <circle 
+                    class="aggregated-week-arc week-${arc.weekNumber}" 
+                    cx="${center}" 
+                    cy="${center}" 
+                    r="${radius}" 
+                    fill="none" 
+                    stroke="${arc.color}" 
+                    stroke-width="${strokeWidth}"
+                    stroke-dasharray="${dashArray}" 
+                    stroke-dashoffset="${dashOffset}"
+                    stroke-linecap="round"/>
+            `;
+        }).join('');
+
+        // Create SVG chart
+        chartContainer.innerHTML = `
+            <div class="aggregated-chart-wrapper" style="position: relative; width: ${size}px; height: ${size}px; margin: 0 auto;">
+                <svg class="aggregated-circular-svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="transform: rotate(-90deg);">
+                    <!-- Background circle -->
+                    <circle 
+                        class="aggregated-circular-bg" 
+                        cx="${center}" 
+                        cy="${center}" 
+                        r="${radius}" 
+                        fill="none" 
+                        stroke="${bgColor}" 
+                        stroke-width="${strokeWidth}"
+                        stroke-linecap="round"/>
+                    <!-- Weekly arcs -->
+                    ${arcsHTML}
+                </svg>
+                <!-- Center content -->
+                <div class="aggregated-chart-center" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; pointer-events: none;">
+                    <div class="aggregated-chart-value" style="font-size: 2rem; font-weight: 700; color: var(--text, #ffffff); line-height: 1.2; margin-bottom: 4px;">
+                        ${displayValue}
+                    </div>
+                    <div class="aggregated-chart-label" style="font-size: 0.75rem; color: var(--muted, rgba(255,255,255,0.6)); text-transform: uppercase; letter-spacing: 0.5px;">
+                        ${metricLabel}
+                    </div>
+                </div>
+            </div>
+            <div class="aggregated-chart-subtitle" style="text-align: center; margin-top: 12px; font-size: 0.85rem; color: var(--muted, rgba(255,255,255,0.6));">
+                ${periodText}
+            </div>
+        `;
+
+        // No animation needed - arcs are rendered in final position
+    }
+
     // Helper function to calculate exercise stats (extracted for reuse)
     function calculateExerciseStats(exerciseName, sessions, metric) {
         let currentStats = { maxKg: 0, totalReps: 0, totalVol: 0, rirSum: 0, rirCount: 0, sessionCount: 0 };
@@ -307,18 +577,13 @@
         const exerciseList = document.getElementById('statsExerciseList');
         const circularChart = document.getElementById('statsCircularChart');
         const chartDetails = document.getElementById('statsChartDetails');
+        const aggregatedChartContainer = document.getElementById('aggregatedChartContainer');
         const sharedMetric = document.getElementById('sharedMetric');
         const sharedExercise = document.getElementById('sharedExercise');
         const sharedPeriod = document.getElementById('sharedPeriod');
 
         if (!listContainer || !chartContainer || !exerciseList || !circularChart || !chartDetails) {
             console.warn('Stats containers not found');
-            return;
-        }
-
-        if (app.sessions.length === 0) {
-            listContainer.style.display = 'none';
-            chartContainer.style.display = 'none';
             return;
         }
 
@@ -332,7 +597,23 @@
         } else {
             exerciseFilter = app.chartState.exercise || 'all';
         }
-        const period = sharedPeriod ? parseInt(sharedPeriod.value) : (app.chartState.period || 8);
+        const period = sharedPeriod ? parseInt(sharedPeriod.value) : (app.chartState.period || 4);
+
+        // Render aggregated circular chart (always shows all exercises, regardless of filter)
+        if (aggregatedChartContainer) {
+            if (app.sessions.length === 0) {
+                aggregatedChartContainer.style.display = 'none';
+            } else {
+                aggregatedChartContainer.style.display = 'block';
+                renderAggregatedCircularChart(metric, period);
+            }
+        }
+
+        if (app.sessions.length === 0) {
+            listContainer.style.display = 'none';
+            chartContainer.style.display = 'none';
+            return;
+        }
 
         // Get exercises to show (filtered by exerciseFilter)
         const allExercises = new Set();
@@ -467,8 +748,8 @@
             renderExerciseList(exerciseData, metric, period);
         } else {
             // When filtering by exercise, show detailed breakdown panel by panel
-            chartContainer.style.display = 'none';
-            listContainer.style.display = 'block';
+                chartContainer.style.display = 'none';
+                listContainer.style.display = 'block';
             
             const exerciseDataItem = exerciseData.find(e => e.exerciseName === exerciseFilter);
             if (exerciseDataItem && exerciseDataItem.currentStats.sessionCount > 0) {
@@ -781,7 +1062,7 @@
     function buildChartState() {
         // Initialize chartState if it doesn't exist
         if (!app.chartState) {
-            app.chartState = { period: 8, exercise: 'all', metric: 'volume' };
+            app.chartState = { period: 4, exercise: 'all', metric: 'volume' };
         }
 
         // Shared filters (used by both chart and stats)
@@ -931,12 +1212,72 @@
         }
 
         if (sharedPeriod) {
-            sharedPeriod.value = String(app.chartState.period || 8);
+            sharedPeriod.value = String(app.chartState.period || 4);
             sharedPeriod.onchange = () => {
                 app.chartState.period = +sharedPeriod.value;
                 buildStats();
             };
         }
+
+        // Week info button
+        const weekInfoBtn = document.getElementById('weekInfoBtn');
+        if (weekInfoBtn) {
+            weekInfoBtn.addEventListener('click', () => {
+                showWeekInfoDialog();
+            });
+        }
+    }
+
+    // Show week information dialog
+    function showWeekInfoDialog() {
+        const dialog = document.getElementById('weekInfoDialog');
+        const content = document.getElementById('weekInfoContent');
+        if (!dialog || !content) return;
+
+        // Get current period and metric
+        const sharedPeriod = document.getElementById('sharedPeriod');
+        const sharedMetric = document.getElementById('sharedMetric');
+        const period = sharedPeriod ? parseInt(sharedPeriod.value) : 4;
+        const metric = sharedMetric ? sharedMetric.value : 'volume';
+
+        // Calculate weekly metrics
+        const weeklyData = calculateWeeklyMetrics(period, metric);
+
+        // Build content HTML
+        let contentHTML = '<div style="display: flex; flex-direction: column; gap: 12px;">';
+        
+        weeklyData.forEach((week, index) => {
+            const weekColor = getWeekColor(week.weekNumber);
+            let displayValue = '';
+            let metricLabel = '';
+            
+            if (metric === 'volume') {
+                metricLabel = 'Volumen total';
+                displayValue = week.value.toLocaleString('es-ES', { maximumFractionDigits: 0 }) + ' kg';
+            } else if (metric === 'rir') {
+                metricLabel = 'RIR promedio';
+                displayValue = week.value.toFixed(1);
+            } else if (metric === 'weight') {
+                metricLabel = 'Peso máximo';
+                displayValue = week.value.toLocaleString('es-ES', { maximumFractionDigits: 1 }) + ' kg';
+            }
+
+            contentHTML += `
+                <div style="display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--card-bg, rgba(255,255,255,0.05)); border-radius: 8px; border-left: 4px solid ${weekColor};">
+                    <div style="width: 24px; height: 24px; border-radius: 50%; background: ${weekColor}; flex-shrink: 0;"></div>
+                    <div style="flex: 1;">
+                        <div style="font-weight: 600; color: var(--text, #ffffff); margin-bottom: 4px;">Semana ${week.weekNumber}</div>
+                        <div style="font-size: 0.9rem; color: var(--muted, rgba(255,255,255,0.6));">${metricLabel}: ${displayValue}</div>
+                    </div>
+                </div>
+            `;
+        });
+
+        contentHTML += '</div>';
+        content.innerHTML = contentHTML;
+
+        // Show dialog
+        dialog.showModal();
     }
 
     function weeklyData(period = 4, filter = 'all', metric = 'volume') {
