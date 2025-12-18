@@ -466,17 +466,16 @@
             // Render vertical list
             renderExerciseList(exerciseData, metric, period);
         } else {
-            // Render circular chart for single exercise
+            // When filtering by exercise, show detailed breakdown panel by panel
+            chartContainer.style.display = 'none';
+            listContainer.style.display = 'block';
+            
             const exerciseDataItem = exerciseData.find(e => e.exerciseName === exerciseFilter);
-            if (exerciseDataItem && exerciseDataItem.currentStats.sessionCount > 0 && exerciseDataItem.progressText !== '0%' && exerciseDataItem.progressText !== 'Sin datos') {
-                // Show chart, hide list
-                listContainer.style.display = 'none';
-                chartContainer.style.display = 'block';
-                renderCircularChart(exerciseDataItem, metric, period);
+            if (exerciseDataItem && exerciseDataItem.currentStats.sessionCount > 0) {
+                // Render single exercise with detailed breakdown (panel by panel)
+                renderExerciseDetailedBreakdown(exerciseDataItem, metric, period);
             } else {
-                // No data found or 0% progress, show list with empty state
-                chartContainer.style.display = 'none';
-                listContainer.style.display = 'block';
+                // No data found, show empty state
                 exerciseList.innerHTML = '<div class="stats-empty-state">No se encontraron datos para este ejercicio</div>';
             }
         }
@@ -563,6 +562,127 @@
             
             exerciseList.appendChild(noDataSection);
         }
+    }
+
+    function renderExerciseDetailedBreakdown(exerciseData, metric, period) {
+        const exerciseList = document.getElementById('statsExerciseList');
+        if (!exerciseList) return;
+
+        exerciseList.innerHTML = '';
+
+        // Create a separate panel for each metric
+        const volume = exerciseData.currentStats.totalVol.toLocaleString();
+        const maxKg = exerciseData.currentStats.maxKg;
+        const totalReps = exerciseData.currentStats.totalReps;
+        const avgRir = exerciseData.currentAvgRir > 0 ? exerciseData.currentAvgRir.toFixed(1) : '–';
+        const sessionCount = exerciseData.currentStats.sessionCount;
+
+        // Calculate progress percentage for display
+        let progressDisplay = '';
+        if (exerciseData.progressText === 'Sin datos') {
+            progressDisplay = '<span class="stats-progress-percentage stats-progress-percentage--none">Sin datos</span>';
+        } else if (exerciseData.progressText === 'Primer registro') {
+            progressDisplay = '<span class="stats-progress-percentage stats-progress-percentage--none">Primer registro</span>';
+        } else {
+            const isPositive = exerciseData.progressClass === 'progress--up';
+            const percentageClass = isPositive ? 'stats-progress-percentage--up' : 'stats-progress-percentage--down';
+            progressDisplay = `<span class="stats-progress-percentage ${percentageClass}">${exerciseData.progressText}</span>`;
+        }
+
+        // Panel 1: Exercise Name (with theme color)
+        const namePanel = document.createElement('div');
+        namePanel.className = 'stats-exercise-item';
+        namePanel.style.cssText = 'margin-bottom: 10px;';
+        namePanel.innerHTML = `
+            <div class="stats-exercise-header">
+                <div class="stats-exercise-name" style="color: var(--primary);">${exerciseData.exerciseName}</div>
+            </div>
+        `;
+        exerciseList.appendChild(namePanel);
+
+        // Panel 2: Progreso (moved to second position)
+        const progressPanel = document.createElement('div');
+        progressPanel.className = 'stats-exercise-item';
+        progressPanel.style.cssText = 'margin-bottom: 10px;';
+        progressPanel.innerHTML = `
+            <div class="stats-exercise-metrics">
+                <div class="stats-metric-row">
+                    <span class="stats-metric-label">Progreso:</span>
+                    <span class="stats-metric-value">${progressDisplay}</span>
+                </div>
+            </div>
+        `;
+        exerciseList.appendChild(progressPanel);
+
+        // Panel 3: Volumen
+        const volumePanel = document.createElement('div');
+        volumePanel.className = 'stats-exercise-item';
+        volumePanel.style.cssText = 'margin-bottom: 10px;';
+        volumePanel.innerHTML = `
+            <div class="stats-exercise-metrics">
+                <div class="stats-metric-row">
+                    <span class="stats-metric-label">Volumen:</span>
+                    <span class="stats-metric-value">${volume} kg</span>
+                </div>
+            </div>
+        `;
+        exerciseList.appendChild(volumePanel);
+
+        // Panel 4: Max KG
+        const maxKgPanel = document.createElement('div');
+        maxKgPanel.className = 'stats-exercise-item';
+        maxKgPanel.style.cssText = 'margin-bottom: 10px;';
+        maxKgPanel.innerHTML = `
+            <div class="stats-exercise-metrics">
+                <div class="stats-metric-row">
+                    <span class="stats-metric-label">Max KG:</span>
+                    <span class="stats-metric-value">${maxKg} kg</span>
+                </div>
+            </div>
+        `;
+        exerciseList.appendChild(maxKgPanel);
+
+        // Panel 5: Total Reps
+        const repsPanel = document.createElement('div');
+        repsPanel.className = 'stats-exercise-item';
+        repsPanel.style.cssText = 'margin-bottom: 10px;';
+        repsPanel.innerHTML = `
+            <div class="stats-exercise-metrics">
+                <div class="stats-metric-row">
+                    <span class="stats-metric-label">Total reps:</span>
+                    <span class="stats-metric-value">${totalReps}</span>
+                </div>
+            </div>
+        `;
+        exerciseList.appendChild(repsPanel);
+
+        // Panel 6: RIR promedio
+        const rirPanel = document.createElement('div');
+        rirPanel.className = 'stats-exercise-item';
+        rirPanel.style.cssText = 'margin-bottom: 10px;';
+        rirPanel.innerHTML = `
+            <div class="stats-exercise-metrics">
+                <div class="stats-metric-row">
+                    <span class="stats-metric-label">RIR promedio:</span>
+                    <span class="stats-metric-value">${avgRir}</span>
+                </div>
+            </div>
+        `;
+        exerciseList.appendChild(rirPanel);
+
+        // Panel 7: Sesiones
+        const sessionsPanel = document.createElement('div');
+        sessionsPanel.className = 'stats-exercise-item';
+        sessionsPanel.style.cssText = 'margin-bottom: 10px;';
+        sessionsPanel.innerHTML = `
+            <div class="stats-exercise-metrics">
+                <div class="stats-metric-row">
+                    <span class="stats-metric-label">Sesiones:</span>
+                    <span class="stats-metric-value">${sessionCount}</span>
+                </div>
+            </div>
+        `;
+        exerciseList.appendChild(sessionsPanel);
     }
 
     function renderCircularChart(exerciseData, metric, period) {

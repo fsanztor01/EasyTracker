@@ -1735,6 +1735,20 @@ textarea.input:disabled {
     order: 3;
 }
 
+/* Button colors */
+.js-complete {
+    color: #10b981 !important;
+}
+
+.js-delete {
+    color: #ef4444 !important;
+}
+
+.js-del-set,
+.set-delete {
+    color: var(--muted) !important;
+}
+
 /* Desktop layout */
 @media (min-width: 768px) {
     .session__header {
@@ -2084,7 +2098,7 @@ textarea.input:disabled {
 .set-delete {
     background: transparent;
     border: none;
-    color: var(--danger);
+    color: var(--muted);
     cursor: pointer;
     padding: 4px;
     border-radius: 4px;
@@ -2092,7 +2106,7 @@ textarea.input:disabled {
 }
 
 .set-delete:hover {
-    background: rgba(239, 68, 68, 0.1);
+    background: rgba(128, 128, 128, 0.1);
 }
 
 .set-inputs {

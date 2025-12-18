@@ -837,11 +837,11 @@ document.addEventListener('DOMContentLoaded', () => {
         actionsContainer.style.cssText = 'width: 100%; display: flex; gap: 3px; margin-top: auto; flex-shrink: 0;';
         
         if (isTemplate) {
-            // Two buttons for templates: Usar and Importar
+            // Two buttons for templates: Plantilla and Importar
             const useBtn = document.createElement('button');
             useBtn.className = 'btn btn--ghost js-use-template';
             useBtn.style.cssText = 'flex: 1; padding: 6px 3px; min-height: 30px; font-size: 0.7rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;';
-            useBtn.textContent = 'Usar';
+            useBtn.textContent = 'Plantilla';
             useBtn.dataset.template = routine.templateKey;
             actionsContainer.appendChild(useBtn);
             
@@ -1222,6 +1222,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const cancelRoutineBuilder = $('#cancelRoutineBuilder');
         if (cancelRoutineBuilder) {
             cancelRoutineBuilder.addEventListener('click', () => {
+                hideRoutineBuilder();
+            });
+        }
+
+        // Button to close routine builder (X button)
+        const closeRoutineBuilder = $('#closeRoutineBuilder');
+        if (closeRoutineBuilder) {
+            closeRoutineBuilder.addEventListener('click', () => {
                 hideRoutineBuilder();
             });
         }
@@ -5926,23 +5934,62 @@ document.addEventListener('DOMContentLoaded', () => {
         toast(`Plantilla «${key}» importada en la semana del ${weekRange}`, 'ok');
     }
 
-    function importRoutineIntoWeek(routineId) {
+    function showRoutineImportWeekDialog(routineId) {
+        app.tempRoutineId = routineId;
+        const dialog = $('#routineImportWeekDialog');
+        const selector = $('#routineImportWeek');
+        if (!dialog || !selector) return;
+        
+        // Initialize week selector
+        selector.innerHTML = '';
+        const base = startOfWeek(new Date());
+        for (let i = -8; i <= 8; i++) {
+            const ws = addDays(base, i * 7), we = addDays(ws, 6);
+            const opt = document.createElement('option');
+            opt.value = i;
+            opt.textContent = `${ws.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })} – ${we.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })}`;
+            if (i === app.weekOffset) opt.selected = true;
+            selector.appendChild(opt);
+        }
+        
+        dialog.showModal();
+    }
+
+    function showTemplateImportWeekDialog(templateKey) {
+        app.tempTemplateKey = templateKey;
+        const dialog = $('#routineImportWeekDialog');
+        const selector = $('#routineImportWeek');
+        if (!dialog || !selector) return;
+        
+        // Initialize week selector
+        selector.innerHTML = '';
+        const base = startOfWeek(new Date());
+        for (let i = -8; i <= 8; i++) {
+            const ws = addDays(base, i * 7), we = addDays(ws, 6);
+            const opt = document.createElement('option');
+            opt.value = i;
+            opt.textContent = `${ws.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })} – ${we.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })}`;
+            if (i === app.weekOffset) opt.selected = true;
+            selector.appendChild(opt);
+        }
+        
+        dialog.showModal();
+    }
+
+    function importRoutineIntoWeek(routineId, weekOffset = null) {
         const routine = app.routines.find(r => r.id === routineId);
         if (!routine) {
             toast('Rutina no encontrada', 'err');
             return;
         }
         
-        // Get selected week from targetWeek selector (same as import sessions)
-        const targetWeekSelect = $('#targetWeek');
+        // Get selected week from parameter or selector
         let targetWeekStart;
-        if (targetWeekSelect && targetWeekSelect.value !== '') {
-            const offset = +targetWeekSelect.value;
-            // Calculate the exact Monday of the target week (forcing 00:00 local time)
-            targetWeekStart = startOfWeek(addDays(new Date(), offset * 7));
+        if (weekOffset !== null) {
+            targetWeekStart = startOfWeek(addDays(new Date(), weekOffset * 7));
             targetWeekStart.setHours(0, 0, 0, 0);
         } else {
-            // Fallback to visible week if selector not available
+            // Fallback to visible week
             const { ws } = getVisibleWeek();
             targetWeekStart = ws;
         }
@@ -5981,6 +6028,41 @@ document.addEventListener('DOMContentLoaded', () => {
         const weekEnd = addDays(targetWeekStart, 6);
         const weekRange = `${targetWeekStart.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })} – ${weekEnd.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })}`;
         toast(`Rutina «${routine.name}» importada en la semana del ${weekRange}`, 'ok');
+    }
+
+    function importTemplateIntoWeek(templateKey, weekOffset = null) {
+        const arr = templates[templateKey] || [];
+        if (!arr.length) {
+            toast('Plantilla no encontrada', 'err');
+            return;
+        }
+        
+        // Get selected week from parameter
+        let targetWeekStart;
+        if (weekOffset !== null) {
+            targetWeekStart = startOfWeek(addDays(new Date(), weekOffset * 7));
+            targetWeekStart.setHours(0, 0, 0, 0);
+        } else {
+            // Fallback to visible week
+            const { ws } = getVisibleWeek();
+            targetWeekStart = ws;
+        }
+        
+        const toAdd = arr.map((it, idx) => ({
+            id: uuid(),
+            name: it.name,
+            date: toLocalISO(addDays(targetWeekStart, idx)),
+            completed: false,
+            exercises: it.ex.map(n => ({ id: uuid(), name: n, sets: [{ id: uuid(), setNumber: 1, kg: '', reps: '', rir: '' }] }))
+        }));
+        app.sessions = [...app.sessions, ...toAdd];
+        save(); 
+        refresh();
+        
+        // Format week range for toast message
+        const weekEnd = addDays(targetWeekStart, 6);
+        const weekRange = `${targetWeekStart.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })} – ${weekEnd.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })}`;
+        toast(`Plantilla «${templateKey}» importada en la semana del ${weekRange}`, 'ok');
     }
 
     /* =================== Selector de semana (panel Importar) =================== */
@@ -6167,6 +6249,40 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
+        // Event listeners for new default routines list (defaultRoutinesList)
+        const defaultRoutinesList = document.getElementById('defaultRoutinesList');
+        if (defaultRoutinesList) {
+            defaultRoutinesList.addEventListener('click', (ev) => {
+                // Handle template button (Plantilla - load into builder to create new routine)
+                const templateBtn = ev.target.closest('.js-use-template');
+                if (templateBtn) {
+                    ev.preventDefault();
+                    ev.stopPropagation();
+                    const templateKey = templateBtn.dataset.template;
+                    if (!templateKey) return;
+                    if (typeof loadTemplateIntoBuilder === 'function') {
+                        // Reset edit ID to create new routine based on template
+                        app.routineEditId = null;
+                        loadTemplateIntoBuilder(templateKey);
+                        showRoutineBuilder();
+                        toast('Plantilla cargada. Puedes personalizarla antes de guardar.', 'ok');
+                    }
+                    return;
+                }
+
+                // Handle import template button (Importar - show week selector)
+                const importTemplateBtn = ev.target.closest('.js-import-template');
+                if (importTemplateBtn) {
+                    ev.preventDefault();
+                    ev.stopPropagation();
+                    const templateKey = importTemplateBtn.dataset.template;
+                    if (!templateKey) return;
+                    showTemplateImportWeekDialog(templateKey);
+                    return;
+                }
+            });
+        }
+
         const createdRoutineList = document.getElementById('createdRoutineList');
         if (createdRoutineList) {
             createdRoutineList.addEventListener('click', (ev) => {
@@ -6235,18 +6351,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     return;
                 }
 
-                // Handle import button
+                // Handle import button (show week selector)
                 const importBtn = ev.target.closest('.js-import-user-routine');
                 if (importBtn) {
                     ev.preventDefault();
                     ev.stopPropagation();
                     const routineId = importBtn.dataset.routineId;
                     if (!routineId) return;
-                    importRoutineIntoWeek(routineId);
+                    showRoutineImportWeekDialog(routineId);
                     return;
                 }
 
-                // Handle template button (Usar - load into builder)
+                // Handle template button (Plantilla - load into builder to create new routine)
                 const templateBtn = ev.target.closest('.js-use-template');
                 if (templateBtn) {
                     ev.preventDefault();
@@ -6254,45 +6370,23 @@ document.addEventListener('DOMContentLoaded', () => {
                     const templateKey = templateBtn.dataset.template;
                     if (!templateKey) return;
                     if (typeof loadTemplateIntoBuilder === 'function') {
+                        // Reset edit ID to create new routine based on template
+                        app.routineEditId = null;
                         loadTemplateIntoBuilder(templateKey);
                         showRoutineBuilder();
+                        toast('Plantilla cargada. Puedes personalizarla antes de guardar.', 'ok');
                     }
                     return;
                 }
 
-                // Handle import template button (Importar - import directly to week)
+                // Handle import template button (Importar - show week selector)
                 const importTemplateBtn = ev.target.closest('.js-import-template');
                 if (importTemplateBtn) {
                     ev.preventDefault();
                     ev.stopPropagation();
                     const templateKey = importTemplateBtn.dataset.template;
                     if (!templateKey) return;
-                    // Import template directly to visible week
-                    const arr = templates[templateKey] || [];
-                    if (!arr.length) {
-                        toast('Plantilla no encontrada', 'err');
-                        return;
-                    }
-                    
-                    // Get visible week
-                    const { ws } = getVisibleWeek();
-                    const targetWeekStart = ws;
-                    
-                    const toAdd = arr.map((it, idx) => ({
-                        id: uuid(),
-                        name: it.name,
-                        date: toLocalISO(addDays(targetWeekStart, idx)),
-                        completed: false,
-                        exercises: it.ex.map(n => ({ id: uuid(), name: n, sets: [{ id: uuid(), setNumber: 1, kg: '', reps: '', rir: '' }] }))
-                    }));
-                    app.sessions = [...app.sessions, ...toAdd];
-                    save(); 
-                    refresh();
-                    
-                    // Format week range for toast message
-                    const weekEnd = addDays(targetWeekStart, 6);
-                    const weekRange = `${targetWeekStart.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })} – ${weekEnd.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })}`;
-                    toast(`Plantilla «${templateKey}» importada en la semana del ${weekRange}`, 'ok');
+                    showTemplateImportWeekDialog(templateKey);
                     return;
                 }
             });
@@ -6682,6 +6776,29 @@ document.addEventListener('DOMContentLoaded', () => {
         const btnCancelImportRoutines = $('#btnCancelImportRoutines');
         if (btnCancelImportRoutines) btnCancelImportRoutines.addEventListener('click', cancelRoutineImport);
 
+        // Routine import week dialog
+        const confirmRoutineImportWeek = $('#confirmRoutineImportWeek');
+        if (confirmRoutineImportWeek) {
+            confirmRoutineImportWeek.addEventListener('click', (e) => {
+                e.preventDefault();
+                const selector = $('#routineImportWeek');
+                if (!selector) return;
+                const weekOffset = +selector.value;
+                
+                // Check if importing routine or template
+                if (app.tempRoutineId) {
+                    importRoutineIntoWeek(app.tempRoutineId, weekOffset);
+                    app.tempRoutineId = null;
+                } else if (app.tempTemplateKey) {
+                    importTemplateIntoWeek(app.tempTemplateKey, weekOffset);
+                    app.tempTemplateKey = null;
+                }
+                
+                const dialog = $('#routineImportWeekDialog');
+                if (dialog) dialog.close();
+            });
+        }
+
         // Plantillas - Only if elements exist
         const templateButtons = $('#templateButtons');
         if (templateButtons) {
@@ -7059,38 +7176,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const firstName = $('#profileFirstName')?.value.trim() || '';
         const lastName = $('#profileLastName')?.value.trim() || '';
-        const height = $('#profileHeight')?.value.trim() || '';
-        const weight = $('#profileWeight')?.value.trim() || '';
-        const bodyFat = $('#profileBodyFat')?.value.trim() || '';
 
         app.profile.firstName = firstName;
         app.profile.lastName = lastName;
-        app.profile.height = height;
-        app.profile.weight = weight;
-        app.profile.bodyFat = bodyFat;
 
         // If no photo is set and no seed exists, generate seed from name
         if (!app.profile.photo && !app.profile.avatarSeed) {
             const nameSeed = (firstName + ' ' + lastName).trim() || 'default';
             app.profile.avatarSeed = nameSeed;
-        }
-
-        // Add to weight history if weight or bodyFat is provided
-        if (weight || bodyFat) {
-            const today = new Date().toISOString().split('T')[0];
-            const existingEntry = app.profile.weightHistory?.find(entry => entry.date === today);
-
-            if (existingEntry) {
-                if (weight) existingEntry.weight = parseFloat(weight) || null;
-                if (bodyFat) existingEntry.bodyFat = parseFloat(bodyFat) || null;
-            } else {
-                if (!app.profile.weightHistory) app.profile.weightHistory = [];
-                app.profile.weightHistory.push({
-                    date: today,
-                    weight: weight ? parseFloat(weight) : null,
-                    bodyFat: bodyFat ? parseFloat(bodyFat) : null
-                });
-            }
         }
 
         save();
@@ -7437,10 +7530,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }, { passive: true });
     }
 
+    const settingsBodyTrack = $('#settingsBodyTrack');
+
     function showSettingsMain() {
         if (settingsMain) settingsMain.style.display = 'block';
         if (settingsTheme) settingsTheme.style.display = 'none';
         if (settingsProfile) settingsProfile.style.display = 'none';
+        if (settingsBodyTrack) settingsBodyTrack.style.display = 'none';
         if (settingsInfo) settingsInfo.style.display = 'none';
     }
 
@@ -7448,6 +7544,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (settingsMain) settingsMain.style.display = 'none';
         if (settingsTheme) settingsTheme.style.display = 'block';
         if (settingsProfile) settingsProfile.style.display = 'none';
+        if (settingsBodyTrack) settingsBodyTrack.style.display = 'none';
         if (settingsInfo) settingsInfo.style.display = 'none';
         updateThemeButtons();
         renderColorSwatches();
@@ -7457,27 +7554,41 @@ document.addEventListener('DOMContentLoaded', () => {
         if (settingsMain) settingsMain.style.display = 'none';
         if (settingsTheme) settingsTheme.style.display = 'none';
         if (settingsProfile) settingsProfile.style.display = 'block';
+        if (settingsBodyTrack) settingsBodyTrack.style.display = 'none';
         if (settingsInfo) settingsInfo.style.display = 'none';
         renderProfile();
+    }
+
+    function showSettingsBodyTrack() {
+        if (settingsMain) settingsMain.style.display = 'none';
+        if (settingsTheme) settingsTheme.style.display = 'none';
+        if (settingsProfile) settingsProfile.style.display = 'none';
+        if (settingsBodyTrack) settingsBodyTrack.style.display = 'block';
+        if (settingsInfo) settingsInfo.style.display = 'none';
+        renderProfile(); // Load body data
     }
 
     function showSettingsInfo() {
         if (settingsMain) settingsMain.style.display = 'none';
         if (settingsTheme) settingsTheme.style.display = 'none';
         if (settingsProfile) settingsProfile.style.display = 'none';
+        if (settingsBodyTrack) settingsBodyTrack.style.display = 'none';
         if (settingsInfo) settingsInfo.style.display = 'block';
     }
 
     // Navigation buttons
     const settingsThemeBtn = $('#settingsThemeBtn');
     const settingsProfileBtn = $('#settingsProfileBtn');
+    const settingsBodyTrackBtn = $('#settingsBodyTrackBtn');
     const settingsInfoBtn = $('#settingsInfoBtn');
     const backFromTheme = $('#backFromTheme');
     const backFromProfile = $('#backFromProfile');
+    const backFromBodyTrack = $('#backFromBodyTrack');
     const backFromInfo = $('#backFromInfo');
 
     if (settingsThemeBtn) settingsThemeBtn.addEventListener('click', showSettingsTheme);
     if (settingsProfileBtn) settingsProfileBtn.addEventListener('click', showSettingsProfile);
+    if (settingsBodyTrackBtn) settingsBodyTrackBtn.addEventListener('click', showSettingsBodyTrack);
     if (settingsInfoBtn) {
         settingsInfoBtn.addEventListener('click', () => {
             const manualDialog = $('#manualDialog');
@@ -7486,6 +7597,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     if (backFromTheme) backFromTheme.addEventListener('click', showSettingsMain);
     if (backFromProfile) backFromProfile.addEventListener('click', showSettingsMain);
+    if (backFromBodyTrack) backFromBodyTrack.addEventListener('click', showSettingsMain);
     if (backFromInfo) backFromInfo.addEventListener('click', showSettingsMain);
 
     // Theme toggle
@@ -7669,18 +7781,25 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e) e.preventDefault();
         const firstName = $('#profileFirstName')?.value.trim() || '';
         const lastName = $('#profileLastName')?.value.trim() || '';
-        const height = $('#profileHeight')?.value.trim() || '';
-        const weight = $('#profileWeight')?.value.trim() || '';
-        const bodyFat = $('#profileBodyFat')?.value.trim() || '';
         app.profile.firstName = firstName;
         app.profile.lastName = lastName;
-        app.profile.height = height;
-        app.profile.weight = weight;
-        app.profile.bodyFat = bodyFat;
         if (!app.profile.photo && !app.profile.avatarSeed) {
             const nameSeed = (firstName + ' ' + lastName).trim() || 'default';
             app.profile.avatarSeed = nameSeed;
         }
+        save();
+        renderProfile();
+        toast('Perfil actualizado', 'ok');
+    }
+
+    function handleBodyTrackSave(e) {
+        if (e) e.preventDefault();
+        const height = $('#profileHeight')?.value.trim() || '';
+        const weight = $('#profileWeight')?.value.trim() || '';
+        const bodyFat = $('#profileBodyFat')?.value.trim() || '';
+        app.profile.height = height;
+        app.profile.weight = weight;
+        app.profile.bodyFat = bodyFat;
         if (weight || bodyFat) {
             const today = new Date().toISOString().split('T')[0];
             const existingEntry = app.profile.weightHistory?.find(entry => entry.date === today);
@@ -7698,7 +7817,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         save();
         renderProfile();
-        toast('Perfil actualizado', 'ok');
+        toast('Datos corporales guardados', 'ok');
     }
 
     function handleBodyMeasurementsSave(e) {
@@ -7877,6 +7996,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (removePhoto) removePhoto.addEventListener('click', handleRemovePhoto);
     const saveProfile = $('#saveProfile');
     if (saveProfile) saveProfile.addEventListener('click', handleProfileSave);
+    const saveBodyTrack = $('#saveBodyTrack');
+    if (saveBodyTrack) saveBodyTrack.addEventListener('click', handleBodyTrackSave);
     const saveBodyMeasurements = $('#saveBodyMeasurements');
     if (saveBodyMeasurements) saveBodyMeasurements.addEventListener('click', handleBodyMeasurementsSave);
     const calculateBMR = $('#calculateBMR');

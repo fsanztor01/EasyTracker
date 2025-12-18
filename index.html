@@ -146,7 +146,10 @@
                     <!-- Routine Builder (Hidden by default) -->
                     <article class="card pop routine-builder-card" id="routineBuilderCard" style="display: none; padding: 16px; margin-bottom: 16px;">
                         <div class="field" style="margin-bottom: 12px;">
-                            <label class="label" for="routineName" style="margin-bottom: 6px; font-size: 0.9rem;">Nombre (opcional)</label>
+                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                                <label class="label" for="routineName" style="margin: 0; font-size: 0.9rem;">Nombre (opcional)</label>
+                                <button type="button" class="btn btn--ghost" id="closeRoutineBuilder" style="padding: 4px 8px; min-height: auto; font-size: 0.9rem; color: var(--muted);" aria-label="Cerrar constructor de rutina" title="Cerrar">✕</button>
+                            </div>
                             <input id="routineName" class="input" placeholder="Ej. Fuerza 4 días" style="padding: 10px; font-size: 0.95rem;" />
                         </div>
                         <div style="margin-bottom: 12px;">
@@ -284,6 +287,11 @@
                                 <span>Perfil</span>
                                 <span>→</span>
                             </button>
+                            <button class="settings-menu-item" id="settingsBodyTrackBtn">
+                                <span>🏃</span>
+                                <span>BodyTrack</span>
+                                <span>→</span>
+                            </button>
                             <button class="settings-menu-item" id="settingsInfoBtn">
                                 <span>ℹ️</span>
                                 <span>Información</span>
@@ -385,21 +393,54 @@
                                         id="profileFirstName" class="input" placeholder="Nombre" /></div>
                                 <div class="field"><label class="label" for="profileLastName">Apellidos</label><input
                                         id="profileLastName" class="input" placeholder="Apellidos" /></div>
-                                <div class="field"><label class="label" for="profileHeight">Altura (cm)</label><input
-                                        id="profileHeight" class="input" type="number" inputmode="decimal" min="0"
-                                        step="0.1" placeholder="Ej. 178" /></div>
-                                <div class="field"><label class="label" for="profileWeight">Peso actual (kg)</label><input
-                                        id="profileWeight" class="input" type="number" inputmode="decimal" min="0"
-                                        step="0.1" placeholder="Opcional" /></div>
-                                <div class="field"><label class="label" for="profileBodyFat">% grasa actual</label><input
-                                        id="profileBodyFat" class="input" type="number" inputmode="decimal" min="0"
-                                        step="0.1" placeholder="Opcional" /></div>
                                 <button class="btn" id="saveProfile" type="button">Actualizar perfil</button>
                             </div>
                         </div>
                     </article>
 
-                    <article class="card pop profile-history" style="padding:16px; margin-top:12px">
+                    <article class="card pop" style="padding:16px; margin-top:12px">
+                        <h3 class="summary__title" style="margin-bottom:8px">Notas rápidas</h3>
+                        <div class="notes-form">
+                            <label class="label" for="noteText">Nueva nota (máx. 200 caracteres)</label>
+                            <textarea id="noteText" class="input" maxlength="200"
+                                placeholder="Escribe tu nota..."></textarea>
+                            <button class="btn btn--secondary" id="addNote" type="button">Guardar nota</button>
+                        </div>
+                        <div class="notes-list" id="notesList"></div>
+                        <div class="routine-empty" id="notesEmpty">Aún no hay notas.</div>
+                    </article>
+                </div>
+
+                <!-- Sub-panel de BodyTrack -->
+                <div class="settings-subpanel" id="settingsBodyTrack" style="display:none">
+                    <article class="card pop" style="padding:16px; margin-bottom:12px">
+                        <div class="settings-header">
+                            <button class="btn btn--ghost" id="backFromBodyTrack" aria-label="Volver">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M19 12H5M12 19l-7-7 7-7"/>
+                                </svg>
+                            </button>
+                            <h3 class="summary__title" style="margin:0; flex:1">BodyTrack</h3>
+                        </div>
+                    </article>
+
+                    <article class="card pop" style="padding:16px; margin-bottom:12px">
+                        <h3 class="summary__title" style="margin-bottom:10px">Datos Corporales</h3>
+                        <div class="profile-form">
+                            <div class="field"><label class="label" for="profileHeight">Altura (cm)</label><input
+                                    id="profileHeight" class="input" type="number" inputmode="decimal" min="0"
+                                    step="0.1" placeholder="Ej. 178" /></div>
+                            <div class="field"><label class="label" for="profileWeight">Peso actual (kg)</label><input
+                                    id="profileWeight" class="input" type="number" inputmode="decimal" min="0"
+                                    step="0.1" placeholder="Opcional" /></div>
+                            <div class="field"><label class="label" for="profileBodyFat">% grasa actual</label><input
+                                    id="profileBodyFat" class="input" type="number" inputmode="decimal" min="0"
+                                    step="0.1" placeholder="Opcional" /></div>
+                            <button class="btn" id="saveBodyTrack" type="button">Guardar datos</button>
+                        </div>
+                    </article>
+
+                    <article class="card pop profile-history" style="padding:16px; margin-bottom:12px">
                         <h3 class="summary__title" style="margin-bottom:8px">Historial de peso y % grasa</h3>
                         <table>
                             <thead>
@@ -417,7 +458,7 @@
                         </table>
                     </article>
 
-                    <article class="card pop" style="padding:16px; margin-top:12px">
+                    <article class="card pop" style="padding:16px; margin-bottom:12px">
                         <h3 class="summary__title" style="margin-bottom:16px">Medidas Corporales</h3>
                         <div class="body-measurements-form"
                             style="display:grid; grid-template-columns: repeat(3, 1fr); gap:12px; margin-bottom:16px">
@@ -486,7 +527,7 @@
                         </div>
                     </article>
 
-                    <article class="card pop" style="padding:16px; margin-top:12px">
+                    <article class="card pop" style="padding:16px">
                         <h3 class="summary__title" style="margin-bottom:16px">Calculadora de TMB y Calorías</h3>
                         <div class="bmr-calculator" style="display:grid; grid-template-columns: repeat(2, 1fr); gap:12px">
                             <div class="field">
@@ -535,18 +576,6 @@
                                 </div>
                             </div>
                         </div>
-                    </article>
-
-                    <article class="card pop" style="padding:16px; margin-top:12px">
-                        <h3 class="summary__title" style="margin-bottom:8px">Notas rápidas</h3>
-                        <div class="notes-form">
-                            <label class="label" for="noteText">Nueva nota (máx. 200 caracteres)</label>
-                            <textarea id="noteText" class="input" maxlength="200"
-                                placeholder="Escribe tu nota..."></textarea>
-                            <button class="btn btn--secondary" id="addNote" type="button">Guardar nota</button>
-                        </div>
-                        <div class="notes-list" id="notesList"></div>
-                        <div class="routine-empty" id="notesEmpty">Aún no hay notas.</div>
                     </article>
                 </div>
 
@@ -711,6 +740,25 @@
                 <div class="modal__actions">
                     <button class="btn btn--ghost" value="cancel">Cancelar</button>
                     <button class="btn btn--secondary" id="confirmTemplate">Importar en esta semana</button>
+                </div>
+            </form>
+        </dialog>
+
+        <dialog id="routineImportWeekDialog" aria-labelledby="routineImportWeekTitle" aria-modal="true">
+            <form method="dialog">
+                <div class="modal__head">
+                    <h3 class="modal__title" id="routineImportWeekTitle">Seleccionar semana</h3>
+                    <button class="theme-btn" value="cancel" aria-label="Cerrar">Cerrar</button>
+                </div>
+                <div class="modal__body">
+                    <div class="field">
+                        <label class="label" for="routineImportWeek">Semana</label>
+                        <select id="routineImportWeek" class="input" style="padding: 10px; font-size: 0.95rem;"></select>
+                    </div>
+                </div>
+                <div class="modal__actions">
+                    <button class="btn btn--ghost" value="cancel">Cancelar</button>
+                    <button class="btn" id="confirmRoutineImportWeek" value="default">Importar</button>
                 </div>
             </form>
         </dialog>
