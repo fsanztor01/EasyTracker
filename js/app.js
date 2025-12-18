@@ -766,11 +766,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const item = document.createElement('div');
         item.className = 'routine-item';
         
-        // Different styling for templates vs created routines - smaller padding
+        // Different styling for templates vs created routines - compact design
         if (isTemplate) {
-            item.style.cssText = 'padding: 10px; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface); transition: all 0.2s ease; cursor: pointer; border-left: 3px solid var(--primary);';
+            item.style.cssText = 'padding: 8px; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface); transition: all 0.2s ease; cursor: pointer; min-height: 100px; display: flex; flex-direction: column;';
         } else {
-            item.style.cssText = 'padding: 10px; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface); transition: all 0.2s ease; cursor: pointer; border-left: 3px solid var(--success);';
+            item.style.cssText = 'padding: 8px; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface); transition: all 0.2s ease; cursor: pointer; min-height: 100px; display: flex; flex-direction: column;';
         }
         
         item.addEventListener('mouseenter', () => {
@@ -797,72 +797,105 @@ document.addEventListener('DOMContentLoaded', () => {
             icon = '🧩'; // Puzzle piece for created routines
         }
         
-        // Compact vertical layout for grid - smaller gaps
+        // Compact vertical layout for grid - smaller spacing
         const content = document.createElement('div');
-        content.style.cssText = 'display: flex; flex-direction: column; align-items: center; text-align: center; gap: 6px;';
+        content.style.cssText = 'display: flex; flex-direction: column; align-items: center; text-align: center; gap: 4px; flex: 1; width: 100%;';
         
         const iconEl = document.createElement('div');
-        iconEl.style.cssText = 'font-size: 1.4rem;';
+        iconEl.style.cssText = 'font-size: 1.1rem; flex-shrink: 0;';
         iconEl.textContent = icon;
         content.appendChild(iconEl);
         
         const info = document.createElement('div');
-        info.style.cssText = 'width: 100%;';
+        info.style.cssText = 'width: 100%; flex: 1; min-height: 0;';
         
         const title = document.createElement('div');
         title.className = 'routine-item-title';
-        title.style.cssText = 'font-weight: 600; font-size: 0.85rem; margin-bottom: 3px; color: var(--text);';
+        title.style.cssText = 'font-weight: 600; font-size: 0.8rem; margin-bottom: 2px; color: var(--text); word-wrap: break-word; overflow-wrap: break-word; hyphens: auto; line-height: 1.2;';
         title.textContent = routine.name;
         info.appendChild(title);
         
         if (routine.meta) {
             const meta = document.createElement('div');
             meta.className = 'routine-item-meta';
-            meta.style.cssText = 'font-size: 0.75rem; color: var(--muted); line-height: 1.3;';
+            meta.style.cssText = 'font-size: 0.7rem; color: var(--muted); line-height: 1.2; word-wrap: break-word; overflow-wrap: break-word;';
             meta.textContent = routine.meta;
             info.appendChild(meta);
         } else {
             const totalExercises = (routine.days || []).reduce((sum, day) => sum + (day.exercises ? day.exercises.length : 0), 0);
             const meta = document.createElement('div');
             meta.className = 'routine-item-meta';
-            meta.style.cssText = 'font-size: 0.75rem; color: var(--muted); line-height: 1.3;';
+            meta.style.cssText = 'font-size: 0.7rem; color: var(--muted); line-height: 1.2; word-wrap: break-word; overflow-wrap: break-word;';
             meta.textContent = `${(routine.days || []).length} días · ${totalExercises} ejercicios`;
             info.appendChild(meta);
         }
         
         content.appendChild(info);
         
-        // Action button - smaller
-        const actionBtn = document.createElement('button');
-        actionBtn.className = 'btn btn--ghost';
-        actionBtn.style.cssText = 'width: 100%; padding: 6px; min-height: 32px; font-size: 0.8rem; margin-top: 2px;';
+        // Action buttons container - compact design
+        const actionsContainer = document.createElement('div');
+        actionsContainer.style.cssText = 'width: 100%; display: flex; gap: 3px; margin-top: auto; flex-shrink: 0;';
         
         if (isTemplate) {
-            actionBtn.textContent = 'Usar';
-            actionBtn.classList.add('js-use-template');
-            actionBtn.dataset.template = routine.templateKey;
+            // Two buttons for templates: Usar and Importar
+            const useBtn = document.createElement('button');
+            useBtn.className = 'btn btn--ghost js-use-template';
+            useBtn.style.cssText = 'flex: 1; padding: 6px 3px; min-height: 30px; font-size: 0.7rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;';
+            useBtn.textContent = 'Usar';
+            useBtn.dataset.template = routine.templateKey;
+            actionsContainer.appendChild(useBtn);
+            
+            const importTemplateBtn = document.createElement('button');
+            importTemplateBtn.className = 'btn btn--ghost js-import-template';
+            importTemplateBtn.style.cssText = 'flex: 1; padding: 6px 3px; min-height: 30px; font-size: 0.7rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;';
+            importTemplateBtn.innerHTML = '<span style="margin-right: 2px;">📥</span><span>Importar</span>';
+            importTemplateBtn.dataset.template = routine.templateKey;
+            actionsContainer.appendChild(importTemplateBtn);
         } else {
-            actionBtn.innerHTML = '<span style="margin-right: 3px;">📥</span> Importar';
-            actionBtn.classList.add('js-import-user-routine');
-            actionBtn.dataset.routineId = routine.id;
+            // Import button
+            const importBtn = document.createElement('button');
+            importBtn.className = 'btn btn--ghost';
+            importBtn.style.cssText = 'flex: 1; padding: 6px 3px; min-height: 30px; font-size: 0.7rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;';
+            importBtn.innerHTML = '<span style="margin-right: 2px;">📥</span><span>Importar</span>';
+            importBtn.classList.add('js-import-user-routine');
+            importBtn.dataset.routineId = routine.id;
+            actionsContainer.appendChild(importBtn);
+            
+            // Edit button
+            const editBtn = document.createElement('button');
+            editBtn.className = 'btn btn--ghost js-edit-routine-item';
+            editBtn.style.cssText = 'padding: 6px; min-height: 30px; font-size: 0.85rem; min-width: 32px; max-width: 32px; flex-shrink: 0;';
+            editBtn.innerHTML = '✏️';
+            editBtn.dataset.routineId = routine.id;
+            editBtn.title = 'Editar rutina';
+            editBtn.setAttribute('aria-label', 'Editar rutina');
+            actionsContainer.appendChild(editBtn);
+            
+            // Delete button
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'btn btn--ghost js-delete-routine-item';
+            deleteBtn.style.cssText = 'padding: 6px; min-height: 30px; font-size: 0.85rem; min-width: 32px; max-width: 32px; flex-shrink: 0; color: var(--danger, #ff4444);';
+            deleteBtn.innerHTML = '✕';
+            deleteBtn.dataset.routineId = routine.id;
+            deleteBtn.title = 'Eliminar rutina';
+            deleteBtn.setAttribute('aria-label', 'Eliminar rutina');
+            actionsContainer.appendChild(deleteBtn);
         }
         
-        content.appendChild(actionBtn);
+        content.appendChild(actionsContainer);
         item.appendChild(content);
         
-        // Click handler
-        item.addEventListener('click', (e) => {
-            if (e.target.closest('button')) return; // Don't trigger if clicking button
-            if (isTemplate) {
+        // Click handler - removed for created routines (only buttons work now)
+        if (isTemplate) {
+            item.addEventListener('click', (e) => {
+                if (e.target.closest('button')) return; // Don't trigger if clicking button
                 if (typeof loadTemplateIntoBuilder === 'function') {
                     loadTemplateIntoBuilder(routine.templateKey);
                     showRoutineBuilder();
                 }
-            } else {
-                // Show routine details or import
-                actionBtn.click();
-            }
-        });
+            });
+        }
+        // For created routines, clicking the panel does nothing - only buttons work
         
         return item;
     }
@@ -1903,13 +1936,14 @@ document.addEventListener('DOMContentLoaded', () => {
             summary.style.display = 'flex';
             summary.style.justifyContent = 'space-between';
             summary.style.alignItems = 'center';
-            summary.style.padding = '10px';
+            summary.style.padding = '8px 10px';
             summary.style.cursor = 'pointer';
 
             const left = document.createElement('div');
-            left.innerHTML = `<strong style="font-weight:800">${session.name}</strong>`;
+            left.innerHTML = `<strong style="font-weight:800; font-size: 0.9rem;">${session.name}</strong>`;
             const right = document.createElement('div');
             right.style.color = 'var(--muted)';
+            right.style.fontSize = '0.85rem';
             const dateStr = new Date(session.date).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' });
             right.textContent = dateStr;
             if (session.completed) {
@@ -1922,14 +1956,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const dayBody = document.createElement('div');
             dayBody.style.display = 'grid';
-            dayBody.style.gap = '8px';
-            dayBody.style.padding = '10px';
+            dayBody.style.gap = '4px';
+            dayBody.style.padding = '0';
 
             // Render the session card
             const card = $('#tpl-session').content.firstElementChild.cloneNode(true);
             card.dataset.id = session.id;
             card.classList.toggle('completed', !!session.completed);
-            card.querySelector('.session__title').textContent = session.name;
+            // Hide session title when inside details (to avoid duplication with summary)
+            const titleEl = card.querySelector('.session__title');
+            if (titleEl) {
+                titleEl.textContent = session.name;
+                titleEl.style.display = 'none';
+            }
             card.querySelector('.session__date').textContent = new Date(session.date).toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
             const dateEl = card.querySelector('.session__date');
             if (dateEl) {
@@ -5853,7 +5892,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function importTemplateIntoVisibleWeek(ev) {
         if (ev) ev.preventDefault();
-        const key = app.tmpTemplateKey; if (!key) return;
+        const key = app.tmpTemplateKey || (ev && ev.target && ev.target.dataset && ev.target.dataset.template); 
+        if (!key) return;
         const arr = templates[key] || [];
         
         // Get selected week from targetWeek selector (if in import panel) or use visible week
@@ -6163,6 +6203,101 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
+        // Event listeners for new created routines list (createdRoutinesList)
+        const createdRoutinesList = document.getElementById('createdRoutinesList');
+        if (createdRoutinesList) {
+            createdRoutinesList.addEventListener('click', (ev) => {
+                // Handle edit button
+                const editBtn = ev.target.closest('.js-edit-routine-item');
+                if (editBtn) {
+                    ev.preventDefault();
+                    ev.stopPropagation();
+                    const routineId = editBtn.dataset.routineId;
+                    if (!routineId) return;
+                    const routine = app.routines.find(r => r.id === routineId);
+                    if (!routine) return;
+                    loadRoutineIntoBuilder(routine);
+                    app.routineEditId = routine.id;
+                    showRoutineBuilder();
+                    toast('Rutina cargada para editar', 'ok');
+                    return;
+                }
+
+                // Handle delete button
+                const deleteBtn = ev.target.closest('.js-delete-routine-item');
+                if (deleteBtn) {
+                    ev.preventDefault();
+                    ev.stopPropagation();
+                    const routineId = deleteBtn.dataset.routineId;
+                    if (!routineId) return;
+                    app.deleteTarget = { type: 'routine', routineId };
+                    showConfirmDialog('¿Eliminar esta rutina personalizada? Esta acción no se puede deshacer.');
+                    return;
+                }
+
+                // Handle import button
+                const importBtn = ev.target.closest('.js-import-user-routine');
+                if (importBtn) {
+                    ev.preventDefault();
+                    ev.stopPropagation();
+                    const routineId = importBtn.dataset.routineId;
+                    if (!routineId) return;
+                    importRoutineIntoWeek(routineId);
+                    return;
+                }
+
+                // Handle template button (Usar - load into builder)
+                const templateBtn = ev.target.closest('.js-use-template');
+                if (templateBtn) {
+                    ev.preventDefault();
+                    ev.stopPropagation();
+                    const templateKey = templateBtn.dataset.template;
+                    if (!templateKey) return;
+                    if (typeof loadTemplateIntoBuilder === 'function') {
+                        loadTemplateIntoBuilder(templateKey);
+                        showRoutineBuilder();
+                    }
+                    return;
+                }
+
+                // Handle import template button (Importar - import directly to week)
+                const importTemplateBtn = ev.target.closest('.js-import-template');
+                if (importTemplateBtn) {
+                    ev.preventDefault();
+                    ev.stopPropagation();
+                    const templateKey = importTemplateBtn.dataset.template;
+                    if (!templateKey) return;
+                    // Import template directly to visible week
+                    const arr = templates[templateKey] || [];
+                    if (!arr.length) {
+                        toast('Plantilla no encontrada', 'err');
+                        return;
+                    }
+                    
+                    // Get visible week
+                    const { ws } = getVisibleWeek();
+                    const targetWeekStart = ws;
+                    
+                    const toAdd = arr.map((it, idx) => ({
+                        id: uuid(),
+                        name: it.name,
+                        date: toLocalISO(addDays(targetWeekStart, idx)),
+                        completed: false,
+                        exercises: it.ex.map(n => ({ id: uuid(), name: n, sets: [{ id: uuid(), setNumber: 1, kg: '', reps: '', rir: '' }] }))
+                    }));
+                    app.sessions = [...app.sessions, ...toAdd];
+                    save(); 
+                    refresh();
+                    
+                    // Format week range for toast message
+                    const weekEnd = addDays(targetWeekStart, 6);
+                    const weekRange = `${targetWeekStart.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })} – ${weekEnd.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })}`;
+                    toast(`Plantilla «${templateKey}» importada en la semana del ${weekRange}`, 'ok');
+                    return;
+                }
+            });
+        }
+
         const importRoutineList = document.getElementById('importRoutineList');
         if (importRoutineList) {
             importRoutineList.addEventListener('click', (ev) => {
@@ -6267,7 +6402,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     app.routines = app.routines.filter(r => r.id !== routineId);
                     if (app.routineEditId === routineId) {
                         resetRoutineBuilder();
+                        hideRoutineBuilder();
                     }
+                    save();
+                    renderRoutines();
+                    $('#confirmDialog').close();
+                    toast('Rutina eliminada', 'ok');
+                    return;
                 }
             } else if (type === 'goal') {
                 if (goalId) {

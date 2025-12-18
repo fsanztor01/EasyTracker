@@ -1597,8 +1597,8 @@ h6 {
 .session__header {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    padding: 16px;
+    gap: 6px;
+    padding: 8px;
     background: transparent;
     color: var(--heading);
 }
@@ -1765,7 +1765,7 @@ textarea.input:disabled {
 
 /* Simplified Exercise */
 .exercise {
-    padding: 10px;
+    padding: 6px;
     border-top: 1px solid var(--border);
 }
 
@@ -1786,8 +1786,8 @@ textarea.input:disabled {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 8px;
-    padding-bottom: 8px;
+    gap: 6px;
+    padding-bottom: 6px;
     border-bottom: 1px solid var(--border);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -1994,25 +1994,25 @@ textarea.input:disabled {
 }
 
 .exercise__name {
-    font-weight: 600;
+    font-weight: 700;
     font-size: 0.875rem;
     letter-spacing: -0.01em;
-    color: var(--text);
+    color: var(--primary);
 }
 
 /* ==================== MOBILE-FIRST SET DESIGN ==================== */
 .sets-container {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-md);
-    margin-top: var(--spacing-md);
+    gap: 6px;
+    margin-top: 6px;
 }
 
 .set-card {
     background: #0D0D0D;
     border: 1px solid rgba(255, 255, 255, 0.03);
     border-radius: var(--radius-lg);
-    padding: var(--spacing-lg);
+    padding: 8px;
     box-shadow: var(--shadow);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
@@ -2068,13 +2068,17 @@ textarea.input:disabled {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 10px;
+    margin-bottom: 6px;
 }
 
 .set-number {
-    font-weight: 800;
-    color: var(--primary);
+    font-weight: 400;
+    color: #FFFFFF;
     font-size: 0.9rem;
+}
+
+[data-theme="light"] .set-number {
+    color: #000000;
 }
 
 .set-delete {
@@ -3343,7 +3347,7 @@ dialog {
 
     /* Exercise sections - Better separation */
     .exercise {
-        padding: 14px 12px;
+        padding: 8px 6px;
         border-top: 1px solid var(--border);
     }
 
@@ -3352,30 +3356,30 @@ dialog {
     }
 
     .exercise__head {
-        padding-bottom: 12px;
-        margin-bottom: 6px;
-        gap: 10px;
+        padding-bottom: 6px;
+        margin-bottom: 3px;
+        gap: 6px;
     }
 
     .exercise__name {
-        font-size: 1rem;
-        line-height: 1.3;
+        font-size: 0.9rem;
+        line-height: 1.2;
     }
 
     /* Set cards - Better visual design */
     .sets-container {
-        gap: 12px;
-        margin-top: 12px;
+        gap: 6px;
+        margin-top: 6px;
     }
 
     .set-card {
-        padding: 16px;
+        padding: 8px;
         border-radius: 12px;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     }
 
     .set-header {
-        margin-bottom: 12px;
+        margin-bottom: 4px;
     }
 
     .set-number {
@@ -4257,7 +4261,7 @@ dialog {
     overflow: hidden;
     transition: max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1),
         opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-    padding: 0 10px;
+    padding: 0 6px;
     /* Keep horizontal padding, remove vertical when closed */
 }
 
@@ -4265,7 +4269,7 @@ dialog {
     max-height: 5000px;
     /* Large enough value to accommodate content */
     opacity: 1;
-    padding: 10px;
+    padding: 6px;
     /* Restore full padding when open */
 }
 
@@ -4310,12 +4314,17 @@ dialog {
 /* Enhanced for mobile */
 @media (max-width: 767px) {
     .day-panel>summary {
-        padding: 12px;
+        padding: 8px 10px;
     }
 
     .day-panel>div {
         transition: grid-template-rows 0.35s cubic-bezier(0.16, 1, 0.3, 1),
             opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        padding: 0 6px;
+    }
+    
+    .day-panel[open]>div {
+        padding: 6px;
     }
 }
 
