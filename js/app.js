@@ -1943,20 +1943,31 @@ document.addEventListener('DOMContentLoaded', () => {
             const summary = document.createElement('summary');
             summary.style.display = 'flex';
             summary.style.justifyContent = 'space-between';
-            summary.style.alignItems = 'center';
-            summary.style.padding = '8px 10px';
+            summary.style.alignItems = 'flex-start';
+            summary.style.padding = '6px 10px';
             summary.style.cursor = 'pointer';
+            summary.style.minHeight = 'auto';
 
             const left = document.createElement('div');
             left.innerHTML = `<strong style="font-weight:800; font-size: 0.9rem;">${session.name}</strong>`;
             const right = document.createElement('div');
+            right.style.display = 'flex';
+            right.style.flexDirection = 'column';
+            right.style.alignItems = 'flex-end';
+            right.style.gap = '2px';
             right.style.color = 'var(--muted)';
             right.style.fontSize = '0.85rem';
             const dateStr = new Date(session.date).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' });
-            right.textContent = dateStr;
+            const dateText = document.createElement('div');
+            dateText.textContent = dateStr;
+            right.appendChild(dateText);
             if (session.completed) {
                 left.classList.add('completed');
-                right.textContent += ' · Completada ✓';
+                const completedText = document.createElement('div');
+                completedText.textContent = 'Completada ✓';
+                completedText.style.color = 'var(--success, #30D158)';
+                completedText.style.fontSize = '0.8rem';
+                right.appendChild(completedText);
             }
             summary.appendChild(left);
             summary.appendChild(right);

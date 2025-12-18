@@ -4250,6 +4250,11 @@ dialog {
 /* Day panel (details element) smooth collapse/expand */
 .day-panel {
     overflow: hidden;
+    margin-bottom: 8px;
+}
+
+.day-panel.card {
+    padding: 0;
 }
 
 .day-panel>summary {
@@ -4257,6 +4262,8 @@ dialog {
     user-select: none;
     transition: background-color 0.2s ease, transform 0.15s ease;
     -webkit-tap-highlight-color: transparent;
+    padding: 6px 10px;
+    min-height: auto;
 }
 
 .day-panel>summary:active {
@@ -4328,7 +4335,8 @@ dialog {
 /* Enhanced for mobile */
 @media (max-width: 767px) {
     .day-panel>summary {
-        padding: 8px 10px;
+        padding: 6px 10px;
+        min-height: auto;
     }
 
     .day-panel>div {
