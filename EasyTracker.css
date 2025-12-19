@@ -1,4 +1,10 @@
 /* ==================== THEME BASE - iOS INSPIRED ==================== */
+/* Performance optimizations: GPU acceleration hints */
+* {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
 :root {
     /* Light Theme - Default (iOS Human Interface Guidelines) */
     --bg1: #F2F2F7;
@@ -148,6 +154,7 @@
 }
 
 /* Optimize transitions - only apply to elements that need them */
+/* Performance: GPU acceleration for frequently animated elements */
 .card,
 .btn,
 .input,
@@ -1018,10 +1025,13 @@ header {
 
 .routine-item {
     transition: all 0.2s ease;
+    /* Performance: GPU acceleration */
+    transform: translateZ(0);
+    will-change: transform;
 }
 
 .routine-item:hover {
-    transform: translateY(-2px);
+    transform: translateY(-2px) translateZ(0);
 }
 
 .routine-builder-card {
@@ -1590,7 +1600,9 @@ h6 {
 /* ==================== SESSIONS ==================== */
 .sessions {
     display: grid;
-    gap: 10px
+    gap: 10px;
+    /* Performance: contain layout and paint */
+    contain: layout style paint;
 }
 
 /* When sessions container is empty, don't take up space */
@@ -1647,6 +1659,9 @@ textarea.input:disabled {
     overflow: hidden;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    /* Performance: GPU acceleration for transforms */
+    transform: translateZ(0);
+    backface-visibility: hidden;
 }
 
 @keyframes fadeIn {

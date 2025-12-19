@@ -5,7 +5,11 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>EasyTracker</title>
-    <link rel="stylesheet" href="EasyTracker.css">
+    <!-- Critical CSS inline or preload -->
+    <link rel="preload" href="EasyTracker.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="EasyTracker.css"></noscript>
+    <!-- Preconnect for potential external resources -->
+    <link rel="dns-prefetch" href="https://github.com">
 </head>
 
 <body>
@@ -1163,21 +1167,20 @@
     </div>
 
     <!-- Main Application -->
-    <!-- Utils (Critical - Load First) -->
-    <script src="js/utils/dom.js"></script>
-    <script src="js/utils/uuid.js"></script>
-    <script src="js/utils/dates.js"></script>
-    <script src="js/utils/calculations.js"></script>
-    <script src="js/utils/theme.js"></script>
-    <script src="js/utils/toast.js"></script>
+    <!-- Critical Utils - Load First (defer for non-blocking) -->
+    <script src="js/utils/dom.js" defer></script>
+    <script src="js/utils/uuid.js" defer></script>
+    <script src="js/utils/dates.js" defer></script>
+    <script src="js/utils/calculations.js" defer></script>
+    <script src="js/utils/theme.js" defer></script>
+    <script src="js/utils/toast.js" defer></script>
     <!-- Config -->
-    <script src="js/config/app-state.js"></script>
-    <script src="js/config/templates.js"></script>
+    <script src="js/config/app-state.js" defer></script>
+    <script src="js/config/templates.js" defer></script>
     <!-- Storage -->
-    <script src="js/utils/storage.js"></script>
-    <!-- Modules (Lazy Load - Load on demand) -->
-    <!-- Main App -->
-    <script src="js/app.js"></script>
+    <script src="js/utils/storage.js" defer></script>
+    <!-- Main App - Load last, after all dependencies -->
+    <script src="js/app.js" defer></script>
 
 </body>
 
