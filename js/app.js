@@ -698,7 +698,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const empty = $('#noCreatedRoutinesEmpty');
         if (!list || !empty) return;
         
-        list.innerHTML = '';
+        // Clear list to prevent duplicates
+        while (list.firstChild) {
+            list.removeChild(list.firstChild);
+        }
         
         // Get created routines
         const createdRoutines = [];
@@ -734,7 +737,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const list = $('#defaultRoutinesList');
         if (!list) return;
         
-        list.innerHTML = '';
+        // Clear list to prevent duplicates
+        while (list.firstChild) {
+            list.removeChild(list.firstChild);
+        }
         
         // Get default templates
         const defaultRoutines = [];
@@ -901,6 +907,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderRoutines() {
+        // Clear all routine containers first to prevent duplicates
+        const defaultRoutinesList = $('#defaultRoutinesList');
+        const createdRoutinesList = $('#createdRoutinesList');
+        const defaultRoutineList = $('#defaultRoutineList');
+        const createdRoutineList = $('#createdRoutineList');
+        
+        if (defaultRoutinesList) defaultRoutinesList.innerHTML = '';
+        if (createdRoutinesList) createdRoutinesList.innerHTML = '';
+        if (defaultRoutineList) defaultRoutineList.innerHTML = '';
+        if (createdRoutineList) createdRoutineList.innerHTML = '';
+        
+        // Render routines
         renderDefaultRoutines();
         renderCreatedRoutines();
         renderImportRoutineList();
@@ -1160,7 +1178,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 renderSessions(); 
                 renderSummary(); 
             }
-            if (panelId === 'panel-routines') { renderRoutines(); }
+            if (panelId === 'panel-routines') { 
+                // Only render if panel is visible to prevent duplicate rendering
+                const routinesPanel = $('#panel-routines');
+                if (routinesPanel && routinesPanel.getAttribute('aria-hidden') === 'false') {
+                    renderRoutines(); 
+                }
+            }
             if (panelId === 'panel-stats') { 
                 renderSummary(); // Update weekly summary
                 loadModule('./js/modules/stats.js').then(() => {
