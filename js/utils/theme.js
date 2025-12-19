@@ -144,15 +144,10 @@ const ThemeUtils = (() => {
     }
 
     function init() {
-        // Check for saved theme, otherwise use system preference or default to light
+        // Check for saved theme, otherwise default to dark
         let savedTheme = localStorage.getItem(THEME_KEY);
         if (!savedTheme) {
-            // Use system preference if available, otherwise default to light
-            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-                savedTheme = 'dark';
-            } else {
-                savedTheme = 'light';
-            }
+            savedTheme = 'dark';
         }
         document.documentElement.setAttribute('data-theme', savedTheme);
         updateThemeButton(savedTheme);

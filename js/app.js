@@ -1229,9 +1229,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Button to close routine builder (X button)
         const closeRoutineBuilder = $('#closeRoutineBuilder');
         if (closeRoutineBuilder) {
-            closeRoutineBuilder.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
+            closeRoutineBuilder.addEventListener('click', () => {
                 hideRoutineBuilder();
             });
         }
@@ -6809,18 +6807,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 const dialog = $('#routineImportWeekDialog');
                 if (dialog) dialog.close();
-            });
-        }
-
-        // Clean up temp state when dialog is closed (X button or cancel)
-        const routineImportWeekDialog = $('#routineImportWeekDialog');
-        if (routineImportWeekDialog) {
-            routineImportWeekDialog.addEventListener('close', (e) => {
-                // Only clear if dialog was closed without importing (cancel or X)
-                if (e.target.returnValue !== 'default') {
-                    app.tempRoutineId = null;
-                    app.tempTemplateKey = null;
-                }
             });
         }
 

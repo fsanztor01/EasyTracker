@@ -61,7 +61,7 @@ const StorageUtils = (() => {
         clearTimeout(saveTimer);
         saveTimer = setTimeout(() => {
             save();
-        }, 500); // Wait 500ms after last change before saving
+        }, 300); // Reduced from 500ms to 300ms for faster saves
     }
 
     async function load() {
