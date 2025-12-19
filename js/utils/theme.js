@@ -6,81 +6,11 @@ const ThemeUtils = (() => {
     const THEME_KEY = 'trainingDiary.theme';
     const COLOR_STORAGE_KEY = 'trainingDiary.colors';
 
-    // Color definitions: [primary, primary-600, accent, accent-600]
-    const COLOR_PRESETS = {
-        azul: {
-            dark: { primary: '#2768F5', primary600: '#2731F5', accent: '#2768F5', accent600: '#2731F5' },
-            light: { primary: '#2768F5', primary600: '#2731F5', accent: '#2768F5', accent600: '#2731F5' }
-        },
-        rojo: {
-            dark: { primary: '#ff6b6b', primary600: '#ff3b30', accent: '#ff6b6b', accent600: '#ff3b30' },
-            light: { primary: '#ff6b6b', primary600: '#ff3b30', accent: '#ff6b6b', accent600: '#ff3b30' }
-        },
-        verde: {
-            dark: { primary: '#34c759', primary600: '#248a3d', accent: '#34c759', accent600: '#248a3d' },
-            light: { primary: '#34c759', primary600: '#248a3d', accent: '#34c759', accent600: '#248a3d' }
-        },
-        amarillo: {
-            dark: { primary: '#FFE100', primary600: '#FFF757', accent: '#FFE100', accent600: '#FFF757' },
-            light: { primary: '#ffcc00', primary600: '#ff9500', accent: '#ffcc00', accent600: '#ff9500' }
-        },
-        morado: {
-            dark: { primary: '#A24AFF', primary600: '#5800FA', accent: '#A24AFF', accent600: '#5800FA' },
-            light: { primary: '#A24AFF', primary600: '#5800FA', accent: '#A24AFF', accent600: '#5800FA' }
-        },
-        rosa: {
-            dark: { primary: '#f783ac', primary600: '#f06292', accent: '#f783ac', accent600: '#f06292' },
-            light: { primary: '#ff2d55', primary600: '#d81b60', accent: '#ff2d55', accent600: '#d81b60' }
-        },
-        naranja: {
-            dark: { primary: '#ff9500', primary600: '#ff6b00', accent: '#ff9500', accent600: '#ff6b00' },
-            light: { primary: '#ff9500', primary600: '#ff6b00', accent: '#ff9500', accent600: '#ff6b00' }
-        },
-        cian: {
-            dark: { primary: '#3bc9db', primary600: '#007aff', accent: '#3bc9db', accent600: '#007aff' },
-            light: { primary: '#3bc9db', primary600: '#007aff', accent: '#3bc9db', accent600: '#007aff' }
-        },
-        gris: {
-            dark: { primary: '#adb5bd', primary600: '#868e96', accent: '#adb5bd', accent600: '#868e96' },
-            light: { primary: '#8e8e93', primary600: '#636366', accent: '#8e8e93', accent600: '#636366' }
-        },
-        turquesa: {
-            dark: { primary: '#00d4aa', primary600: '#00b894', accent: '#00d4aa', accent600: '#00b894' },
-            light: { primary: '#00d4aa', primary600: '#00b894', accent: '#00d4aa', accent600: '#00b894' }
-        },
-        esmeralda: {
-            dark: { primary: '#10b981', primary600: '#059669', accent: '#10b981', accent600: '#059669' },
-            light: { primary: '#10b981', primary600: '#059669', accent: '#10b981', accent600: '#059669' }
-        },
-        indigo: {
-            dark: { primary: '#6366f1', primary600: '#4f46e5', accent: '#6366f1', accent600: '#4f46e5' },
-            light: { primary: '#6366f1', primary600: '#4f46e5', accent: '#6366f1', accent600: '#4f46e5' }
-        },
-        fucsia: {
-            dark: { primary: '#d946ef', primary600: '#c026d3', accent: '#d946ef', accent600: '#c026d3' },
-            light: { primary: '#d946ef', primary600: '#c026d3', accent: '#d946ef', accent600: '#c026d3' }
-        },
-        coral: {
-            dark: { primary: '#ff7f50', primary600: '#ff6348', accent: '#ff7f50', accent600: '#ff6348' },
-            light: { primary: '#ff7f50', primary600: '#ff6348', accent: '#ff7f50', accent600: '#ff6348' }
-        },
-        lima: {
-            dark: { primary: '#84cc16', primary600: '#65a30d', accent: '#84cc16', accent600: '#65a30d' },
-            light: { primary: '#84cc16', primary600: '#65a30d', accent: '#84cc16', accent600: '#65a30d' }
-        },
-        teal: {
-            dark: { primary: '#14b8a6', primary600: '#0d9488', accent: '#14b8a6', accent600: '#0d9488' },
-            light: { primary: '#14b8a6', primary600: '#0d9488', accent: '#14b8a6', accent600: '#0d9488' }
-        },
-        violeta: {
-            dark: { primary: '#8b5cf6', primary600: '#7c3aed', accent: '#8b5cf6', accent600: '#7c3aed' },
-            light: { primary: '#8b5cf6', primary600: '#7c3aed', accent: '#8b5cf6', accent600: '#7c3aed' }
-        },
-        carmesi: {
-            dark: { primary: '#dc2626', primary600: '#b91c1c', accent: '#dc2626', accent600: '#b91c1c' },
-            light: { primary: '#dc2626', primary600: '#b91c1c', accent: '#dc2626', accent600: '#b91c1c' }
-        }
-    };
+    // Color definitions organized by color scale: [primary, primary-600, accent, accent-600]
+    // Organized in color spectrum order: Red -> Orange -> Yellow -> Green -> Blue -> Purple -> Pink -> Gray
+    // This matches the structure in app.js - using window.COLOR_PRESETS from app.js
+    // Note: COLOR_PRESETS will be available from app.js after DOMContentLoaded
+    const COLOR_PRESETS = {};
 
     // Load saved colors or use defaults
     function loadColorPreferences() {
@@ -118,7 +48,13 @@ const ThemeUtils = (() => {
     function updateThemeColors(theme) {
         const prefs = loadColorPreferences();
         const colorKey = prefs[theme] || 'azul';
-        const colors = COLOR_PRESETS[colorKey][theme];
+        // Use window.COLOR_PRESETS if available (from app.js), otherwise fallback to local
+        const presets = window.COLOR_PRESETS || COLOR_PRESETS;
+        let colors = presets[colorKey]?.[theme];
+        if (!colors) {
+            console.warn(`Color preset "${colorKey}" not found, using default azul`);
+            colors = presets['azul']?.[theme] || { primary: '#2768F5', primary600: '#2731F5', accent: '#2768F5', accent600: '#2731F5' };
+        }
 
         const root = document.documentElement;
         root.style.setProperty('--primary', colors.primary);

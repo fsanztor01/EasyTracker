@@ -1502,7 +1502,7 @@ header {
 /* Remove duplicate card styles - already defined above */
 
 .summary {
-    padding: 16px
+    padding: 22px
 }
 
 .summary__title {
@@ -1512,7 +1512,7 @@ header {
     margin: 0 0 12px;
     color: var(--heading);
     font-weight: 600;
-    font-size: 1.1rem;
+    font-size: 1.25rem;
     letter-spacing: -0.01em;
 }
 
@@ -1529,7 +1529,7 @@ h6 {
 
 .summary__grid {
     display: grid;
-    gap: 10px;
+    gap: 14px;
     grid-template-columns: repeat(2, 1fr)
 }
 
@@ -1559,7 +1559,7 @@ h6 {
     -webkit-backdrop-filter: blur(20px) saturate(180%);
     border: 1px solid rgba(255, 255, 255, 0.03);
     border-radius: 20px;
-    padding: var(--spacing-lg);
+    padding: 20px;
     text-align: center;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
 }
@@ -1596,14 +1596,14 @@ h6 {
 
 .kpi__label {
     color: var(--muted);
-    font-size: .95rem;
+    font-size: 1.05rem;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
 .kpi__value {
-    font-size: 1.7rem;
+    font-size: 1.9rem;
     font-weight: 600;
     margin-top: 4px;
     color: var(--heading-strong);
@@ -1617,7 +1617,7 @@ h6 {
 /* ==================== SESSIONS ==================== */
 .sessions {
     display: grid;
-    gap: 10px
+    gap: 16px
 }
 
 /* When sessions container is empty, don't take up space */
@@ -1630,7 +1630,7 @@ h6 {
     display: flex;
     flex-direction: column;
     gap: 6px;
-    padding: 8px;
+    padding: 14px;
     background: transparent;
     color: var(--heading);
 }
@@ -1748,14 +1748,14 @@ textarea.input:disabled {
 
 .session__title {
     font-weight: 600;
-    font-size: 1.1rem;
+    font-size: 1.25rem;
     order: 2;
     color: var(--heading);
     letter-spacing: -0.01em;
 }
 
 .session__date {
-    font-size: .9rem;
+    font-size: 1rem;
     color: var(--muted);
     order: 1;
 }
@@ -1811,7 +1811,7 @@ textarea.input:disabled {
 
 /* Simplified Exercise */
 .exercise {
-    padding: 6px;
+    padding: 12px;
     border-top: 1px solid var(--border);
 }
 
@@ -2041,7 +2041,7 @@ textarea.input:disabled {
 
 .exercise__name {
     font-weight: 700;
-    font-size: 0.95rem;
+    font-size: 1.1rem;
     letter-spacing: -0.01em;
     color: var(--primary);
 }
@@ -2058,7 +2058,7 @@ textarea.input:disabled {
     background: #0D0D0D;
     border: 1px solid rgba(255, 255, 255, 0.03);
     border-radius: var(--radius-lg);
-    padding: 8px;
+    padding: 12px;
     box-shadow: var(--shadow);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
@@ -3320,13 +3320,13 @@ dialog {
 
     /* Summary card - Better spacing */
     .summary {
-        padding: 18px;
+        padding: 24px;
         margin-bottom: 10px;
     }
 
     .summary__title {
         margin: 0 0 14px;
-        font-size: 1.15rem;
+        font-size: 1.3rem;
     }
 
     .summary__grid {
@@ -3335,7 +3335,7 @@ dialog {
 
     /* KPI cards - Better proportions */
     .kpi {
-        padding: 16px 14px;
+        padding: 20px 16px;
         border-radius: 14px;
         transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
@@ -3345,13 +3345,13 @@ dialog {
     }
 
     .kpi__label {
-        font-size: 0.82rem;
+        font-size: 0.9rem;
         margin-bottom: 6px;
         line-height: 1.3;
     }
 
     .kpi__value {
-        font-size: 1.35rem;
+        font-size: 1.5rem;
         margin-top: 4px;
         line-height: 1.2;
     }
@@ -3367,7 +3367,7 @@ dialog {
     }
 
     .session__header {
-        padding: 16px;
+        padding: 18px;
         gap: 14px;
         border-radius: var(--radius-sm);
     }
@@ -3377,7 +3377,7 @@ dialog {
     }
 
     .session__title {
-        font-size: 1.2rem;
+        font-size: 1.3rem;
         line-height: 1.3;
     }
 
@@ -3408,18 +3408,18 @@ dialog {
     }
 
     .exercise__name {
-        font-size: 1.05rem;
+        font-size: 1.15rem;
         line-height: 1.2;
     }
 
     /* Set cards - Better visual design */
     .sets-container {
-        gap: 6px;
-        margin-top: 6px;
+        gap: 8px;
+        margin-top: 8px;
     }
 
     .set-card {
-        padding: 8px;
+        padding: 12px;
         border-radius: 12px;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     }
@@ -5166,14 +5166,43 @@ details>summary::-webkit-details-marker {
 
 /* Color swatches */
 .color-swatches {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.color-group {
+    margin-bottom: 20px;
+}
+
+.color-group:last-child {
+    margin-bottom: 0;
+}
+
+.color-group-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--muted);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.color-swatches-group {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
     gap: 10px;
 }
 
 @media (min-width: 480px) {
-    .color-swatches {
-        grid-template-columns: repeat(9, 1fr);
+    .color-swatches-group {
+        grid-template-columns: repeat(6, 1fr);
+    }
+}
+
+@media (min-width: 768px) {
+    .color-swatches-group {
+        grid-template-columns: repeat(8, 1fr);
     }
 }
 
