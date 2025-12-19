@@ -252,15 +252,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     /* Parallax suave - throttled for better performance */
     let scrollTimeout;
-    // Throttle scroll events for better performance
-    // Throttle scroll events for better performance (16ms = ~60fps)
-    window.addEventListener('scroll', throttle(() => {
+    window.addEventListener('scroll', () => {
         if (scrollTimeout) return;
         scrollTimeout = requestAnimationFrame(() => {
             document.documentElement.style.setProperty('--grad-pos', String(window.scrollY));
             scrollTimeout = null;
         });
-    }, 16), { passive: true });
+    }, { passive: true });
 
     /* =================== Estado =================== */
     // app, templates, and templateLabels are now imported from modules
@@ -1885,6 +1883,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         const hadPrev = prevDetails.length > 0;
 
+        container.innerHTML = '';
+
         // Use robust function to check if there are any sessions in the visible week
         const hasSessions = hasSessionsThisWeek();
 
@@ -1894,7 +1894,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 emptyState.hidden = false;
                 emptyState.style.display = '';
             }
-            if (container) container.innerHTML = '';
             return;
         }
 
@@ -1919,10 +1918,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // Find the first non-completed session (the "current day")
         const firstNonCompletedIndex = sortedSessions.findIndex(s => !s.completed);
 
-        // Use DocumentFragment for batch DOM updates (reduces reflows)
-        const fragment = document.createDocumentFragment();
-        
         // Render each session as its own day (collapsible <details> element)
+        // Use requestAnimationFrame to batch renders for better performance
         sortedSessions.forEach((session, sessionIndex) => {
             const dayKey = toLocalISO(parseLocalDate(session.date));
             const sessionId = session.id;
@@ -2021,7 +2018,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             dayBody.appendChild(card);
             details.appendChild(dayBody);
-            fragment.appendChild(details);
+            container.appendChild(details);
 
             // Add toggle event listener to trigger animation each time
             details.addEventListener('toggle', function() {
@@ -2056,11 +2053,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }, 50);
             }
         });
-        
-        // Single DOM update with DocumentFragment (reduces reflows from N to 1)
-        if (container && fragment.hasChildNodes()) {
-            container.appendChild(fragment);
-        }
     }
     
     // Optimized renderExercise with deferred set rendering
@@ -3651,23 +3643,18 @@ document.addEventListener('DOMContentLoaded', () => {
             if (achievements.length === 0) {
                 achievementsList.innerHTML = '<div class="routine-empty">Aún no hay logros. ¡Sigue entrenando!</div>';
             } else {
-                // Use DocumentFragment for batch DOM updates
-                const fragment = document.createDocumentFragment();
-                achievements.forEach(ach => {
+                achievementsList.innerHTML = achievements.map(ach => {
                     const date = new Date(ach.date).toLocaleDateString('es-ES', { year: 'numeric', month: 'short', day: 'numeric' });
-                    const item = document.createElement('div');
-                    item.className = 'achievement-item';
-                    item.innerHTML = `
-                        <div class="achievement-icon">${ach.icon}</div>
-                        <div class="achievement-content">
-                            <div class="achievement-title">${ach.title}</div>
-                            <div class="achievement-date">${date}</div>
+                    return `
+                        <div class="achievement-item">
+                            <div class="achievement-icon">${ach.icon}</div>
+                            <div class="achievement-content">
+                                <div class="achievement-title">${ach.title}</div>
+                                <div class="achievement-date">${date}</div>
+                            </div>
                         </div>
                     `;
-                    fragment.appendChild(item);
-                });
-                achievementsList.innerHTML = '';
-                achievementsList.appendChild(fragment);
+                }).join('');
             }
         }
     }
@@ -7026,21 +7013,23 @@ document.addEventListener('DOMContentLoaded', () => {
         let resizeTimer;
         let lastViewportWidth = window.innerWidth;
         const MOBILE_BREAKPOINT = 768;
-        // Debounce resize events for better performance
-        window.addEventListener('resize', debounce(() => {
-            const currentWidth = window.innerWidth;
-            const wasMobile = lastViewportWidth < MOBILE_BREAKPOINT;
-            const isMobile = currentWidth < MOBILE_BREAKPOINT;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                const currentWidth = window.innerWidth;
+                const wasMobile = lastViewportWidth < MOBILE_BREAKPOINT;
+                const isMobile = currentWidth < MOBILE_BREAKPOINT;
 
-            // Only re-render if crossing mobile/desktop threshold
-            if (wasMobile !== isMobile) {
-                const activePanel = document.querySelector('.panel[aria-hidden="false"]');
-                if (activePanel && activePanel.id === 'panel-diary') {
-                    renderSessions();
+                // Only re-render if crossing mobile/desktop threshold
+                if (wasMobile !== isMobile) {
+                    const activePanel = document.querySelector('.panel[aria-hidden="false"]');
+                    if (activePanel && activePanel.id === 'panel-diary') {
+                        renderSessions();
+                    }
                 }
-            }
-            lastViewportWidth = currentWidth;
-        }, 300));
+                lastViewportWidth = currentWidth;
+            }, 300);
+        });
 
     }
 
@@ -7950,9 +7939,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (notesEmpty) notesEmpty.hidden = true;
         const sortedNotes = [...app.notes].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-        // Use DocumentFragment for batch DOM updates
-        const fragment = document.createDocumentFragment();
-        sortedNotes.forEach(note => {
+        notesList.innerHTML = sortedNotes.map(note => {
             const date = new Date(note.createdAt).toLocaleDateString('es-ES', {
                 year: 'numeric',
                 month: 'short',
@@ -7960,19 +7947,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 hour: '2-digit',
                 minute: '2-digit'
             });
-            const item = document.createElement('div');
-            item.className = 'note-item';
-            item.innerHTML = `
-                <p>${escapeHtml(note.text)}</p>
-                <div class="note-meta">
-                    <span>${date}</span>
-                    <button class="note-delete-btn js-delete-note" data-note-id="${note.id}" aria-label="Eliminar nota" title="Eliminar nota">✕</button>
+            return `
+                <div class="note-item">
+                    <p>${escapeHtml(note.text)}</p>
+                    <div class="note-meta">
+                        <span>${date}</span>
+                        <button class="note-delete-btn js-delete-note" data-note-id="${note.id}" aria-label="Eliminar nota" title="Eliminar nota">✕</button>
+                    </div>
                 </div>
             `;
-            fragment.appendChild(item);
-        });
-        notesList.innerHTML = '';
-        notesList.appendChild(fragment);
+        }).join('');
     }
 
     function renderProfile() {
