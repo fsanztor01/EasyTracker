@@ -1229,7 +1229,9 @@ document.addEventListener('DOMContentLoaded', () => {
         // Button to close routine builder (X button)
         const closeRoutineBuilder = $('#closeRoutineBuilder');
         if (closeRoutineBuilder) {
-            closeRoutineBuilder.addEventListener('click', () => {
+            closeRoutineBuilder.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
                 hideRoutineBuilder();
             });
         }
@@ -6810,6 +6812,18 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
+        // Clean up temp state when dialog is closed (X button or cancel)
+        const routineImportWeekDialog = $('#routineImportWeekDialog');
+        if (routineImportWeekDialog) {
+            routineImportWeekDialog.addEventListener('close', (e) => {
+                // Only clear if dialog was closed without importing (cancel or X)
+                if (e.target.returnValue !== 'default') {
+                    app.tempRoutineId = null;
+                    app.tempTemplateKey = null;
+                }
+            });
+        }
+
         // Plantillas - Only if elements exist
         const templateButtons = $('#templateButtons');
         if (templateButtons) {
@@ -7506,6 +7520,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const settingsTheme = $('#settingsTheme');
     const settingsProfile = $('#settingsProfile');
     const settingsInfo = $('#settingsInfo');
+    const settingsCreator = $('#settingsCreator');
     const themeDarkBtn = $('#themeDarkBtn');
     const themeLightBtn = $('#themeLightBtn');
     const colorSwatches = $('#colorSwatches');
@@ -7529,12 +7544,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 const themePanel = $('#settingsTheme');
                 const profilePanel = $('#settingsProfile');
                 const infoPanel = $('#settingsInfo');
+                const creatorPanel = $('#settingsCreator');
                 
                 if (themePanel && themePanel.style.display !== 'none') {
                     showSettingsMain();
                 } else if (profilePanel && profilePanel.style.display !== 'none') {
                     showSettingsMain();
                 } else if (infoPanel && infoPanel.style.display !== 'none') {
+                    showSettingsMain();
+                } else if (creatorPanel && creatorPanel.style.display !== 'none') {
                     showSettingsMain();
                 }
             }
@@ -7549,6 +7567,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (settingsProfile) settingsProfile.style.display = 'none';
         if (settingsBodyTrack) settingsBodyTrack.style.display = 'none';
         if (settingsInfo) settingsInfo.style.display = 'none';
+        if (settingsCreator) settingsCreator.style.display = 'none';
     }
 
     function showSettingsTheme() {
@@ -7557,6 +7576,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (settingsProfile) settingsProfile.style.display = 'none';
         if (settingsBodyTrack) settingsBodyTrack.style.display = 'none';
         if (settingsInfo) settingsInfo.style.display = 'none';
+        if (settingsCreator) settingsCreator.style.display = 'none';
         updateThemeButtons();
         renderColorSwatches();
     }
@@ -7567,6 +7587,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (settingsProfile) settingsProfile.style.display = 'block';
         if (settingsBodyTrack) settingsBodyTrack.style.display = 'none';
         if (settingsInfo) settingsInfo.style.display = 'none';
+        if (settingsCreator) settingsCreator.style.display = 'none';
         renderProfile();
     }
 
@@ -7576,6 +7597,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (settingsProfile) settingsProfile.style.display = 'none';
         if (settingsBodyTrack) settingsBodyTrack.style.display = 'block';
         if (settingsInfo) settingsInfo.style.display = 'none';
+        if (settingsCreator) settingsCreator.style.display = 'none';
         renderProfile(); // Load body data
     }
 
@@ -7585,6 +7607,16 @@ document.addEventListener('DOMContentLoaded', () => {
         if (settingsProfile) settingsProfile.style.display = 'none';
         if (settingsBodyTrack) settingsBodyTrack.style.display = 'none';
         if (settingsInfo) settingsInfo.style.display = 'block';
+        if (settingsCreator) settingsCreator.style.display = 'none';
+    }
+
+    function showSettingsCreator() {
+        if (settingsMain) settingsMain.style.display = 'none';
+        if (settingsTheme) settingsTheme.style.display = 'none';
+        if (settingsProfile) settingsProfile.style.display = 'none';
+        if (settingsBodyTrack) settingsBodyTrack.style.display = 'none';
+        if (settingsInfo) settingsInfo.style.display = 'none';
+        if (settingsCreator) settingsCreator.style.display = 'block';
     }
 
     // Navigation buttons
@@ -7592,10 +7624,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const settingsProfileBtn = $('#settingsProfileBtn');
     const settingsBodyTrackBtn = $('#settingsBodyTrackBtn');
     const settingsInfoBtn = $('#settingsInfoBtn');
+    const settingsCreatorBtn = $('#settingsCreatorBtn');
     const backFromTheme = $('#backFromTheme');
     const backFromProfile = $('#backFromProfile');
     const backFromBodyTrack = $('#backFromBodyTrack');
     const backFromInfo = $('#backFromInfo');
+    const backFromCreator = $('#backFromCreator');
 
     if (settingsThemeBtn) settingsThemeBtn.addEventListener('click', showSettingsTheme);
     if (settingsProfileBtn) settingsProfileBtn.addEventListener('click', showSettingsProfile);
@@ -7606,10 +7640,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (manualDialog) manualDialog.showModal();
         });
     }
+    if (settingsCreatorBtn) settingsCreatorBtn.addEventListener('click', showSettingsCreator);
     if (backFromTheme) backFromTheme.addEventListener('click', showSettingsMain);
     if (backFromProfile) backFromProfile.addEventListener('click', showSettingsMain);
     if (backFromBodyTrack) backFromBodyTrack.addEventListener('click', showSettingsMain);
     if (backFromInfo) backFromInfo.addEventListener('click', showSettingsMain);
+    if (backFromCreator) backFromCreator.addEventListener('click', showSettingsMain);
 
     // Theme toggle
     function updateThemeButtons() {

@@ -1593,6 +1593,11 @@ h6 {
     gap: 10px
 }
 
+/* When sessions container is empty, don't take up space */
+.sessions:empty {
+    display: none;
+}
+
 /* Simplified Session Header */
 .session__header {
     display: flex;
@@ -3289,7 +3294,7 @@ dialog {
     /* Summary card - Better spacing */
     .summary {
         padding: 16px;
-        margin-bottom: 18px;
+        margin-bottom: 10px;
     }
 
     .summary__title {
@@ -3497,7 +3502,7 @@ dialog {
 
     .summary {
         padding: 14px;
-        margin-bottom: 16px;
+        margin-bottom: 10px;
     }
 
     .summary__title {
@@ -4918,6 +4923,7 @@ details>summary::-webkit-details-marker {
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    margin-top: 0;
 }
 
 /* Mobile specific adjustments */
@@ -4949,23 +4955,24 @@ details>summary::-webkit-details-marker {
 /* ==================== SETTINGS MENU ==================== */
 .settings-menu {
     display: grid;
-    gap: 8px;
+    gap: 12px;
 }
 
 .settings-menu-item {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 16px;
+    gap: 16px;
+    padding: 20px;
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius);
     cursor: pointer;
     transition: var(--transition-base);
     text-align: left;
-    font-size: 1rem;
+    font-size: 1.15rem;
     color: var(--text);
     font-weight: 500;
+    min-height: 64px;
 }
 
 .settings-menu-item:hover {
@@ -4975,17 +4982,18 @@ details>summary::-webkit-details-marker {
 }
 
 .settings-menu-item span:first-child {
-    font-size: 1.2rem;
+    font-size: 1.6rem;
     flex-shrink: 0;
 }
 
 .settings-menu-item span:nth-child(2) {
     flex: 1;
+    font-size: 1.15rem;
 }
 
 .settings-menu-item span:last-child {
     color: var(--muted);
-    font-size: 1.2rem;
+    font-size: 1.4rem;
 }
 
 .settings-header {
