@@ -1438,7 +1438,7 @@ document.addEventListener('DOMContentLoaded', () => {
             for (let i = 0; i < history.length; i++) {
                 if (parseLocalDate(history[i].date).getTime() >= currentSessionDate) {
                     currentIndex = i;
-                    break;
+                break;
                 }
             }
         }
@@ -1458,8 +1458,8 @@ document.addEventListener('DOMContentLoaded', () => {
             for (let j = 0; j < s.exercises.length; j++) {
                 if (s.exercises[j].name === currentEx.name) {
                     ex = s.exercises[j];
-                    break;
-                }
+                break;
+        }
             }
             if (!ex) continue;
 
@@ -1787,8 +1787,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const queue = domUpdateQueue.splice(0);
                 queue.forEach(fn => {
                     try { fn(); } catch (e) { console.warn('DOM update error:', e); }
-                });
             });
+        });
         }
     }
 
@@ -2180,7 +2180,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 };
 
                 saveBtn.addEventListener('click', (e) => {
-                    e.preventDefault();
+            e.preventDefault();
                     e.stopPropagation();
                     saveChanges();
                 });
@@ -2317,9 +2317,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 exerciseBlock.style.opacity = '1';
                 exerciseBlock.style.transform = 'translateY(0)';
             });
-            return;
-        }
-        
+                return;
+            }
+
         let hasRendered = false;
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
@@ -3839,7 +3839,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function markSessionAsChanged(sessionId) {
         if (app.editingSessions[sessionId]) {
             app.editingSessions[sessionId].hasChanges = true;
-        } else {
+                        } else {
             app.editingSessions[sessionId] = { isEditing: false, hasChanges: true };
         }
         updateSessionEditUI(sessionId);
@@ -5161,7 +5161,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 } catch (e) {
                     console.warn('Error updating progress UI:', e);
                 }
-            } else {
+                } else {
                 // Use cached value
                 let progressHTML = cachedProgress;
                 if (set.isPR) {
@@ -5624,7 +5624,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function normalizeSessionFromImport(src, dateISO) {
-        return {
+    return {
             id: uuid(),
             name: String(src.name || 'Sesión'),
             date: dateISO,
@@ -7108,7 +7108,7 @@ document.addEventListener('DOMContentLoaded', () => {
         bindEvents();
         render();
         // Removed competitive mode initialization for EasyTracker (only Diary and Routines)
-    })();
+})();
 
 
     /* =================== Profile Handlers =================== */
@@ -7365,7 +7365,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const entries = [...(app.profile.weightHistory || [])].sort((a, b) => new Date(b.date) - new Date(a.date));
             if (!entries.length) {
                 historyBody.innerHTML = '<tr><td colspan="3" style="padding:8px">Sin registros aún</td></tr>';
-            } else {
+} else {
                 historyBody.innerHTML = entries.map(entry => {
                     const date = new Date(entry.date).toLocaleDateString('es-ES', { year: 'numeric', month: 'short', day: 'numeric' });
                     const hasWeight = typeof entry.weight === 'number' && Number.isFinite(entry.weight);

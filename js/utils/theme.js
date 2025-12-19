@@ -147,7 +147,7 @@ const ThemeUtils = (() => {
         // Check for saved theme, otherwise default to dark
         let savedTheme = localStorage.getItem(THEME_KEY);
         if (!savedTheme) {
-            savedTheme = 'dark';
+                savedTheme = 'dark';
         }
         document.documentElement.setAttribute('data-theme', savedTheme);
         updateThemeButton(savedTheme);
