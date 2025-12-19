@@ -817,21 +817,21 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const title = document.createElement('div');
         title.className = 'routine-item-title';
-        title.style.cssText = 'font-weight: 600; font-size: 0.8rem; margin-bottom: 2px; color: var(--text); word-wrap: break-word; overflow-wrap: break-word; hyphens: auto; line-height: 1.2;';
+        title.style.cssText = 'font-weight: 600; font-size: 0.9rem; margin-bottom: 2px; color: var(--text); word-wrap: break-word; overflow-wrap: break-word; hyphens: auto; line-height: 1.2;';
         title.textContent = routine.name;
         info.appendChild(title);
         
         if (routine.meta) {
             const meta = document.createElement('div');
             meta.className = 'routine-item-meta';
-            meta.style.cssText = 'font-size: 0.7rem; color: var(--muted); line-height: 1.2; word-wrap: break-word; overflow-wrap: break-word;';
+            meta.style.cssText = 'font-size: 0.78rem; color: var(--muted); line-height: 1.2; word-wrap: break-word; overflow-wrap: break-word;';
             meta.textContent = routine.meta;
             info.appendChild(meta);
         } else {
             const totalExercises = (routine.days || []).reduce((sum, day) => sum + (day.exercises ? day.exercises.length : 0), 0);
             const meta = document.createElement('div');
             meta.className = 'routine-item-meta';
-            meta.style.cssText = 'font-size: 0.7rem; color: var(--muted); line-height: 1.2; word-wrap: break-word; overflow-wrap: break-word;';
+            meta.style.cssText = 'font-size: 0.78rem; color: var(--muted); line-height: 1.2; word-wrap: break-word; overflow-wrap: break-word;';
             meta.textContent = `${(routine.days || []).length} días · ${totalExercises} ejercicios`;
             info.appendChild(meta);
         }
