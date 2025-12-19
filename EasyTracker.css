@@ -880,7 +880,7 @@ header {
     font-weight: 800;
     color: var(--heading);
     min-height: 24px;
-    font-size: 1rem
+    font-size: 1.15rem
 }
 
 [data-theme="light"] .week-info {
@@ -1755,7 +1755,7 @@ textarea.input:disabled {
 }
 
 .session__date {
-    font-size: 1rem;
+    font-size: 1.15rem;
     color: var(--muted);
     order: 1;
 }
@@ -3293,7 +3293,7 @@ dialog {
     }
 
     .week-info {
-        font-size: 0.95rem;
+        font-size: 1.1rem;
         font-weight: 800;
         padding: 0 8px;
         text-align: center;
@@ -3382,7 +3382,7 @@ dialog {
     }
 
     .session__date {
-        font-size: 0.88rem;
+        font-size: 1.05rem;
     }
 
     .session__tools {
@@ -3511,7 +3511,7 @@ dialog {
     }
 
     .week-info {
-        font-size: 0.9rem;
+        font-size: 1rem;
         padding: 0 6px;
     }
 
