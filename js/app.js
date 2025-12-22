@@ -27,161 +27,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Color definitions organized by color scale: [primary, primary-600, accent, accent-600]
     // Organized in color spectrum order: Red -> Orange -> Yellow -> Green -> Blue -> Purple -> Pink -> Gray
-    const COLOR_PRESETS = {
-        // REDS - Rojos
-        carmesi: {
-            dark: { primary: '#dc2626', primary600: '#b91c1c', accent: '#dc2626', accent600: '#b91c1c' },
-            light: { primary: '#dc2626', primary600: '#b91c1c', accent: '#dc2626', accent600: '#b91c1c' }
-        },
-        rojo: {
-            dark: { primary: '#ff6b6b', primary600: '#ff3b30', accent: '#ff6b6b', accent600: '#ff3b30' },
-            light: { primary: '#ff6b6b', primary600: '#ff3b30', accent: '#ff6b6b', accent600: '#ff3b30' }
-        },
-        rojoClaro: {
-            dark: { primary: '#ff8787', primary600: '#ff6b6b', accent: '#ff8787', accent600: '#ff6b6b' },
-            light: { primary: '#ff5252', primary600: '#ff1744', accent: '#ff5252', accent600: '#ff1744' }
-        },
-        rojoOscuro: {
-            dark: { primary: '#ef4444', primary600: '#dc2626', accent: '#ef4444', accent600: '#dc2626' },
-            light: { primary: '#e53935', primary600: '#c62828', accent: '#e53935', accent600: '#c62828' }
-        },
-        // ORANGES - Naranjas
-        naranjaOscuro: {
-            dark: { primary: '#f97316', primary600: '#ea580c', accent: '#f97316', accent600: '#ea580c' },
-            light: { primary: '#ff6f00', primary600: '#e65100', accent: '#ff6f00', accent600: '#e65100' }
-        },
-        naranja: {
-            dark: { primary: '#ff9500', primary600: '#ff6b00', accent: '#ff9500', accent600: '#ff6b00' },
-            light: { primary: '#ff9500', primary600: '#ff6b00', accent: '#ff9500', accent600: '#ff6b00' }
-        },
-        coral: {
-            dark: { primary: '#ff7f50', primary600: '#ff6348', accent: '#ff7f50', accent600: '#ff6348' },
-            light: { primary: '#ff7f50', primary600: '#ff6348', accent: '#ff7f50', accent600: '#ff6348' }
-        },
-        naranjaClaro: {
-            dark: { primary: '#ffa726', primary600: '#ff9800', accent: '#ffa726', accent600: '#ff9800' },
-            light: { primary: '#ffb74d', primary600: '#ffa726', accent: '#ffb74d', accent600: '#ffa726' }
-        },
-        // YELLOWS - Amarillos
-        amarilloOscuro: {
-            dark: { primary: '#fbbf24', primary600: '#f59e0b', accent: '#fbbf24', accent600: '#f59e0b' },
-            light: { primary: '#ffc107', primary600: '#ffb300', accent: '#ffc107', accent600: '#ffb300' }
-        },
-        amarillo: {
-            dark: { primary: '#FFE100', primary600: '#FFF757', accent: '#FFE100', accent600: '#FFF757' },
-            light: { primary: '#ffcc00', primary600: '#ff9500', accent: '#ffcc00', accent600: '#ff9500' }
-        },
-        lima: {
-            dark: { primary: '#84cc16', primary600: '#65a30d', accent: '#84cc16', accent600: '#65a30d' },
-            light: { primary: '#84cc16', primary600: '#65a30d', accent: '#84cc16', accent600: '#65a30d' }
-        },
-        amarilloClaro: {
-            dark: { primary: '#fde047', primary600: '#facc15', accent: '#fde047', accent600: '#facc15' },
-            light: { primary: '#ffeb3b', primary600: '#fdd835', accent: '#ffeb3b', accent600: '#fdd835' }
-        },
-        // GREENS - Verdes
-        verdeOscuro: {
-            dark: { primary: '#16a34a', primary600: '#15803d', accent: '#16a34a', accent600: '#15803d' },
-            light: { primary: '#2e7d32', primary600: '#1b5e20', accent: '#2e7d32', accent600: '#1b5e20' }
-        },
-        verde: {
-            dark: { primary: '#34c759', primary600: '#248a3d', accent: '#34c759', accent600: '#248a3d' },
-            light: { primary: '#34c759', primary600: '#248a3d', accent: '#34c759', accent600: '#248a3d' }
-        },
-        esmeralda: {
-            dark: { primary: '#10b981', primary600: '#059669', accent: '#10b981', accent600: '#059669' },
-            light: { primary: '#10b981', primary600: '#059669', accent: '#10b981', accent600: '#059669' }
-        },
-        verdeClaro: {
-            dark: { primary: '#4ade80', primary600: '#22c55e', accent: '#4ade80', accent600: '#22c55e' },
-            light: { primary: '#66bb6a', primary600: '#4caf50', accent: '#66bb6a', accent600: '#4caf50' }
-        },
-        // TEAL/CYAN - Turquesas/Cianes
-        teal: {
-            dark: { primary: '#14b8a6', primary600: '#0d9488', accent: '#14b8a6', accent600: '#0d9488' },
-            light: { primary: '#14b8a6', primary600: '#0d9488', accent: '#14b8a6', accent600: '#0d9488' }
-        },
-        turquesa: {
-            dark: { primary: '#00d4aa', primary600: '#00b894', accent: '#00d4aa', accent600: '#00b894' },
-            light: { primary: '#00d4aa', primary600: '#00b894', accent: '#00d4aa', accent600: '#00b894' }
-        },
-        cian: {
-            dark: { primary: '#3bc9db', primary600: '#007aff', accent: '#3bc9db', accent600: '#007aff' },
-            light: { primary: '#3bc9db', primary600: '#007aff', accent: '#3bc9db', accent600: '#007aff' }
-        },
-        cianClaro: {
-            dark: { primary: '#22d3ee', primary600: '#06b6d4', accent: '#22d3ee', accent600: '#06b6d4' },
-            light: { primary: '#00bcd4', primary600: '#0097a7', accent: '#00bcd4', accent600: '#0097a7' }
-        },
-        // BLUES - Azules
-        azulOscuro: {
-            dark: { primary: '#1e40af', primary600: '#1e3a8a', accent: '#1e40af', accent600: '#1e3a8a' },
-            light: { primary: '#1976d2', primary600: '#1565c0', accent: '#1976d2', accent600: '#1565c0' }
-        },
-        azul: {
-            dark: { primary: '#2768F5', primary600: '#2731F5', accent: '#2768F5', accent600: '#2731F5' },
-            light: { primary: '#2768F5', primary600: '#2731F5', accent: '#2768F5', accent600: '#2731F5' }
-        },
-        azulClaro: {
-            dark: { primary: '#3b82f6', primary600: '#2563eb', accent: '#3b82f6', accent600: '#2563eb' },
-            light: { primary: '#42a5f5', primary600: '#2196f3', accent: '#42a5f5', accent600: '#2196f3' }
-        },
-        azulCielo: {
-            dark: { primary: '#60a5fa', primary600: '#3b82f6', accent: '#60a5fa', accent600: '#3b82f6' },
-            light: { primary: '#64b5f6', primary600: '#42a5f5', accent: '#64b5f6', accent600: '#42a5f5' }
-        },
-        // INDIGO - Índigos
-        indigo: {
-            dark: { primary: '#6366f1', primary600: '#4f46e5', accent: '#6366f1', accent600: '#4f46e5' },
-            light: { primary: '#6366f1', primary600: '#4f46e5', accent: '#6366f1', accent600: '#4f46e5' }
-        },
-        indigoOscuro: {
-            dark: { primary: '#4c1d95', primary600: '#3730a3', accent: '#4c1d95', accent600: '#3730a3' },
-            light: { primary: '#5e35b1', primary600: '#512da8', accent: '#5e35b1', accent600: '#512da8' }
-        },
-        indigoClaro: {
-            dark: { primary: '#818cf8', primary600: '#6366f1', accent: '#818cf8', accent600: '#6366f1' },
-            light: { primary: '#7986cb', primary600: '#5c6bc0', accent: '#7986cb', accent600: '#5c6bc0' }
-        },
-        indigoVibrante: {
-            dark: { primary: '#7c3aed', primary600: '#6d28d9', accent: '#7c3aed', accent600: '#6d28d9' },
-            light: { primary: '#7c3aed', primary600: '#6d28d9', accent: '#7c3aed', accent600: '#6d28d9' }
-        },
-        // PURPLES - Morados/Violetas
-        moradoOscuro: {
-            dark: { primary: '#7c3aed', primary600: '#6d28d9', accent: '#7c3aed', accent600: '#6d28d9' },
-            light: { primary: '#7b1fa2', primary600: '#6a1b9a', accent: '#7b1fa2', accent600: '#6a1b9a' }
-        },
-        morado: {
-            dark: { primary: '#A24AFF', primary600: '#5800FA', accent: '#A24AFF', accent600: '#5800FA' },
-            light: { primary: '#A24AFF', primary600: '#5800FA', accent: '#A24AFF', accent600: '#5800FA' }
-        },
-        violeta: {
-            dark: { primary: '#8b5cf6', primary600: '#7c3aed', accent: '#8b5cf6', accent600: '#7c3aed' },
-            light: { primary: '#8b5cf6', primary600: '#7c3aed', accent: '#8b5cf6', accent600: '#7c3aed' }
-        },
-        moradoClaro: {
-            dark: { primary: '#a78bfa', primary600: '#8b5cf6', accent: '#a78bfa', accent600: '#8b5cf6' },
-            light: { primary: '#9575cd', primary600: '#7986cb', accent: '#9575cd', accent600: '#7986cb' }
-        },
-        // PINKS - Rosas/Fucsias
-        rosaOscuro: {
-            dark: { primary: '#ec4899', primary600: '#db2777', accent: '#ec4899', accent600: '#db2777' },
-            light: { primary: '#c2185b', primary600: '#ad1457', accent: '#c2185b', accent600: '#ad1457' }
-        },
-        rosa: {
-            dark: { primary: '#f783ac', primary600: '#f06292', accent: '#f783ac', accent600: '#f06292' },
-            light: { primary: '#ff2d55', primary600: '#d81b60', accent: '#ff2d55', accent600: '#d81b60' }
-        },
-        fucsia: {
-            dark: { primary: '#d946ef', primary600: '#c026d3', accent: '#d946ef', accent600: '#c026d3' },
-            light: { primary: '#d946ef', primary600: '#c026d3', accent: '#d946ef', accent600: '#c026d3' }
-        },
-        rosaClaro: {
-            dark: { primary: '#f9a8d4', primary600: '#f472b6', accent: '#f9a8d4', accent600: '#f472b6' },
-            light: { primary: '#f48fb1', primary600: '#ec407a', accent: '#f48fb1', accent600: '#ec407a' }
-        },
-    };
+    // Color definitions now loaded from ThemeUtils to ensure consistency
+    const COLOR_PRESETS = ThemeUtils.COLOR_PRESETS;
 
     // Color display names
     const COLOR_NAMES = {
@@ -261,7 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
             window.ThemeUtils.updateThemeColors(theme);
             return;
         }
-        
+
         const prefs = loadColorPreferences();
         const colorKey = prefs[theme] || 'azul';
         const colors = COLOR_PRESETS[colorKey][theme];
@@ -358,10 +205,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Make COLOR_PRESETS available globally for theme.js
     window.COLOR_PRESETS = COLOR_PRESETS;
-    
+
     // Make COLOR_PRESETS available globally for theme.js
     window.COLOR_PRESETS = COLOR_PRESETS;
-    
+
     // Make renderColorSwatches available globally for renderProfile
     window.renderColorSwatches = renderColorSwatches;
 
@@ -812,12 +659,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const list = $('#createdRoutinesList');
         const empty = $('#noCreatedRoutinesEmpty');
         if (!list || !empty) return;
-        
+
         // Clear list to prevent duplicates
         while (list.firstChild) {
             list.removeChild(list.firstChild);
         }
-        
+
         // Get created routines
         const createdRoutines = [];
         if (app.routines && app.routines.length > 0) {
@@ -830,33 +677,33 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             });
         }
-        
+
         // Show empty state if no routines
         if (createdRoutines.length === 0) {
             empty.hidden = false;
             list.hidden = true;
             return;
         }
-        
+
         empty.hidden = true;
         list.hidden = false;
-        
+
         // Render created routines in 2x2 grid
         createdRoutines.forEach(routine => {
             const item = createRoutineItem(routine, false);
             list.appendChild(item);
         });
     }
-    
+
     function renderDefaultRoutinesList() {
         const list = $('#defaultRoutinesList');
         if (!list) return;
-        
+
         // Clear list to prevent duplicates
         while (list.firstChild) {
             list.removeChild(list.firstChild);
         }
-        
+
         // Get default templates
         const defaultRoutines = [];
         if (typeof templates !== 'undefined' && templates) {
@@ -875,25 +722,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             });
         }
-        
+
         // Render default routines in 2x2 grid
         defaultRoutines.forEach(routine => {
             const item = createRoutineItem(routine, true);
             list.appendChild(item);
         });
     }
-    
+
     function createRoutineItem(routine, isTemplate) {
         const item = document.createElement('div');
         item.className = 'routine-item';
-        
+
         // Different styling for templates vs created routines - compact design
         if (isTemplate) {
             item.style.cssText = 'padding: 8px; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface); transition: all 0.2s ease; cursor: pointer; min-height: 100px; display: flex; flex-direction: column;';
         } else {
             item.style.cssText = 'padding: 8px; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface); transition: all 0.2s ease; cursor: pointer; min-height: 100px; display: flex; flex-direction: column;';
         }
-        
+
         item.addEventListener('mouseenter', () => {
             item.style.background = 'var(--surface-2)';
             item.style.borderColor = 'var(--primary)';
@@ -904,7 +751,7 @@ document.addEventListener('DOMContentLoaded', () => {
             item.style.borderColor = 'var(--border)';
             item.style.transform = 'translateY(0)';
         });
-        
+
         // Icon based on routine type and name
         let icon = '🧩';
         if (isTemplate) {
@@ -917,25 +764,25 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             icon = '🧩'; // Puzzle piece for created routines
         }
-        
+
         // Compact vertical layout for grid - smaller spacing
         const content = document.createElement('div');
         content.style.cssText = 'display: flex; flex-direction: column; align-items: center; text-align: center; gap: 4px; flex: 1; width: 100%;';
-        
+
         const iconEl = document.createElement('div');
         iconEl.style.cssText = 'font-size: 1.1rem; flex-shrink: 0;';
         iconEl.textContent = icon;
         content.appendChild(iconEl);
-        
+
         const info = document.createElement('div');
         info.style.cssText = 'width: 100%; flex: 1; min-height: 0;';
-        
+
         const title = document.createElement('div');
         title.className = 'routine-item-title';
         title.style.cssText = 'font-weight: 600; font-size: 0.9rem; margin-bottom: 2px; color: var(--text); word-wrap: break-word; overflow-wrap: break-word; hyphens: auto; line-height: 1.2;';
         title.textContent = routine.name;
         info.appendChild(title);
-        
+
         if (routine.meta) {
             const meta = document.createElement('div');
             meta.className = 'routine-item-meta';
@@ -950,13 +797,13 @@ document.addEventListener('DOMContentLoaded', () => {
             meta.textContent = `${(routine.days || []).length} días · ${totalExercises} ejercicios`;
             info.appendChild(meta);
         }
-        
+
         content.appendChild(info);
-        
+
         // Action buttons container - compact design
         const actionsContainer = document.createElement('div');
         actionsContainer.style.cssText = 'width: 100%; display: flex; gap: 3px; margin-top: auto; flex-shrink: 0;';
-        
+
         if (isTemplate) {
             // Two buttons for templates: Plantilla and Importar
             const useBtn = document.createElement('button');
@@ -965,7 +812,7 @@ document.addEventListener('DOMContentLoaded', () => {
             useBtn.textContent = 'Plantilla';
             useBtn.dataset.template = routine.templateKey;
             actionsContainer.appendChild(useBtn);
-            
+
             const importTemplateBtn = document.createElement('button');
             importTemplateBtn.className = 'btn btn--ghost js-import-template';
             importTemplateBtn.style.cssText = 'flex: 1; padding: 6px 3px; min-height: 30px; font-size: 0.7rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;';
@@ -981,7 +828,7 @@ document.addEventListener('DOMContentLoaded', () => {
             importBtn.classList.add('js-import-user-routine');
             importBtn.dataset.routineId = routine.id;
             actionsContainer.appendChild(importBtn);
-            
+
             // Edit button
             const editBtn = document.createElement('button');
             editBtn.className = 'btn btn--ghost js-edit-routine-item';
@@ -991,7 +838,7 @@ document.addEventListener('DOMContentLoaded', () => {
             editBtn.title = 'Editar rutina';
             editBtn.setAttribute('aria-label', 'Editar rutina');
             actionsContainer.appendChild(editBtn);
-            
+
             // Delete button
             const deleteBtn = document.createElement('button');
             deleteBtn.className = 'btn btn--ghost js-delete-routine-item';
@@ -1002,22 +849,22 @@ document.addEventListener('DOMContentLoaded', () => {
             deleteBtn.setAttribute('aria-label', 'Eliminar rutina');
             actionsContainer.appendChild(deleteBtn);
         }
-        
+
         content.appendChild(actionsContainer);
         item.appendChild(content);
-        
+
         // Click handler - removed for created routines (only buttons work now)
         if (isTemplate) {
-        item.addEventListener('click', (e) => {
-            if (e.target.closest('button')) return; // Don't trigger if clicking button
+            item.addEventListener('click', (e) => {
+                if (e.target.closest('button')) return; // Don't trigger if clicking button
                 if (typeof loadTemplateIntoBuilder === 'function') {
                     loadTemplateIntoBuilder(routine.templateKey);
                     showRoutineBuilder();
-            }
-        });
+                }
+            });
         }
         // For created routines, clicking the panel does nothing - only buttons work
-        
+
         return item;
     }
 
@@ -1027,12 +874,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const createdRoutinesList = $('#createdRoutinesList');
         const defaultRoutineList = $('#defaultRoutineList');
         const createdRoutineList = $('#createdRoutineList');
-        
+
         if (defaultRoutinesList) defaultRoutinesList.innerHTML = '';
         if (createdRoutinesList) createdRoutinesList.innerHTML = '';
         if (defaultRoutineList) defaultRoutineList.innerHTML = '';
         if (createdRoutineList) createdRoutineList.innerHTML = '';
-        
+
         // Render routines
         renderDefaultRoutines();
         renderCreatedRoutines();
@@ -1041,7 +888,7 @@ document.addEventListener('DOMContentLoaded', () => {
         renderDefaultRoutinesList();
         updateRoutineDayTitles();
     }
-    
+
     function showRoutineBuilder() {
         const builder = $('#routineBuilderCard');
         const btn = $('#btnCreateNewRoutine');
@@ -1050,7 +897,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Scroll to builder
         if (builder) builder.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
-    
+
     function hideRoutineBuilder() {
         const builder = $('#routineBuilderCard');
         const btn = $('#btnCreateNewRoutine');
@@ -1070,10 +917,10 @@ document.addEventListener('DOMContentLoaded', () => {
             routineNameInput.value = templateLabels[key] || `Rutina ${key}`;
             routineNameInput.focus();
         }
-        
+
         // For PPL (6 days), use 3 sets per exercise, otherwise 1 set
         const setsPerExercise = (key === 'ppl') ? 3 : 1;
-        
+
         preset.forEach(day => {
             const dayEl = addRoutineDay({
                 id: uuid(),
@@ -1208,11 +1055,11 @@ document.addEventListener('DOMContentLoaded', () => {
     /* =================== Persistencia =================== */
     // Override save to include clearProgressCache
     const originalSave = window.save;
-    window.save = async function() {
+    window.save = async function () {
         clearProgressCache();
         return originalSave();
     };
-    
+
     // save, load, debouncedSave, and createDefaultProfile are now imported from storage.js module
     // initializeDefaultData is now imported from app-state.js module
 
@@ -1247,7 +1094,7 @@ document.addEventListener('DOMContentLoaded', () => {
         function updateNav(panelId) {
             const navId = panelToNav[panelId];
             if (!navId) return;
-            
+
             // Update bottom nav buttons (optimized: batch DOM updates)
             const navIds = ['navDiary', 'navStats', 'navRoutines', 'navSettings'];
             const updates = [];
@@ -1282,25 +1129,25 @@ document.addEventListener('DOMContentLoaded', () => {
             for (let i = 0; i < panels.length; i++) {
                 panels[i].setAttribute('aria-hidden', panels[i].id === panelId ? 'false' : 'true');
             }
-            
+
             // Reset settings panel to main menu when switching away
             if (panelId !== 'panel-settings') {
                 if (typeof showSettingsMain === 'function') showSettingsMain();
             }
-            
+
             updateNav(panelId);
-            if (panelId === 'panel-diary') { 
-                renderSessions(); 
-                renderSummary(); 
+            if (panelId === 'panel-diary') {
+                renderSessions();
+                renderSummary();
             }
-            if (panelId === 'panel-routines') { 
+            if (panelId === 'panel-routines') {
                 // Only render if panel is visible to prevent duplicate rendering
                 const routinesPanel = $('#panel-routines');
                 if (routinesPanel && routinesPanel.getAttribute('aria-hidden') === 'false') {
-                    renderRoutines(); 
+                    renderRoutines();
                 }
             }
-            if (panelId === 'panel-stats') { 
+            if (panelId === 'panel-stats') {
                 renderSummary(); // Update weekly summary
                 loadModule('./js/modules/stats.js').then(() => {
                     if (typeof buildStats === 'function') buildStats();
@@ -1308,7 +1155,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (typeof renderArchivedCycles === 'function') renderArchivedCycles();
                 });
             }
-            if (panelId === 'panel-import') { 
+            if (panelId === 'panel-import') {
                 loadModule('js/modules/import.js').then(() => {
                     if (typeof initWeekSelector === 'function') initWeekSelector();
                     if (typeof renderImportRoutineList === 'function') renderImportRoutineList();
@@ -1332,7 +1179,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 btn.addEventListener('click', () => select(navBindings[navId]));
             }
         });
-        
+
         // Button to navigate to import panel from routines
         const btnGoToImport = $('#btnGoToImport');
         if (btnGoToImport) {
@@ -1340,7 +1187,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 select('panel-import');
             });
         }
-        
+
         // Button to go back from import panel to routines
         const btnBackFromImport = $('#btnBackFromImport');
         if (btnBackFromImport) {
@@ -1348,7 +1195,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 select('panel-routines');
             });
         }
-        
+
         // Button to create new routine
         const btnCreateNewRoutine = $('#btnCreateNewRoutine');
         if (btnCreateNewRoutine) {
@@ -1356,7 +1203,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 showRoutineBuilder();
             });
         }
-        
+
         // Button to cancel routine builder
         const cancelRoutineBuilder = $('#cancelRoutineBuilder');
         if (cancelRoutineBuilder) {
@@ -1372,7 +1219,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 hideRoutineBuilder();
             });
         }
-        
+
 
         select('panel-diary');
     }
@@ -1510,7 +1357,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         }
-        
+
         // Sort by date
         history.sort((a, b) => parseLocalDate(a.date) - parseLocalDate(b.date));
 
@@ -1553,7 +1400,7 @@ document.addEventListener('DOMContentLoaded', () => {
             for (let i = 0; i < history.length; i++) {
                 if (parseLocalDate(history[i].date).getTime() >= currentSessionDate) {
                     currentIndex = i;
-                break;
+                    break;
                 }
             }
         }
@@ -1573,8 +1420,8 @@ document.addEventListener('DOMContentLoaded', () => {
             for (let j = 0; j < s.exercises.length; j++) {
                 if (s.exercises[j].name === currentEx.name) {
                     ex = s.exercises[j];
-                break;
-        }
+                    break;
+                }
             }
             if (!ex) continue;
 
@@ -1587,7 +1434,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
                 }
             }
-            
+
             if (prevSet && (prevSet.kg || prevSet.reps)) {
                 const [txt, cls] = compareSets(prevSet, currentSet, currentSet.setNumber);
                 const result = `<span class="${cls}">${txt}</span>`;
@@ -1629,24 +1476,24 @@ document.addEventListener('DOMContentLoaded', () => {
     // EXTREME PERFORMANCE ARCHITECTURE
     // Event delegation: single global listener for all inputs
     let diaryEventDelegationSetup = false;
-    
+
     // Component-level DOM caches (WeakMap for automatic cleanup)
     const sessionElementCache = new WeakMap(); // session object -> DOM element
     const exerciseElementCache = new WeakMap(); // exercise object -> DOM element
     const setElementCache = new WeakMap(); // set object -> DOM element
-    
+
     // Render state tracking
     let isRendering = false;
     let renderedSessions = new WeakSet(); // Track which sessions are rendered
-    
+
     // IntersectionObserver for lazy loading calculations
     let calculationObserver = null;
-    
+
     /* =================== PERFORMANCE OPTIMIZATION UTILITIES =================== */
     // Throttle function for scroll events
     function throttle(func, limit) {
         let inThrottle;
-        return function(...args) {
+        return function (...args) {
             if (!inThrottle) {
                 func.apply(this, args);
                 inThrottle = true;
@@ -1654,16 +1501,16 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
     }
-    
+
     // Debounce function for resize and other events
     function debounce(func, wait) {
         let timeout;
-        return function(...args) {
+        return function (...args) {
             clearTimeout(timeout);
             timeout = setTimeout(() => func.apply(this, args), wait);
         };
     }
-    
+
     // Virtual scrolling manager for exercises and sets
     class VirtualScrollManager {
         constructor(container, itemHeight, buffer = 3) {
@@ -1679,48 +1526,48 @@ document.addEventListener('DOMContentLoaded', () => {
             this.scrollHandler = null;
             this.isInitialized = false;
         }
-        
+
         init(items, renderFn) {
             this.items = items;
             this.totalItems = items.length;
             this.renderFn = renderFn;
-            
+
             if (this.totalItems === 0) {
                 this.container.innerHTML = '';
                 return;
             }
-            
+
             // Calculate visible range
             this.updateVisibleRange();
-            
+
             // Render initial visible items
             this.render();
-            
+
             // Setup scroll listener with throttling
             this.scrollHandler = throttle(() => {
                 this.updateVisibleRange();
                 this.render();
             }, 16); // ~60fps
-            
+
             this.container.addEventListener('scroll', this.scrollHandler, { passive: true });
-            
+
             // Setup IntersectionObserver for better performance
             this.setupObserver();
-            
+
             this.isInitialized = true;
         }
-        
+
         updateVisibleRange() {
             const scrollTop = this.container.scrollTop || 0;
             const containerHeight = this.container.clientHeight || this.container.offsetHeight;
-            
+
             this.visibleStart = Math.max(0, Math.floor(scrollTop / this.itemHeight) - this.buffer);
             this.visibleEnd = Math.min(
                 this.totalItems - 1,
                 Math.ceil((scrollTop + containerHeight) / this.itemHeight) + this.buffer
             );
         }
-        
+
         render() {
             requestAnimationFrame(() => {
                 // Remove items outside visible range
@@ -1730,7 +1577,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         this.renderedItems.delete(index);
                     }
                 });
-                
+
                 // Add items in visible range
                 for (let i = this.visibleStart; i <= this.visibleEnd; i++) {
                     if (!this.renderedItems.has(i) && this.items[i]) {
@@ -1744,7 +1591,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             element.style.right = '0';
                             element.style.height = `${this.itemHeight}px`;
                             element.dataset.virtualIndex = i;
-                            
+
                             // Insert in correct position
                             const existing = Array.from(this.container.children);
                             let insertBefore = null;
@@ -1760,20 +1607,20 @@ document.addEventListener('DOMContentLoaded', () => {
                             } else {
                                 this.container.appendChild(element);
                             }
-                            
+
                             this.renderedItems.set(i, element);
                         }
                     }
                 }
-                
+
                 // Update container height for proper scrolling
                 this.container.style.height = `${this.totalItems * this.itemHeight}px`;
             });
         }
-        
+
         setupObserver() {
             if (!window.IntersectionObserver) return;
-            
+
             this.observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
@@ -1793,7 +1640,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 threshold: 0
             });
         }
-        
+
         destroy() {
             if (this.scrollHandler) {
                 this.container.removeEventListener('scroll', this.scrollHandler);
@@ -1804,7 +1651,7 @@ document.addEventListener('DOMContentLoaded', () => {
             this.renderedItems.clear();
             this.isInitialized = false;
         }
-        
+
         updateItems(newItems) {
             this.items = newItems;
             this.totalItems = newItems.length;
@@ -1813,10 +1660,10 @@ document.addEventListener('DOMContentLoaded', () => {
             this.render();
         }
     }
-    
+
     // Cache for virtual scroll managers
     const virtualScrollManagers = new WeakMap();
-    
+
     // Get or create virtual scroll manager for a container
     function getVirtualScrollManager(container, itemHeight, buffer = 3) {
         if (!virtualScrollManagers.has(container)) {
@@ -1825,73 +1672,73 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         return virtualScrollManagers.get(container);
     }
-    
+
     // Batch update queue for DOM modifications
     const domUpdateQueue = [];
     let domUpdateScheduled = false;
-    
+
     // Memoization caches
     const sessionRenderCache = new WeakMap();
     const exerciseRenderCache = new WeakMap();
-    
+
     // Setup global event delegation (once)
     function setupDiaryEventDelegation() {
         const container = $('#sessions');
         if (!container) return;
-        
+
         // Only set up once to avoid duplicate listeners
         if (diaryEventDelegationSetup) return;
         diaryEventDelegationSetup = true;
-        
+
         // Single listener for all input events (delegation)
         container.addEventListener('input', (e) => {
             const input = e.target;
-            if (!input.classList.contains('js-kg') && 
-                !input.classList.contains('js-reps') && 
+            if (!input.classList.contains('js-kg') &&
+                !input.classList.contains('js-reps') &&
                 !input.classList.contains('js-rir')) return;
-            
+
             const setElement = input.closest('[data-set-id]');
             if (!setElement) return;
-            
+
             const sessionEl = input.closest('.session');
             const exerciseEl = input.closest('.exercise');
             if (!sessionEl || !exerciseEl) return;
-            
+
             const sessionId = sessionEl.dataset.id;
             const exId = exerciseEl.dataset.exId;
             const setId = setElement.dataset.setId;
-            
+
             if (!sessionId || !exId || !setId) return;
-            
+
             // Get field name from class
             let field = 'kg';
             if (input.classList.contains('js-reps')) field = 'reps';
             else if (input.classList.contains('js-rir')) field = 'rir';
-            
+
             // Update immediately without re-render
             updateSet(sessionId, exId, setId, field, input.value.trim(), true);
         }, { passive: true });
-        
+
         // Single listener for focus events
         container.addEventListener('focus', (e) => {
             const input = e.target;
-            if (!input.classList.contains('js-kg') && 
-                !input.classList.contains('js-reps') && 
+            if (!input.classList.contains('js-kg') &&
+                !input.classList.contains('js-reps') &&
                 !input.classList.contains('js-rir')) return;
-            
+
             const setElement = input.closest('[data-set-id]');
             if (!setElement) return;
-            
+
             const sessionId = input.closest('.session')?.dataset.id;
             const exId = input.closest('.exercise')?.dataset.exId;
             const setId = setElement.dataset.setId;
-            
+
             if (sessionId && exId && setId) {
                 restoreOriginalValues(sessionId, exId, setId);
             }
         }, true);
     }
-    
+
     // Batch DOM updates to minimize reflows
     function scheduleDOMUpdate(callback) {
         domUpdateQueue.push(callback);
@@ -1902,8 +1749,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const queue = domUpdateQueue.splice(0);
                 queue.forEach(fn => {
                     try { fn(); } catch (e) { console.warn('DOM update error:', e); }
+                });
             });
-        });
         }
     }
 
@@ -1914,7 +1761,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const state = new Map();
         const inputs = container.querySelectorAll('.js-kg, .js-reps, .js-rir');
         if (inputs.length === 0) return state; // Early return if no inputs
-        
+
         const activeElement = document.activeElement;
         const isActive = (el) => el === activeElement;
 
@@ -1925,7 +1772,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const session = input.closest('.session');
             const exercise = input.closest('.exercise');
-            
+
             const sessionId = session?.dataset.id;
             const exId = exercise?.dataset.exId;
             const setId = setElement.dataset.setId;
@@ -2006,7 +1853,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const container = $('#sessions');
         const emptyState = $('#emptyState');
         if (!container) return;
-        
+
         // Setup event delegation for diary inputs (ensure it's set up after container exists)
         setupDiaryEventDelegation();
 
@@ -2160,7 +2007,7 @@ document.addEventListener('DOMContentLoaded', () => {
             container.appendChild(details);
 
             // Add toggle event listener to trigger animation each time
-            details.addEventListener('toggle', function() {
+            details.addEventListener('toggle', function () {
                 if (this.open) {
                     // Remove animation class first to reset
                     const sessionCard = this.querySelector('.session.card');
@@ -2193,14 +2040,14 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-    
+
     // Optimized renderExercise with deferred set rendering
     function renderExercise(session, ex) {
         const block = $('#tpl-exercise').content.firstElementChild.cloneNode(true);
         block.dataset.exId = ex.id;
         const nameEl = block.querySelector('.exercise__name');
         nameEl.textContent = ex.name;
-        
+
         // Use requestAnimationFrame for smooth rendering
         requestAnimationFrame(() => {
             block.style.opacity = '0';
@@ -2295,7 +2142,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 };
 
                 saveBtn.addEventListener('click', (e) => {
-            e.preventDefault();
+                    e.preventDefault();
                     e.stopPropagation();
                     saveChanges();
                 });
@@ -2357,7 +2204,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const mobileContainer = block.querySelector('.sets-container');
         const desktopTable = block.querySelector('.sets');
         const sets = ex.sets || [];
-        
+
         // Use IntersectionObserver to render sets only when exercise is visible
         if (sets.length > 10) {
             // For exercises with many sets, use deferred rendering
@@ -2383,7 +2230,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     });
                 });
-                
+
                 // Fade in exercise block
                 requestAnimationFrame(() => {
                     block.style.opacity = '1';
@@ -2416,11 +2263,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         return block;
     }
-    
+
     // Deferred rendering for exercises with many sets
     function renderSetsDeferred(session, ex, sets, mobileContainer, desktopTable, exerciseBlock) {
         if (!mobileContainer && !desktopTable) return;
-        
+
         // Create intersection observer for the exercise block
         if (!window.IntersectionObserver) {
             // Fallback: render all sets immediately
@@ -2432,8 +2279,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 exerciseBlock.style.opacity = '1';
                 exerciseBlock.style.transform = 'translateY(0)';
             });
-                return;
-            }
+            return;
+        }
 
         let hasRendered = false;
         const observer = new IntersectionObserver((entries) => {
@@ -2441,11 +2288,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (entry.isIntersecting && !hasRendered) {
                     hasRendered = true;
                     observer.disconnect();
-                    
+
                     // Render sets in batches using requestAnimationFrame
                     const batchSize = 5;
                     let index = 0;
-                    
+
                     const renderBatch = () => {
                         const end = Math.min(index + batchSize, sets.length);
                         for (let i = index; i < end; i++) {
@@ -2465,7 +2312,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 desktopTable.appendChild(renderSet(session, ex, set));
                             }
                         }
-                        
+
                         index = end;
                         if (index < sets.length) {
                             requestAnimationFrame(renderBatch);
@@ -2477,16 +2324,16 @@ document.addEventListener('DOMContentLoaded', () => {
                             });
                         }
                     };
-                    
+
                     requestAnimationFrame(renderBatch);
                 }
             });
         }, {
             rootMargin: '100px' // Start rendering 100px before visible
         });
-        
+
         observer.observe(exerciseBlock);
-        
+
         // Fallback: if not visible after 500ms, render anyway
         setTimeout(() => {
             if (!hasRendered) {
@@ -3954,7 +3801,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function markSessionAsChanged(sessionId) {
         if (app.editingSessions[sessionId]) {
             app.editingSessions[sessionId].hasChanges = true;
-                        } else {
+        } else {
             app.editingSessions[sessionId] = { isEditing: false, hasChanges: true };
         }
         updateSessionEditUI(sessionId);
@@ -5162,16 +5009,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Cache for DOM element references to avoid repeated queries
     let domElementCache = new WeakMap();
-    
+
     // Fallback for requestIdleCallback
     const requestIdleCallback = window.requestIdleCallback || ((callback, options) => {
         const timeout = (options && options.timeout) ? options.timeout : 50;
         return setTimeout(callback, timeout);
     });
-    
+
     // Throttle updateSetUI calls to avoid excessive updates during rapid typing
     let updateSetUITimeouts = new Map();
-    
+
     function updateSet(sessionId, exId, setId, field, value, skipRefresh = false) {
         const s = app.sessions.find(x => x.id === sessionId); if (!s) return;
         const ex = s.exercises.find(e => e.id === exId); if (!ex) return;
@@ -5206,12 +5053,12 @@ document.addEventListener('DOMContentLoaded', () => {
         // Update UI incrementally only if needed and throttle to avoid excessive updates
         if (!skipRefresh) {
             const cacheKey = `${sessionId}-${exId}-${setId}`;
-            
+
             // Clear existing timeout for this set
             if (updateSetUITimeouts.has(cacheKey)) {
                 clearTimeout(updateSetUITimeouts.get(cacheKey));
             }
-            
+
             // Throttle UI updates - only update after user stops typing for 300ms
             const timeout = setTimeout(() => {
                 updateSetUITimeouts.delete(cacheKey);
@@ -5222,7 +5069,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
                 }
             }, 300);
-            
+
             updateSetUITimeouts.set(cacheKey, timeout);
         }
     }
@@ -5244,7 +5091,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             setElement = exerciseEl.querySelector(`[data-set-id="${setId}"]`);
             if (!setElement) return;
-            
+
             // Cache the element reference
             domElementCache.set(set, setElement);
         }
@@ -5262,7 +5109,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const setValuesKey = `${set.kg || ''}-${set.reps || ''}-${set.rir || ''}`;
             const cacheKey = `${getCacheKey(sessionData.id, exData.id, set.id)}-${setValuesKey}`;
             const cachedProgress = progressCache.get(cacheKey);
-            
+
             // Only recalculate if not cached - calculate immediately
             if (!cachedProgress) {
                 try {
@@ -5276,7 +5123,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 } catch (e) {
                     console.warn('Error updating progress UI:', e);
                 }
-                } else {
+            } else {
                 // Use cached value
                 let progressHTML = cachedProgress;
                 if (set.isPR) {
@@ -5739,7 +5586,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function normalizeSessionFromImport(src, dateISO) {
-    return {
+        return {
             id: uuid(),
             name: String(src.name || 'Sesión'),
             date: dateISO,
@@ -6050,10 +5897,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function importTemplateIntoVisibleWeek(ev) {
         if (ev) ev.preventDefault();
-        const key = app.tmpTemplateKey || (ev && ev.target && ev.target.dataset && ev.target.dataset.template); 
+        const key = app.tmpTemplateKey || (ev && ev.target && ev.target.dataset && ev.target.dataset.template);
         if (!key) return;
         const arr = templates[key] || [];
-        
+
         // Get selected week from targetWeek selector (if in import panel) or use visible week
         const targetWeekSelect = $('#targetWeek');
         let targetWeekStart;
@@ -6067,7 +5914,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const { ws } = getVisibleWeek();
             targetWeekStart = ws;
         }
-        
+
         const toAdd = arr.map((it, idx) => ({
             id: uuid(),
             name: it.name,
@@ -6077,7 +5924,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }));
         app.sessions = [...app.sessions, ...toAdd];
         save(); refresh(); $('#templateDialog').close();
-        
+
         // Format week range for toast message
         const weekEnd = addDays(targetWeekStart, 6);
         const weekRange = `${targetWeekStart.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })} – ${weekEnd.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })}`;
@@ -6089,7 +5936,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const dialog = $('#routineImportWeekDialog');
         const selector = $('#routineImportWeek');
         if (!dialog || !selector) return;
-        
+
         // Initialize week selector
         selector.innerHTML = '';
         const base = startOfWeek(new Date());
@@ -6101,7 +5948,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (i === app.weekOffset) opt.selected = true;
             selector.appendChild(opt);
         }
-        
+
         dialog.showModal();
     }
 
@@ -6110,7 +5957,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const dialog = $('#routineImportWeekDialog');
         const selector = $('#routineImportWeek');
         if (!dialog || !selector) return;
-        
+
         // Initialize week selector
         selector.innerHTML = '';
         const base = startOfWeek(new Date());
@@ -6122,7 +5969,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (i === app.weekOffset) opt.selected = true;
             selector.appendChild(opt);
         }
-        
+
         dialog.showModal();
     }
 
@@ -6132,7 +5979,7 @@ document.addEventListener('DOMContentLoaded', () => {
             toast('Rutina no encontrada', 'err');
             return;
         }
-        
+
         // Get selected week from parameter or selector
         let targetWeekStart;
         if (weekOffset !== null) {
@@ -6143,7 +5990,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const { ws } = getVisibleWeek();
             targetWeekStart = ws;
         }
-        
+
         const days = routine.days || [];
         if (!days.length) {
             toast('La rutina no tiene días definidos', 'warn');
@@ -6173,7 +6020,7 @@ document.addEventListener('DOMContentLoaded', () => {
         app.sessions = [...app.sessions, ...toAdd];
         save();
         refresh();
-        
+
         // Format week range for toast message
         const weekEnd = addDays(targetWeekStart, 6);
         const weekRange = `${targetWeekStart.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })} – ${weekEnd.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })}`;
@@ -6186,7 +6033,7 @@ document.addEventListener('DOMContentLoaded', () => {
             toast('Plantilla no encontrada', 'err');
             return;
         }
-        
+
         // Get selected week from parameter
         let targetWeekStart;
         if (weekOffset !== null) {
@@ -6197,7 +6044,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const { ws } = getVisibleWeek();
             targetWeekStart = ws;
         }
-        
+
         const toAdd = arr.map((it, idx) => ({
             id: uuid(),
             name: it.name,
@@ -6206,9 +6053,9 @@ document.addEventListener('DOMContentLoaded', () => {
             exercises: it.ex.map(n => ({ id: uuid(), name: n, sets: [{ id: uuid(), setNumber: 1, kg: '', reps: '', rir: '' }] }))
         }));
         app.sessions = [...app.sessions, ...toAdd];
-        save(); 
+        save();
         refresh();
-        
+
         // Format week range for toast message
         const weekEnd = addDays(targetWeekStart, 6);
         const weekRange = `${targetWeekStart.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })} – ${weekEnd.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })}`;
@@ -6934,7 +6781,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const selector = $('#routineImportWeek');
                 if (!selector) return;
                 const weekOffset = +selector.value;
-                
+
                 // Check if importing routine or template
                 if (app.tempRoutineId) {
                     importRoutineIntoWeek(app.tempRoutineId, weekOffset);
@@ -6943,7 +6790,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     importTemplateIntoWeek(app.tempTemplateKey, weekOffset);
                     app.tempTemplateKey = null;
                 }
-                
+
                 const dialog = $('#routineImportWeekDialog');
                 if (dialog) dialog.close();
             });
@@ -7199,7 +7046,7 @@ document.addEventListener('DOMContentLoaded', () => {
         app.exerciseHistoryCache = {}; // Clear history cache
 
         render();
-        
+
         // Render Stats if visible
         const activePanel = document.querySelector('.panel[aria-hidden="false"]');
         if (activePanel && activePanel.id === 'panel-stats') {
@@ -7208,7 +7055,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (typeof buildChartState === 'function') buildChartState();
             if (typeof renderArchivedCycles === 'function') renderArchivedCycles();
         }
-        
+
         // Render Import if visible
         if (activePanel && activePanel.id === 'panel-import') {
             if (typeof initWeekSelector === 'function') initWeekSelector();
@@ -7223,7 +7070,7 @@ document.addEventListener('DOMContentLoaded', () => {
         bindEvents();
         render();
         // Removed competitive mode initialization for EasyTracker (only Diary and Routines)
-})();
+    })();
 
 
     /* =================== Profile Handlers =================== */
@@ -7480,7 +7327,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const entries = [...(app.profile.weightHistory || [])].sort((a, b) => new Date(b.date) - new Date(a.date));
             if (!entries.length) {
                 historyBody.innerHTML = '<tr><td colspan="3" style="padding:8px">Sin registros aún</td></tr>';
-} else {
+            } else {
                 historyBody.innerHTML = entries.map(entry => {
                     const date = new Date(entry.date).toLocaleDateString('es-ES', { year: 'numeric', month: 'short', day: 'numeric' });
                     const hasWeight = typeof entry.weight === 'number' && Number.isFinite(entry.weight);
@@ -7658,19 +7505,19 @@ document.addEventListener('DOMContentLoaded', () => {
         settingsPanel.addEventListener('touchstart', (e) => {
             touchStartX = e.changedTouches[0].screenX;
         }, { passive: true });
-        
+
         settingsPanel.addEventListener('touchend', (e) => {
             touchEndX = e.changedTouches[0].screenX;
             const swipeThreshold = 50;
             const swipeDistance = touchStartX - touchEndX;
-            
+
             // Swipe right (go back)
             if (swipeDistance < -swipeThreshold) {
                 const themePanel = $('#settingsTheme');
                 const profilePanel = $('#settingsProfile');
                 const infoPanel = $('#settingsInfo');
                 const creatorPanel = $('#settingsCreator');
-                
+
                 if (themePanel && themePanel.style.display !== 'none') {
                     showSettingsMain();
                 } else if (profilePanel && profilePanel.style.display !== 'none') {
@@ -7832,44 +7679,44 @@ document.addEventListener('DOMContentLoaded', () => {
             const groupContainer = document.createElement('div');
             groupContainer.className = 'color-group';
             groupContainer.style.cssText = 'margin-bottom: 20px;';
-            
+
             // Add group label
             const groupLabel = document.createElement('div');
             groupLabel.className = 'color-group-label';
             groupLabel.textContent = group.name;
             groupLabel.style.cssText = 'font-size: 0.75rem; font-weight: 600; color: var(--muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;';
             groupContainer.appendChild(groupLabel);
-            
+
             // Create swatches container for this group
             const swatchesContainer = document.createElement('div');
             swatchesContainer.className = 'color-swatches-group';
             swatchesContainer.style.cssText = 'display: grid; grid-template-columns: repeat(auto-fill, minmax(44px, 1fr)); gap: 10px;';
-            
+
             group.colors.forEach(colorKey => {
                 if (!COLOR_PRESETS[colorKey]) return; // Skip if color doesn't exist
-                
+
                 const colors = COLOR_PRESETS[colorKey];
                 const swatch = document.createElement('button');
                 swatch.className = 'color-swatch';
                 swatch.setAttribute('aria-label', `Color ${COLOR_NAMES[colorKey] || colorKey}`);
                 swatch.style.setProperty('--swatch-color', colors.dark.primary);
                 swatch.dataset.colorKey = colorKey;
-                
+
                 // Check if this color is selected for either theme
                 if (prefs.dark === colorKey || prefs.light === colorKey) {
                     swatch.classList.add('active');
                 }
-                
+
                 swatch.addEventListener('click', () => {
                     // Apply to both themes
                     setThemeColor('dark', colorKey);
                     setThemeColor('light', colorKey);
                     renderColorSwatches();
                 });
-                
+
                 swatchesContainer.appendChild(swatch);
             });
-            
+
             if (swatchesContainer.children.length > 0) {
                 groupContainer.appendChild(swatchesContainer);
                 colorSwatches.appendChild(groupContainer);
