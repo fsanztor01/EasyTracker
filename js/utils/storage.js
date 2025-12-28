@@ -45,8 +45,8 @@ const StorageUtils = (() => {
             statsPeriod: app.statsPeriod || '8weeks',
             goals: app.goals || [],
             recentAchievements: app.recentAchievements || [],
-
-
+            lastLevel: app.lastLevel || 1,
+            totalDaysCompleted: app.totalDaysCompleted || 0,
             archivedCycles: app.archivedCycles || []
         };
 
@@ -126,8 +126,8 @@ const StorageUtils = (() => {
                 app.statsPeriod = parsed.statsPeriod || 'lastWeek';
                 app.goals = Array.isArray(parsed.goals) ? parsed.goals : [];
                 app.recentAchievements = Array.isArray(parsed.recentAchievements) ? parsed.recentAchievements : [];
-
-
+                app.lastLevel = parsed.lastLevel || 1;
+                app.totalDaysCompleted = parsed.totalDaysCompleted || 0;
                 app.archivedCycles = Array.isArray(parsed.archivedCycles) ? parsed.archivedCycles : [];
             }
 

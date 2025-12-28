@@ -28,12 +28,9 @@
     --spacing-xl: 24px;
 
     /* iOS border radius - Human Interface Guidelines */
-    --radius-xl: 14px;
-    /* Cards */
-    --radius-lg: 12px;
-    /* Inputs */
-    --radius: 10px;
-    /* Buttons */
+    --radius-xl: 14px;  /* Cards */
+    --radius-lg: 12px;  /* Inputs */
+    --radius: 10px;     /* Buttons */
     --radius-sm: 8px;
     --radius-xs: 6px;
 
@@ -86,7 +83,7 @@
         --danger: #FF3B30;
         --progress-green: #30D158;
         --success: #30D158;
-
+        
         /* Dark theme shadows - none */
         --shadow-xs: none;
         --shadow-sm: none;
@@ -189,15 +186,15 @@
     .set-card {
         will-change: transform, opacity;
     }
-
+    
     /* Optimize animations - use only transform and opacity */
     .session.card.animate-in,
     .exercise,
     .set-card {
-        transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
-            opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), 
+                    opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     }
-
+    
     /* Remove will-change after animation completes to free GPU memory */
     .session.card:not(.animate-in),
     .exercise:not(:hover),
@@ -213,11 +210,7 @@
 }
 
 /* Smooth animations for animated elements only */
-[class*="fade"],
-[class*="pop"],
-[class*="slide"],
-.card,
-.btn {
+[class*="fade"], [class*="pop"], [class*="slide"], .card, .btn {
     animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -280,13 +273,7 @@ body {
 }
 
 /* Firefox - apply to scrollable elements only */
-.scrollable,
-.panel,
-.modal__body,
-.manual-content,
-.sessions,
-.routine-days,
-.routine-exercises {
+.scrollable, .panel, .modal__body, .manual-content, .sessions, .routine-days, .routine-exercises {
     scrollbar-width: thin;
     scrollbar-color: var(--border) var(--surface-2);
 }
@@ -509,7 +496,6 @@ header {
 @media (max-width: 767px) {
     .panel {
         padding-top: 0;
-        padding-bottom: calc(var(--nav-h) + 60px);
     }
 }
 
@@ -633,7 +619,7 @@ header {
         color: var(--text) !important;
         border: 1px solid rgba(0, 0, 0, 0.1) !important;
     }
-
+    
     .btn--ghost svg {
         stroke: var(--heading) !important;
         color: var(--heading) !important;
@@ -842,7 +828,7 @@ header {
         border: 1px solid rgba(0, 0, 0, 0.1) !important;
         color: var(--text) !important;
     }
-
+    
     .weekbar .btn--ghost span {
         color: var(--heading) !important;
     }
@@ -1074,7 +1060,6 @@ header {
         opacity: 0;
         transform: translateY(-10px);
     }
-
     to {
         opacity: 1;
         transform: translateY(0);
@@ -1509,6 +1494,8 @@ header {
 /* Performance Optimization */
 .card,
 .day-panel {
+    content-visibility: auto;
+    contain-intrinsic-size: 100px 500px;
     will-change: transform, opacity;
 }
 
@@ -1630,8 +1617,7 @@ h6 {
 /* ==================== SESSIONS ==================== */
 .sessions {
     display: grid;
-    gap: 12px;
-    align-content: start;
+    gap: 16px
 }
 
 /* When sessions container is empty, don't take up space */
@@ -1639,36 +1625,14 @@ h6 {
     display: none;
 }
 
-/* Session Day Layout */
-.day-panel {
-    border: 1px solid var(--border);
-    margin-bottom: 8px;
-    background: var(--surface);
-    overflow: hidden;
-}
-
-.day-panel summary {
-    user-select: none;
-    -webkit-tap-highlight-color: transparent;
-}
-
-.day-panel .session {
-    border-top: 1px solid var(--border);
-    background: transparent;
-}
-
+/* Simplified Session Header */
 .session__header {
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    padding: 10px 14px;
+    gap: 6px;
+    padding: 14px;
     background: transparent;
     color: var(--heading);
-}
-
-.day-panel .session__header {
-    padding: 8px 14px;
-    border-bottom: 1px solid var(--border);
 }
 
 .session__edit-controls {
@@ -1724,10 +1688,22 @@ textarea.input:disabled {
     }
 }
 
-/* Session card is always fully visible */
-.session.card {
-    overflow: visible;
-    opacity: 1;
+.session.card.animate-in {
+    animation: slideDown 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+        max-height: 0;
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+        max-height: 2000px;
+    }
 }
 
 .session.card:hover {
@@ -4400,7 +4376,7 @@ dialog {
             opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1);
         padding: 0 6px;
     }
-
+    
     .day-panel[open]>div {
         padding: 6px;
     }
@@ -4807,7 +4783,42 @@ dialog {
     }
 }
 
+/* Fiesta Animation - Celebration effect */
+@keyframes fiestaBounce {
 
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.08);
+    }
+}
+
+@keyframes confettiFall {
+    0% {
+        transform: translateY(-100vh) rotate(0deg);
+        opacity: 1;
+    }
+
+    100% {
+        transform: translateY(100vh) rotate(720deg);
+        opacity: 0;
+    }
+}
+
+@keyframes confettiExplode {
+    0% {
+        transform: scale(0) rotate(0deg);
+        opacity: 1;
+    }
+
+    100% {
+        transform: scale(1) rotate(360deg);
+        opacity: 0;
+    }
+}
 
 
 /* Apply Diagonal animation to session cards on mobile */
@@ -4859,7 +4870,10 @@ dialog {
         animation: diagonalEnter 0.35s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-
+    /* Fiesta celebration class */
+    .fiesta-celebration {
+        animation: fiestaBounce 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
 }
 
 /* Respect reduced motion preference */
@@ -4867,11 +4881,14 @@ dialog {
 
     .sessions .session.card,
     dialog[open],
-    .panel[aria-hidden="false"] {
+    .panel[aria-hidden="false"],
+    .fiesta-celebration {
         animation: none !important;
     }
 
-
+    .confetti-container {
+        display: none !important;
+    }
 }
 
 /* ==================== UI FIXES ==================== */
@@ -5022,7 +5039,6 @@ details>summary::-webkit-details-marker {
         opacity: 0;
         transform: translateX(20px);
     }
-
     to {
         opacity: 1;
         transform: translateX(0);
@@ -5549,3 +5565,4 @@ details>summary::-webkit-details-marker {
         font-size: 0.95rem;
     }
 }
+

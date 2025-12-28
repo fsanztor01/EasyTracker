@@ -93,11 +93,8 @@
                 </article>
 
                 <!-- Aggregated Circular Chart (All Exercises) -->
-                <article class="card pop" id="aggregatedChartContainer"
-                    style="padding:16px; margin-top:10px; margin-bottom:10px; position: relative;">
-                    <button type="button" id="weekInfoBtn" class="btn"
-                        style="position: absolute; top: 12px; right: 12px; min-width: 36px; height: 36px; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; z-index: 10; background: var(--card-bg, rgba(255,255,255,0.1)); border: 1px solid var(--border, rgba(255,255,255,0.2));"
-                        title="Información de semanas">
+                <article class="card pop" id="aggregatedChartContainer" style="padding:16px; margin-top:10px; margin-bottom:10px; position: relative;">
+                    <button type="button" id="weekInfoBtn" class="btn" style="position: absolute; top: 12px; right: 12px; min-width: 36px; height: 36px; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; z-index: 10; background: var(--card-bg, rgba(255,255,255,0.1)); border: 1px solid var(--border, rgba(255,255,255,0.2));" title="Información de semanas">
                         📈
                     </button>
                     <div id="aggregatedCircularChart" class="aggregated-circular-chart"></div>
@@ -130,77 +127,62 @@
                 aria-hidden="true">
                 <div class="routine-panel">
                     <!-- Title -->
-
+                    
                     <!-- Import/Export Management -->
                     <br>
-                    <button class="btn btn--ghost routines-import-btn" id="btnGoToImport"
-                        style="width: 100%; padding: 12px; min-height: 44px; font-size: 0.95rem; margin-bottom: 16px; display: flex; align-items: center; justify-content: center; gap: 8px; background: rgba(100, 100, 110, 0.15); border: 1px solid var(--border);">
+                    <button class="btn btn--ghost routines-import-btn" id="btnGoToImport" style="width: 100%; padding: 12px; min-height: 44px; font-size: 0.95rem; margin-bottom: 16px; display: flex; align-items: center; justify-content: center; gap: 8px; background: rgba(100, 100, 110, 0.15); border: 1px solid var(--border);">
                         <span>📁</span>
                         <span>Gestión de Importación/Exportación</span>
                     </button>
-
+                    
                     <!-- Create New Routine Button -->
-                    <button class="btn" id="btnCreateNewRoutine"
-                        style="width: 100%; padding: 14px; min-height: 48px; font-size: 1rem; margin-bottom: 16px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                    <button class="btn" id="btnCreateNewRoutine" style="width: 100%; padding: 14px; min-height: 48px; font-size: 1rem; margin-bottom: 16px; display: flex; align-items: center; justify-content: center; gap: 8px;">
                         <span style="font-size: 1.2rem;">+</span>
                         <span>Crear nueva rutina</span>
                     </button>
-
+                    
                     <!-- Routine Builder (Hidden by default) -->
-                    <article class="card pop routine-builder-card" id="routineBuilderCard"
-                        style="display: none; padding: 16px; margin-bottom: 16px;">
+                    <article class="card pop routine-builder-card" id="routineBuilderCard" style="display: none; padding: 16px; margin-bottom: 16px;">
                         <div class="field" style="margin-bottom: 12px;">
-                            <div
-                                style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
-                                <label class="label" for="routineName" style="margin: 0; font-size: 0.9rem;">Nombre
-                                    (opcional)</label>
-                                <button type="button" class="btn btn--ghost" id="closeRoutineBuilder"
-                                    style="padding: 8px; min-height: 36px; min-width: 36px; font-size: 1.1rem; color: var(--muted); cursor: pointer; z-index: 10; position: relative;"
-                                    aria-label="Cerrar constructor de rutina" title="Cerrar">✕</button>
+                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                                <label class="label" for="routineName" style="margin: 0; font-size: 0.9rem;">Nombre (opcional)</label>
+                                <button type="button" class="btn btn--ghost" id="closeRoutineBuilder" style="padding: 8px; min-height: 36px; min-width: 36px; font-size: 1.1rem; color: var(--muted); cursor: pointer; z-index: 10; position: relative;" aria-label="Cerrar constructor de rutina" title="Cerrar">✕</button>
                             </div>
-                            <input id="routineName" class="input" placeholder="Ej. Fuerza 4 días"
-                                style="padding: 10px; font-size: 0.95rem;" />
+                            <input id="routineName" class="input" placeholder="Ej. Fuerza 4 días" style="padding: 10px; font-size: 0.95rem;" />
                         </div>
                         <div style="margin-bottom: 12px;">
-                            <button class="btn" id="addRoutineDay"
-                                style="width: 100%; padding: 12px; min-height: 44px; font-size: 0.95rem;">
+                            <button class="btn" id="addRoutineDay" style="width: 100%; padding: 12px; min-height: 44px; font-size: 0.95rem;">
                                 + Añadir día
                             </button>
                         </div>
                         <div class="routine-days" id="routineDays"></div>
                         <div style="display: flex; gap: 8px; margin-top: 16px;">
-                            <button class="btn" id="saveRoutine"
-                                style="flex: 1; padding: 12px; min-height: 44px; font-size: 0.95rem;">
+                            <button class="btn" id="saveRoutine" style="flex: 1; padding: 12px; min-height: 44px; font-size: 0.95rem;">
                                 Guardar rutina
                             </button>
-                            <button class="btn btn--ghost" id="cancelRoutineBuilder"
-                                style="flex: 1; padding: 12px; min-height: 44px; font-size: 0.95rem;">
+                            <button class="btn btn--ghost" id="cancelRoutineBuilder" style="flex: 1; padding: 12px; min-height: 44px; font-size: 0.95rem;">
                                 Cancelar
                             </button>
                         </div>
                     </article>
-
+                    
                     <!-- Created Routines List -->
                     <article class="card pop" style="padding: 12px; margin-bottom: 12px;">
                         <h3 class="summary__title" style="margin: 0 0 10px 0; font-size: 1rem;">Rutinas creadas</h3>
-                        <div id="createdRoutinesList" class="all-routines-list"
-                            style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;"></div>
-                        <div class="routine-empty" id="noCreatedRoutinesEmpty"
-                            style="text-align: center; padding: 30px 20px; color: var(--muted);">
+                        <div id="createdRoutinesList" class="all-routines-list" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;"></div>
+                        <div class="routine-empty" id="noCreatedRoutinesEmpty" style="text-align: center; padding: 30px 20px; color: var(--muted);">
                             <div style="font-size: 2.5rem; margin-bottom: 10px;">⭐</div>
-                            <div style="font-size: 1rem; font-weight: 600; margin-bottom: 5px; color: var(--text);">
-                                ¡Crea tu primera rutina!</div>
+                            <div style="font-size: 1rem; font-weight: 600; margin-bottom: 5px; color: var(--text);">¡Crea tu primera rutina!</div>
                             <div style="font-size: 0.85rem;">Pulsa el botón de arriba para empezar</div>
                         </div>
                     </article>
-
+                    
                     <!-- Default Routines List -->
                     <article class="card pop" style="padding: 12px; margin-bottom: 12px;">
                         <h3 class="summary__title" style="margin: 0 0 10px 0; font-size: 1rem;">Rutinas por defecto</h3>
-                        <div id="defaultRoutinesList" class="all-routines-list"
-                            style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;"></div>
+                        <div id="defaultRoutinesList" class="all-routines-list" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;"></div>
                     </article>
-
+                    
                     <!-- Legacy lists (hidden, kept for functionality) -->
                     <div style="display: none;">
                         <div class="routine-created__list" id="createdRoutineList"></div>
@@ -211,13 +193,10 @@
             </section>
 
             <!-- IMPORTAR -->
-            <section class="panel import-panel" id="panel-import" role="tabpanel" aria-labelledby="tab-import"
-                aria-hidden="true">
+            <section class="panel import-panel" id="panel-import" role="tabpanel" aria-labelledby="tab-import" aria-hidden="true">
                 <!-- Back Button -->
-                <button class="btn btn--ghost" id="btnBackFromImport"
-                    style="margin-bottom: 16px; padding: 12px 16px; min-height: 44px; display: flex; align-items: center; gap: 8px;">
-                    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px;">
+                <button class="btn btn--ghost" id="btnBackFromImport" style="margin-bottom: 16px; padding: 12px 16px; min-height: 44px; display: flex; align-items: center; gap: 8px;">
+                    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px;">
                         <path d="M19 12H5" />
                         <path d="M12 19l-7-7 7-7" />
                     </svg>
@@ -225,15 +204,14 @@
                 </button>
                 <!-- Section 1: Import/Export Sessions -->
                 <article class="card pop import-section" style="padding: 16px; margin-bottom: 16px;">
-                    <h3 class="summary__title import-panel-title" style="margin: 0 0 12px 0; font-size: 1.1rem;">
-                        Importar / Exportar sesiones</h3>
+                    <h3 class="summary__title import-panel-title" style="margin: 0 0 12px 0; font-size: 1.1rem;">Importar / Exportar sesiones</h3>
                     <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 16px;">
-                        <button class="btn btn--ghost" onclick="document.getElementById('fileInput').click()"
+                        <button class="btn btn--ghost" onclick="document.getElementById('fileInput').click()" 
                             style="padding: 12px; min-height: 48px; font-size: 0.95rem; display: flex; flex-direction: column; align-items: center; gap: 6px;">
                             <span style="font-size: 1.5rem;">📄</span>
                             <span>Importar sesiones</span>
                         </button>
-                        <button class="btn btn--ghost" id="btnExport"
+                        <button class="btn btn--ghost" id="btnExport" 
                             style="padding: 12px; min-height: 48px; font-size: 0.95rem; display: flex; flex-direction: column; align-items: center; gap: 6px;">
                             <span style="font-size: 1.5rem;">🖨️</span>
                             <span>Exportar sesiones</span>
@@ -241,20 +219,16 @@
                     </div>
                     <input id="fileInput" type="file" accept="application/json,.json" style="display:none" />
                     <div class="field" style="margin-bottom: 12px;">
-                        <label class="label" for="targetWeek" style="margin-bottom: 6px; font-size: 0.9rem;">📅
-                            Semana</label>
+                        <label class="label" for="targetWeek" style="margin-bottom: 6px; font-size: 0.9rem;">📅 Semana</label>
                         <select id="targetWeek" class="input" style="padding: 10px; font-size: 0.95rem;"></select>
                     </div>
                     <div id="importAlert" class="toast toast--err hidden" role="alert" aria-live="assertive"></div>
                     <div id="importErrorList" class="import-error-list hidden"></div>
-                    <div id="preview" class="card hidden"
-                        style="padding:10px; margin-bottom: 12px; background: var(--surface-2);">
+                    <div id="preview" class="card hidden" style="padding:10px; margin-bottom: 12px; background: var(--surface-2);">
                         <div style="font-weight: 600; margin-bottom: 6px; font-size: 0.9rem;">Vista previa:</div>
-                        <ul id="previewList" style="margin:0; padding-left: 18px; list-style:disc; font-size: 0.9rem;">
-                        </ul>
+                        <ul id="previewList" style="margin:0; padding-left: 18px; list-style:disc; font-size: 0.9rem;"></ul>
                     </div>
-                    <button class="btn" id="btnImport"
-                        style="width:100%; padding: 12px; font-size: 0.95rem; min-height: 44px;">
+                    <button class="btn" id="btnImport" style="width:100%; padding: 12px; font-size: 0.95rem; min-height: 44px;">
                         ✅ Importar
                     </button>
                 </article>
@@ -262,52 +236,40 @@
                 <!-- Section 2: Saved Routines -->
                 <article class="card pop" style="padding: 16px;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px">
-                        <h4 class="summary__title import-panel-title" style="margin:0; font-size: 1rem;">📁 Rutinas
-                            guardadas</h4>
+                        <h4 class="summary__title import-panel-title" style="margin:0; font-size: 1rem;">📁 Rutinas guardadas</h4>
                         <div style="display:flex; gap:6px; align-items:center">
-                            <button class="btn btn--ghost" id="btnImportRoutines"
-                                style="padding: 6px 10px; font-size: 0.85rem; min-height: 36px;">
+                            <button class="btn btn--ghost" id="btnImportRoutines" style="padding: 6px 10px; font-size: 0.85rem; min-height: 36px;">
                                 📥 Importar
                             </button>
-                            <button class="btn btn--ghost" id="btnExportRoutines"
-                                style="padding: 6px 10px; font-size: 0.85rem; min-height: 36px;">
+                            <button class="btn btn--ghost" id="btnExportRoutines" style="padding: 6px 10px; font-size: 0.85rem; min-height: 36px;">
                                 📤 Exportar
                             </button>
                         </div>
                     </div>
                     <input id="routineFileInput" type="file" accept="application/json,.json" style="display:none" />
                     <div id="routineFileInputContainer" style="display:none; margin-bottom:16px">
-                        <div id="routineImportAlert" class="toast toast--err hidden" role="alert" aria-live="assertive">
-                        </div>
+                        <div id="routineImportAlert" class="toast toast--err hidden" role="alert" aria-live="assertive"></div>
                         <div id="routineImportErrorList" class="import-error-list hidden"></div>
-                        <div id="routinePreview" class="card hidden"
-                            style="padding:12px; margin-bottom: 16px; background: var(--surface-2);">
-                            <div class="import-panel-text" style="font-weight: 600; margin-bottom: 8px;">Vista previa:
-                            </div>
-                            <ul id="routinePreviewList" class="import-panel-text"
-                                style="margin:0; padding-left: 20px; list-style:disc"></ul>
+                        <div id="routinePreview" class="card hidden" style="padding:12px; margin-bottom: 16px; background: var(--surface-2);">
+                            <div class="import-panel-text" style="font-weight: 600; margin-bottom: 8px;">Vista previa:</div>
+                            <ul id="routinePreviewList" class="import-panel-text" style="margin:0; padding-left: 20px; list-style:disc"></ul>
                         </div>
                         <div style="display: flex; gap: 12px;">
-                            <button class="btn" id="btnConfirmImportRoutines"
-                                style="flex: 1; padding: 14px; min-height: 48px;">✅ Importar</button>
-                            <button class="btn btn--ghost" id="btnCancelImportRoutines"
-                                style="flex: 1; padding: 14px; min-height: 48px;">✕ Cancelar</button>
+                            <button class="btn" id="btnConfirmImportRoutines" style="flex: 1; padding: 14px; min-height: 48px;">✅ Importar</button>
+                            <button class="btn btn--ghost" id="btnCancelImportRoutines" style="flex: 1; padding: 14px; min-height: 48px;">✕ Cancelar</button>
                         </div>
                     </div>
                     <div id="importRoutineList" class="routine-import__list"></div>
-                    <div class="routine-empty" id="importRoutineEmpty"
-                        style="text-align: center; padding: 40px 20px; color: var(--muted);">
+                    <div class="routine-empty" id="importRoutineEmpty" style="text-align: center; padding: 40px 20px; color: var(--muted);">
                         <div style="font-size: 3rem; margin-bottom: 12px;">📝</div>
-                        <div style="font-size: 1.1rem; font-weight: 600; margin-bottom: 8px; color: var(--text);">Crea
-                            tu primera rutina</div>
+                        <div style="font-size: 1.1rem; font-weight: 600; margin-bottom: 8px; color: var(--text);">Crea tu primera rutina</div>
                         <div style="font-size: 0.9rem;">Ve a "Rutinas" para empezar</div>
                     </div>
                 </article>
             </section>
 
             <!-- AJUSTES -->
-            <section class="panel" id="panel-settings" role="tabpanel" aria-labelledby="tab-settings"
-                aria-hidden="true">
+            <section class="panel" id="panel-settings" role="tabpanel" aria-labelledby="tab-settings" aria-hidden="true">
                 <!-- Menú principal de ajustes -->
                 <div class="settings-main" id="settingsMain">
                     <article class="card pop" style="padding:16px">
@@ -347,9 +309,8 @@
                     <article class="card pop" style="padding:16px">
                         <div class="settings-header">
                             <button class="btn btn--ghost" id="backFromTheme" aria-label="Volver">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2">
-                                    <path d="M19 12H5M12 19l-7-7 7-7" />
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M19 12H5M12 19l-7-7 7-7"/>
                                 </svg>
                             </button>
                             <h3 class="summary__title" style="margin:0; flex:1">Tema</h3>
@@ -365,8 +326,7 @@
 
                         <div class="field" style="margin-top:20px">
                             <label class="label">Color de botones</label>
-                            <p style="color:var(--muted); font-size:0.85rem; margin-bottom:12px">El color seleccionado
-                                se aplicará a ambos temas</p>
+                            <p style="color:var(--muted); font-size:0.85rem; margin-bottom:12px">El color seleccionado se aplicará a ambos temas</p>
                             <div class="color-swatches" id="colorSwatches"></div>
                         </div>
                     </article>
@@ -377,14 +337,15 @@
                     <article class="card pop" style="padding:16px; margin-bottom:12px">
                         <div class="settings-header">
                             <button class="btn btn--ghost" id="backFromProfile" aria-label="Volver">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2">
-                                    <path d="M19 12H5M12 19l-7-7 7-7" />
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M19 12H5M12 19l-7-7 7-7"/>
                                 </svg>
                             </button>
                             <h3 class="summary__title" style="margin:0; flex:1">Perfil</h3>
                         </div>
-
+                        <div id="profileLevelDisplay" style="margin-top:16px">
+                            <!-- Se renderizará dinámicamente -->
+                        </div>
                     </article>
 
                     <article class="card pop" style="padding:16px">
@@ -393,8 +354,7 @@
                             <div class="profile-avatar-wrapper">
                                 <img id="profileAvatar" class="profile-avatar" alt="Avatar" src="" />
                                 <div class="avatar-controls" style="display:grid; gap:10px; width:100%">
-                                    <div
-                                        style="display:grid; grid-template-columns: 1fr auto; gap:10px; align-items:end">
+                                    <div style="display:grid; grid-template-columns: 1fr auto; gap:10px; align-items:end">
                                         <div class="field" style="margin-bottom:0">
                                             <label class="label" for="avatarStyle">Estilo de avatar</label>
                                             <select id="avatarStyle" class="input">
@@ -459,9 +419,8 @@
                     <article class="card pop" style="padding:16px; margin-bottom:12px">
                         <div class="settings-header">
                             <button class="btn btn--ghost" id="backFromBodyTrack" aria-label="Volver">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2">
-                                    <path d="M19 12H5M12 19l-7-7 7-7" />
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M19 12H5M12 19l-7-7 7-7"/>
                                 </svg>
                             </button>
                             <h3 class="summary__title" style="margin:0; flex:1">BodyTrack</h3>
@@ -471,15 +430,15 @@
                     <article class="card pop" style="padding:16px; margin-bottom:12px">
                         <h3 class="summary__title" style="margin-bottom:10px">Datos Corporales</h3>
                         <div class="profile-form">
-                            <div class="field"><label class="label" for="profileHeight">Altura (cm)</label><input
-                                    id="profileHeight" class="input" type="number" inputmode="decimal" min="0"
-                                    step="0.1" placeholder="Ej. 178" /></div>
-                            <div class="field"><label class="label" for="profileWeight">Peso actual (kg)</label><input
-                                    id="profileWeight" class="input" type="number" inputmode="decimal" min="0"
-                                    step="0.1" placeholder="Opcional" /></div>
-                            <div class="field"><label class="label" for="profileBodyFat">% grasa actual</label><input
-                                    id="profileBodyFat" class="input" type="number" inputmode="decimal" min="0"
-                                    step="0.1" placeholder="Opcional" /></div>
+                                <div class="field"><label class="label" for="profileHeight">Altura (cm)</label><input
+                                        id="profileHeight" class="input" type="number" inputmode="decimal" min="0"
+                                        step="0.1" placeholder="Ej. 178" /></div>
+                                <div class="field"><label class="label" for="profileWeight">Peso actual (kg)</label><input
+                                        id="profileWeight" class="input" type="number" inputmode="decimal" min="0"
+                                        step="0.1" placeholder="Opcional" /></div>
+                                <div class="field"><label class="label" for="profileBodyFat">% grasa actual</label><input
+                                        id="profileBodyFat" class="input" type="number" inputmode="decimal" min="0"
+                                        step="0.1" placeholder="Opcional" /></div>
                             <button class="btn" id="saveBodyTrack" type="button">Guardar datos</button>
                         </div>
                     </article>
@@ -536,44 +495,34 @@
                                 <input id="measurementCalves" class="input" type="number" inputmode="decimal" min="0"
                                     step="0.1" placeholder="Ej. 38" />
                             </div>
-                            <button class="btn" id="saveBodyMeasurements" type="button"
-                                style="grid-column: 1 / -1;">Guardar
+                            <button class="btn" id="saveBodyMeasurements" type="button" style="grid-column: 1 / -1;">Guardar
                                 medidas</button>
                         </div>
                         <div class="body-measurements-history">
-                            <h4 class="summary__title" style="margin-bottom:8px; font-size:1rem">Historial de medidas
-                            </h4>
+                            <h4 class="summary__title" style="margin-bottom:8px; font-size:1rem">Historial de medidas</h4>
                             <div style="overflow-x:auto">
                                 <table style="width:100%; border-collapse:collapse; font-size:0.9rem">
                                     <thead>
                                         <tr>
-                                            <th
-                                                style="padding:8px; border-bottom:1px solid var(--border); text-align:left">
+                                            <th style="padding:8px; border-bottom:1px solid var(--border); text-align:left">
                                                 Fecha</th>
-                                            <th
-                                                style="padding:8px; border-bottom:1px solid var(--border); text-align:left">
+                                            <th style="padding:8px; border-bottom:1px solid var(--border); text-align:left">
                                                 Brazos</th>
-                                            <th
-                                                style="padding:8px; border-bottom:1px solid var(--border); text-align:left">
+                                            <th style="padding:8px; border-bottom:1px solid var(--border); text-align:left">
                                                 Pecho</th>
-                                            <th
-                                                style="padding:8px; border-bottom:1px solid var(--border); text-align:left">
+                                            <th style="padding:8px; border-bottom:1px solid var(--border); text-align:left">
                                                 Cintura</th>
-                                            <th
-                                                style="padding:8px; border-bottom:1px solid var(--border); text-align:left">
+                                            <th style="padding:8px; border-bottom:1px solid var(--border); text-align:left">
                                                 Caderas</th>
-                                            <th
-                                                style="padding:8px; border-bottom:1px solid var(--border); text-align:left">
+                                            <th style="padding:8px; border-bottom:1px solid var(--border); text-align:left">
                                                 Piernas</th>
-                                            <th
-                                                style="padding:8px; border-bottom:1px solid var(--border); text-align:left">
+                                            <th style="padding:8px; border-bottom:1px solid var(--border); text-align:left">
                                                 Gemelos</th>
                                         </tr>
                                     </thead>
                                     <tbody id="bodyMeasurementsHistoryBody">
                                         <tr>
-                                            <td colspan="7" style="padding:8px; color:var(--muted)">Sin registros aún
-                                            </td>
+                                            <td colspan="7" style="padding:8px; color:var(--muted)">Sin registros aún</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -583,8 +532,7 @@
 
                     <article class="card pop" style="padding:16px">
                         <h3 class="summary__title" style="margin-bottom:16px">Calculadora de TMB y Calorías</h3>
-                        <div class="bmr-calculator"
-                            style="display:grid; grid-template-columns: repeat(2, 1fr); gap:12px">
+                        <div class="bmr-calculator" style="display:grid; grid-template-columns: repeat(2, 1fr); gap:12px">
                             <div class="field">
                                 <label class="label" for="bmrGender">Sexo</label>
                                 <select id="bmrGender" class="input">
@@ -623,8 +571,7 @@
                             <div style="display:grid; gap:8px">
                                 <div><strong>TMB (Tasa Metabólica Basal):</strong> <span id="bmrValue">—</span> kcal/día
                                 </div>
-                                <div><strong>TDEE (Gasto Energético Total):</strong> <span id="tdeeValue">—</span>
-                                    kcal/día
+                                <div><strong>TDEE (Gasto Energético Total):</strong> <span id="tdeeValue">—</span> kcal/día
                                 </div>
                                 <div style="margin-top:8px; padding-top:8px; border-top:1px solid var(--border)">
                                     <strong>Calorías recomendadas:</strong>
@@ -640,15 +587,13 @@
                     <article class="card pop" style="padding:16px">
                         <div class="settings-header">
                             <button class="btn btn--ghost" id="backFromInfo" aria-label="Volver">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2">
-                                    <path d="M19 12H5M12 19l-7-7 7-7" />
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M19 12H5M12 19l-7-7 7-7"/>
                                 </svg>
                             </button>
                             <h3 class="summary__title" style="margin:0; flex:1">Información</h3>
                         </div>
-                        <button class="btn" id="btnManual" style="width:100%; margin-top:20px">ℹ️ Abrir Manual de
-                            Usuario</button>
+                        <button class="btn" id="btnManual" style="width:100%; margin-top:20px">ℹ️ Abrir Manual de Usuario</button>
                     </article>
                 </div>
 
@@ -657,28 +602,26 @@
                     <article class="card pop" style="padding:16px">
                         <div class="settings-header">
                             <button class="btn btn--ghost" id="backFromCreator" aria-label="Volver">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2">
-                                    <path d="M19 12H5M12 19l-7-7 7-7" />
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M19 12H5M12 19l-7-7 7-7"/>
                                 </svg>
                             </button>
                             <h3 class="summary__title" style="margin:0; flex:1">Creador</h3>
                         </div>
-                        <div
-                            style="margin-top:20px; text-align:center; display:flex; flex-direction:column; gap:16px; align-items:center;">
+                        <div style="margin-top:20px; text-align:center; display:flex; flex-direction:column; gap:16px; align-items:center;">
                             <div style="font-size:3rem; margin-bottom:8px;">🏃🏼‍♂️‍➡️​​</div>
                             <p style="color:var(--text); font-size:1rem; line-height:1.6; margin:0;">
-                                ¡Hola! Soy F.Sanz el creador de EasyTracker. Si te gusta esta aplicación y te está
-                                siendo útil,
+                                ¡Hola! Soy F.Sanz el creador de EasyTracker. Si te gusta esta aplicación y te está siendo útil, 
                                 te agradecería mucho si pudieras darme una ⭐ estrella en GitHub.
                             </p>
-                            <a href="https://github.com/fsanztor01/EasyTracker" target="_blank"
-                                rel="noopener noreferrer"
-                                style="display:inline-flex; align-items:center; gap:8px; padding:12px 20px; background:var(--accent, #0A84FF); color:#FFFFFF; border-radius:8px; text-decoration:none; font-weight:600; transition:opacity 0.2s;"
-                                onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
+                            <a href="https://github.com/fsanztor01/EasyTracker" 
+                               target="_blank" 
+                               rel="noopener noreferrer"
+                               style="display:inline-flex; align-items:center; gap:8px; padding:12px 20px; background:var(--accent, #0A84FF); color:#FFFFFF; border-radius:8px; text-decoration:none; font-weight:600; transition:opacity 0.2s;"
+                               onmouseover="this.style.opacity='0.9'" 
+                               onmouseout="this.style.opacity='1'">
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                                    <path
-                                        d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+                                    <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
                                 </svg>
                                 <span>Ver en GitHub</span>
                             </a>
@@ -728,8 +671,7 @@
                 <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                     stroke-linecap="round" stroke-linejoin="round">
                     <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
-                    <path
-                        d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1Z" />
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1Z" />
                 </svg>
                 <span>Ajustes</span>
             </button>
@@ -844,14 +786,12 @@
             <form method="dialog">
                 <div class="modal__head">
                     <h3 class="modal__title" id="routineImportWeekTitle">Seleccionar semana</h3>
-                    <button type="button" class="theme-btn" value="cancel" aria-label="Cerrar"
-                        onclick="this.closest('dialog').close()">Cerrar</button>
+                    <button type="button" class="theme-btn" value="cancel" aria-label="Cerrar" onclick="this.closest('dialog').close()">Cerrar</button>
                 </div>
                 <div class="modal__body">
                     <div class="field">
                         <label class="label" for="routineImportWeek">Semana</label>
-                        <select id="routineImportWeek" class="input"
-                            style="padding: 10px; font-size: 0.95rem;"></select>
+                        <select id="routineImportWeek" class="input" style="padding: 10px; font-size: 0.95rem;"></select>
                     </div>
                 </div>
                 <div class="modal__actions">
@@ -896,145 +836,143 @@
                         style="display:none">Cancelar</button>
                 </div>
             </form>
-        </dialog>
+                </dialog>
 
-        <dialog id="manualDialog" aria-labelledby="manualTitle" aria-modal="true">
-            <form method="dialog">
-                <div class="modal__head">
-                    <h3 class="modal__title" id="manualTitle">Manual de Usuario - EasyTracker</h3>
-                    <button class="theme-btn" value="cancel" aria-label="Cerrar">✕</button>
-                </div>
-                <div class="modal__body">
-                    <div class="manual-content">
-                        <div class="manual-section">
-                            <h2>📋 Tabla de Contenidos</h2>
-                            <div class="manual-toc">
-                                <ul>
-                                    <li><a href="#inicio">Inicio</a></li>
-                                    <li><a href="#diario">Diario de Entrenamientos</a></li>
-                                    <li><a href="#estadisticas">Estadísticas</a></li>
-                                    <li><a href="#rutinas">Rutinas</a></li>
-                                    <li><a href="#importar">Importar/Exportar</a></li>
-                                </ul>
+                <dialog id="manualDialog" aria-labelledby="manualTitle" aria-modal="true">
+                    <form method="dialog">
+                        <div class="modal__head">
+                            <h3 class="modal__title" id="manualTitle">Manual de Usuario - EasyTracker</h3>
+                            <button class="theme-btn" value="cancel" aria-label="Cerrar">✕</button>
+                        </div>
+                        <div class="modal__body">
+                            <div class="manual-content">
+                                <div class="manual-section">
+                                    <h2>📋 Tabla de Contenidos</h2>
+                                    <div class="manual-toc">
+                                        <ul>
+                                            <li><a href="#inicio">Inicio</a></li>
+                                            <li><a href="#diario">Diario de Entrenamientos</a></li>
+                                            <li><a href="#estadisticas">Estadísticas</a></li>
+                                            <li><a href="#rutinas">Rutinas</a></li>
+                                            <li><a href="#importar">Importar/Exportar</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                <div class="manual-section" id="inicio">
+                                    <h2>🏋️‍♂️ Inicio</h2>
+                                    <h3>¿Qué es EasyTracker?</h3>
+                                    <p>EasyTracker es una aplicación web para registrar y analizar tus entrenamientos,
+                                        ayudándote a
+                                        mejorar tu progreso y alcanzar tus metas.</p>
+
+                                    <h3>Navegación</h3>
+                                    <ul>
+                                        <li><strong>Navegación inferior:</strong> Acceso rápido a Diario, Estadísticas, Rutinas e
+                                            Importar
+                                        </li>
+                                        <li><strong>Ajustes:</strong> Botón de engranaje en la esquina superior derecha para acceder a Tema, Perfil e Información</li>
+                                    </ul>
+                                </div>
+
+                                <div class="manual-section" id="diario">
+                                    <h2>📝 Diario</h2>
+                                    <h3>Crear una sesión</h3>
+                                    <ul>
+                                        <li>Pulsa "+ Nueva sesión"</li>
+                                        <li>Ingresa el nombre (ej: "Pecho y tríceps")</li>
+                                        <li>Selecciona la fecha</li>
+                                        <li>Pulsa "Guardar"</li>
+                                    </ul>
+
+                                    <h3>Añadir ejercicios</h3>
+                                    <ul>
+                                        <li>Dentro de una sesión, pulsa "+ Ejercicio" en cualquier momento</li>
+                                        <li>No necesitas activar ningún modo de edición</li>
+                                        <li>Ingresa el nombre del ejercicio y pulsa "Guardar"</li>
+                                    </ul>
+
+                                    <h3>Registrar sets</h3>
+                                    <p>Para cada ejercicio, puedes añadir:</p>
+                                    <ul>
+                                        <li><strong>KG:</strong> Peso levantado</li>
+                                        <li><strong>Reps:</strong> Repeticiones realizadas</li>
+                                        <li><strong>RIR:</strong> Repeticiones en reserva (esfuerzo percibido)</li>
+                                    </ul>
+
+                                    <h3>Temporizador de descanso</h3>
+                                    <ul>
+                                        <li>Pulsa el botón ⏳ junto a cada set para activar el temporizador</li>
+                                        <li>En móvil, aparecerá una ventana flotante centrada en la pantalla</li>
+                                        <li>Cuando termine el tiempo, verás un mensaje de confirmación y se cerrará
+                                            automáticamente</li>
+                                    </ul>
+                                </div>
+
+                                <div class="manual-section" id="estadisticas">
+                                    <h2>📊 Estadísticas</h2>
+                                    <h3>Ver tu progreso</h3>
+                                    <ul>
+                                        <li>Ve a la pestaña "Estadísticas"</li>
+                                        <li>Selecciona la métrica que quieres analizar:
+                                            <ul>
+                                                <li>Volumen total</li>
+                                                <li>RIR promedio</li>
+                                                <li>Peso máximo</li>
+                                            </ul>
+                                        </li>
+                                        <li>Filtra por ejercicio específico o "Todos los ejercicios"</li>
+                                        <li>Elige el período a analizar</li>
+                                    </ul>
+                                </div>
+
+                                <div class="manual-section" id="rutinas">
+                                    <h2>🧩 Rutinas</h2>
+                                    <h3>Crear rutina personalizada</h3>
+                                    <ul>
+                                        <li>Ve a la pestaña "Rutinas"</li>
+                                        <li>Ingresa un nombre para tu rutina</li>
+                                        <li>Pulsa "+ Añadir día" para cada día de entrenamiento</li>
+                                        <li>Para cada día:
+                                            <ul>
+                                                <li>Asigna un nombre (ej: "Día 1 - Pecho")</li>
+                                                <li>Añade ejercicios con "+ Ejercicio"</li>
+                                                <li>Configura sets para cada ejercicio</li>
+                                            </ul>
+                                        </li>
+                                        <li>Pulsa "Guardar rutina"</li>
+                                    </ul>
+                                </div>
+
+                                <div class="manual-section" id="importar">
+                                    <h2>📥 Importar/Exportar</h2>
+                                    <h3>Importar entrenamientos</h3>
+                                    <ul>
+                                        <li>Ve a la pestaña "Importar"</li>
+                                        <li>Selecciona la semana objetivo</li>
+                                        <li>Elige un archivo JSON válido</li>
+                                        <li>Revisa la vista previa</li>
+                                        <li>Pulsa "Importar"</li>
+                                    </ul>
+
+                                    <h3>Exportar datos</h3>
+                                    <p>Puedes exportar tus datos en formato JSON:</p>
+                                    <ul>
+                                        <li><strong>Exportar sesiones:</strong> Pulsa "Exportar sesiones" en la sección
+                                            "Importar
+                                            entrenamientos" para descargar todos tus entrenamientos registrados.</li>
+                                        <li><strong>Exportar rutinas:</strong> En la sección "Rutinas creadas", pulsa "📤
+                                            Exportar
+                                            rutinas" para descargar todas tus rutinas personalizadas creadas.</li>
+                                    </ul>
+                                </div>
                             </div>
                         </div>
-
-                        <div class="manual-section" id="inicio">
-                            <h2>🏋️‍♂️ Inicio</h2>
-                            <h3>¿Qué es EasyTracker?</h3>
-                            <p>EasyTracker es una aplicación web para registrar y analizar tus entrenamientos,
-                                ayudándote a
-                                mejorar tu progreso y alcanzar tus metas.</p>
-
-                            <h3>Navegación</h3>
-                            <ul>
-                                <li><strong>Navegación inferior:</strong> Acceso rápido a Diario, Estadísticas, Rutinas
-                                    e
-                                    Importar
-                                </li>
-                                <li><strong>Ajustes:</strong> Botón de engranaje en la esquina superior derecha para
-                                    acceder a Tema, Perfil e Información</li>
-                            </ul>
+                        <div class="modal__actions">
+                            <button class="btn" value="cancel">Cerrar</button>
                         </div>
-
-                        <div class="manual-section" id="diario">
-                            <h2>📝 Diario</h2>
-                            <h3>Crear una sesión</h3>
-                            <ul>
-                                <li>Pulsa "+ Nueva sesión"</li>
-                                <li>Ingresa el nombre (ej: "Pecho y tríceps")</li>
-                                <li>Selecciona la fecha</li>
-                                <li>Pulsa "Guardar"</li>
-                            </ul>
-
-                            <h3>Añadir ejercicios</h3>
-                            <ul>
-                                <li>Dentro de una sesión, pulsa "+ Ejercicio" en cualquier momento</li>
-                                <li>No necesitas activar ningún modo de edición</li>
-                                <li>Ingresa el nombre del ejercicio y pulsa "Guardar"</li>
-                            </ul>
-
-                            <h3>Registrar sets</h3>
-                            <p>Para cada ejercicio, puedes añadir:</p>
-                            <ul>
-                                <li><strong>KG:</strong> Peso levantado</li>
-                                <li><strong>Reps:</strong> Repeticiones realizadas</li>
-                                <li><strong>RIR:</strong> Repeticiones en reserva (esfuerzo percibido)</li>
-                            </ul>
-
-                            <h3>Temporizador de descanso</h3>
-                            <ul>
-                                <li>Pulsa el botón ⏳ junto a cada set para activar el temporizador</li>
-                                <li>En móvil, aparecerá una ventana flotante centrada en la pantalla</li>
-                                <li>Cuando termine el tiempo, verás un mensaje de confirmación y se cerrará
-                                    automáticamente</li>
-                            </ul>
-                        </div>
-
-                        <div class="manual-section" id="estadisticas">
-                            <h2>📊 Estadísticas</h2>
-                            <h3>Ver tu progreso</h3>
-                            <ul>
-                                <li>Ve a la pestaña "Estadísticas"</li>
-                                <li>Selecciona la métrica que quieres analizar:
-                                    <ul>
-                                        <li>Volumen total</li>
-                                        <li>RIR promedio</li>
-                                        <li>Peso máximo</li>
-                                    </ul>
-                                </li>
-                                <li>Filtra por ejercicio específico o "Todos los ejercicios"</li>
-                                <li>Elige el período a analizar</li>
-                            </ul>
-                        </div>
-
-                        <div class="manual-section" id="rutinas">
-                            <h2>🧩 Rutinas</h2>
-                            <h3>Crear rutina personalizada</h3>
-                            <ul>
-                                <li>Ve a la pestaña "Rutinas"</li>
-                                <li>Ingresa un nombre para tu rutina</li>
-                                <li>Pulsa "+ Añadir día" para cada día de entrenamiento</li>
-                                <li>Para cada día:
-                                    <ul>
-                                        <li>Asigna un nombre (ej: "Día 1 - Pecho")</li>
-                                        <li>Añade ejercicios con "+ Ejercicio"</li>
-                                        <li>Configura sets para cada ejercicio</li>
-                                    </ul>
-                                </li>
-                                <li>Pulsa "Guardar rutina"</li>
-                            </ul>
-                        </div>
-
-                        <div class="manual-section" id="importar">
-                            <h2>📥 Importar/Exportar</h2>
-                            <h3>Importar entrenamientos</h3>
-                            <ul>
-                                <li>Ve a la pestaña "Importar"</li>
-                                <li>Selecciona la semana objetivo</li>
-                                <li>Elige un archivo JSON válido</li>
-                                <li>Revisa la vista previa</li>
-                                <li>Pulsa "Importar"</li>
-                            </ul>
-
-                            <h3>Exportar datos</h3>
-                            <p>Puedes exportar tus datos en formato JSON:</p>
-                            <ul>
-                                <li><strong>Exportar sesiones:</strong> Pulsa "Exportar sesiones" en la sección
-                                    "Importar
-                                    entrenamientos" para descargar todos tus entrenamientos registrados.</li>
-                                <li><strong>Exportar rutinas:</strong> En la sección "Rutinas creadas", pulsa "📤
-                                    Exportar
-                                    rutinas" para descargar todas tus rutinas personalizadas creadas.</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal__actions">
-                    <button class="btn" value="cancel">Cerrar</button>
-                </div>
-            </form>
-        </dialog>
+                    </form>
+                </dialog>
 
         <!-- Week Info Dialog -->
         <dialog id="weekInfoDialog" aria-labelledby="weekInfoTitle" aria-modal="true">
@@ -1052,7 +990,7 @@
             </form>
         </dialog>
 
-        <!-- Templates -->
+                <!-- Templates -->
         <template id="tpl-session">
             <article class="session card pop" data-id="">
                 <div class="session__header">
@@ -1245,3 +1183,4 @@
 </body>
 
 </html>
+

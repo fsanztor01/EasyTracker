@@ -5,7 +5,7 @@
 
 const AppState = (() => {
     const STORAGE_KEY = 'trainingDiary.v8';
-
+    
     const app = {
         sessions: [],
         routines: [],
@@ -33,8 +33,8 @@ const AppState = (() => {
         statsPeriod: '8weeks',
         goals: [],
         recentAchievements: [],
-
-
+        lastLevel: 1,
+        totalDaysCompleted: 0,
         archivedCycles: [],
         editingSessions: {},
         sessionSnapshots: {},
@@ -71,8 +71,8 @@ const AppState = (() => {
         app.statsPeriod = 'lastWeek';
         app.goals = [];
         app.recentAchievements = [];
-
-
+        app.lastLevel = 1;
+        app.totalDaysCompleted = 0;
         app.archivedCycles = [];
     }
 
